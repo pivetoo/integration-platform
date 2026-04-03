@@ -240,7 +240,7 @@ ClientBin/
 *.publishsettings
 
 # Application settings
-.appsettings.json
+appsettings.json
 appsettings.Development.json
 orleans.codegen.cs
 
