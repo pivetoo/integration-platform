@@ -9,4 +9,5 @@
   <Project Path="IntegrationPlataform.Application/IntegrationPlataform.Application.csproj" />
   <Project Path="IntegrationPlataform.Domain/IntegrationPlataform.Domain.csproj" />
   <Project Path="IntegrationPlataform.Infrastructure/IntegrationPlataform.Infrastructure.csproj" />
+  <Project Path="IntegrationPlataform.Testing/IntegrationPlataform.Testing.csproj" />
 </Solution>
