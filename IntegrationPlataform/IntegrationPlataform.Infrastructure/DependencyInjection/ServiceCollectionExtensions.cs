@@ -11,6 +11,7 @@ namespace IntegrationPlataform.Infrastructure.DependencyInjection
         public static IServiceCollection AddIntegrationPlataformInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddArchonPersistence(configuration, typeof(ServiceCollectionExtensions).Assembly);
+            services.AddHttpClient();
             services.RunMigrations(
                 configuration,
                 GetMigrationSchema(configuration),
