@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    [RequireAccess]
     public sealed class DashboardController : ApiControllerBase
     {
         private readonly IDashboardService dashboardService;
@@ -15,7 +14,8 @@ namespace IntegrationPlataform.Api.Controllers
             this.dashboardService = dashboardService;
         }
 
-        [GetEndpoint("")]
+        [RequireAccess]
+        [GetEndpoint]
         public async Task<IActionResult> GetDashboardData(CancellationToken cancellationToken)
         {
             var data = await dashboardService.GetDashboardData(cancellationToken);

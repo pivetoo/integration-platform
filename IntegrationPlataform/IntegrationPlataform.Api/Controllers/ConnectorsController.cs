@@ -1,7 +1,6 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Application.Requests.Connectors;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -10,45 +9,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    [RequireAccess]
-    public sealed class ConnectorsController : ApiControllerBase
+    public sealed class ConnectorsController : ReadOnlyController<Connector>
     {
-        private readonly DbContext dbContext;
         private readonly IConnectorService connectorService;
 
-        public ConnectorsController(DbContext dbContext, IConnectorService connectorService)
+        public ConnectorsController(DbContext dbContext, IConnectorService connectorService) : base(dbContext)
         {
-            this.dbContext = dbContext;
             this.connectorService = connectorService;
         }
 
-        [GetEndpoint("")]
+        [RequireAccess]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await dbContext.Set<Connector>()
-                .AsNoTracking()
-                .OrderByDescending(item => item.Id)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            return await base.Get(request, cancellationToken);
         }
 
+        [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            if (id <= 0)
-            {
-                return Http400("Id is required.");
-            }
-
-            Connector? entity = await dbContext.Set<Connector>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
-            return entity is null ? Http404("Record not found.") : Http200(entity);
+            return await base.GetById(id, cancellationToken);
         }
 
-        [PostEndpoint("")]
+        [RequireAccess]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateConnectorRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);
@@ -61,6 +46,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(connector, "Connector created successfully.");
         }
 
+        [RequireAccess]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorRequest request, CancellationToken cancellationToken)
         {

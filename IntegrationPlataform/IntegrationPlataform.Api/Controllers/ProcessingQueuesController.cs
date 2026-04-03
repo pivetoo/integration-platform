@@ -1,7 +1,6 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.ProcessingQueues;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -10,49 +9,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    [RequireAccess]
-    public sealed class ProcessingQueuesController : ApiControllerBase
+    public sealed class ProcessingQueuesController : ReadOnlyController<ProcessingQueue>
     {
-        private readonly DbContext dbContext;
         private readonly IExecutionService executionService;
         private readonly IQueueProcessorService queueProcessorService;
 
-        public ProcessingQueuesController(
-            DbContext dbContext,
-            IExecutionService executionService,
-            IQueueProcessorService queueProcessorService)
+        public ProcessingQueuesController(DbContext dbContext, IExecutionService executionService, IQueueProcessorService queueProcessorService) : base(dbContext)
         {
-            this.dbContext = dbContext;
             this.executionService = executionService;
             this.queueProcessorService = queueProcessorService;
         }
 
-        [GetEndpoint("")]
+        [RequireAccess]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await dbContext.Set<ProcessingQueue>()
-                .AsNoTracking()
-                .OrderByDescending(item => item.CreatedAt)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            return await base.Get(request, cancellationToken);
         }
 
+        [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            if (id <= 0)
-            {
-                return Http400("Id is required.");
-            }
-
-            ProcessingQueue? item = await dbContext.Set<ProcessingQueue>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
-
-            return item is null ? Http404("Record not found.") : Http200(item);
+            return await base.GetById(id, cancellationToken);
         }
 
+        [RequireAccess]
         [GetEndpoint("pending")]
         public async Task<IActionResult> GetPending(CancellationToken cancellationToken)
         {
@@ -60,6 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(items);
         }
 
+        [RequireAccess]
         [PostEndpoint("enqueue")]
         public async Task<IActionResult> Enqueue([FromBody] EnqueuePipelineRequest request, CancellationToken cancellationToken)
         {
@@ -79,6 +62,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(item, "Pipeline enqueued successfully.");
         }
 
+        [RequireAccess]
         [PostEndpoint("{processingQueueId:long}/process")]
         public async Task<IActionResult> Process(long processingQueueId, CancellationToken cancellationToken)
         {

@@ -11,24 +11,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    [RequireAccess]
     public sealed class ExecutionsController : ApiControllerBase
     {
         private readonly DbContext dbContext;
         private readonly IExecutionService executionService;
         private readonly IExecutionEngineService executionEngineService;
 
-        public ExecutionsController(
-            DbContext dbContext,
-            IExecutionService executionService,
-            IExecutionEngineService executionEngineService)
+        public ExecutionsController(DbContext dbContext, IExecutionService executionService, IExecutionEngineService executionEngineService)
         {
             this.dbContext = dbContext;
             this.executionService = executionService;
             this.executionEngineService = executionEngineService;
         }
 
-        [GetEndpoint("")]
+        [RequireAccess]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             var result = await dbContext.Set<Execution>()
@@ -39,6 +36,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(result);
         }
 
+        [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -54,6 +52,7 @@ namespace IntegrationPlataform.Api.Controllers
             return execution is null ? Http404("Record not found.") : Http200(execution);
         }
 
+        [RequireAccess]
         [GetEndpoint("connector/{connectorId:long}")]
         public async Task<IActionResult> GetByConnector(long connectorId, CancellationToken cancellationToken)
         {
@@ -66,6 +65,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(executions);
         }
 
+        [RequireAccess]
         [GetEndpoint("status/{status}")]
         public async Task<IActionResult> GetByStatus(ExecutionStatus status, CancellationToken cancellationToken)
         {
@@ -73,6 +73,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(executions);
         }
 
+        [RequireAccess]
         [GetEndpoint("recent")]
         public async Task<IActionResult> GetRecent([FromQuery] int take = 10, CancellationToken cancellationToken = default)
         {
@@ -80,6 +81,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(executions);
         }
 
+        [RequireAccess]
         [PostEndpoint("execute")]
         public async Task<IActionResult> Execute([FromBody] ExecutePipelineRequest request, CancellationToken cancellationToken)
         {
@@ -99,6 +101,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(CreateExecutionResponse(execution));
         }
 
+        [RequireAccess]
         [PostEndpoint("debug/start")]
         public async Task<IActionResult> StartDebug([FromBody] DebugPipelineRequest request, CancellationToken cancellationToken)
         {
@@ -125,6 +128,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
+        [RequireAccess]
         [PostEndpoint("debug/next-step")]
         public async Task<IActionResult> ExecuteNextDebugStep([FromBody] NextDebugStepRequest request, CancellationToken cancellationToken)
         {
@@ -138,6 +142,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(result);
         }
 
+        [RequireAccess]
         [PostEndpoint("debug/finish")]
         public async Task<IActionResult> FinishDebug([FromBody] FinishDebugPipelineRequest request, CancellationToken cancellationToken)
         {
@@ -151,6 +156,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(CreateExecutionResponse(execution));
         }
 
+        [RequireAccess]
         [PostEndpoint("execute-by-identifier/{integrationIdentifier}/{pipelineIdentifier}")]
         public async Task<IActionResult> ExecuteByIdentifier(
             string integrationIdentifier,
