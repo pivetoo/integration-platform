@@ -1,11 +1,11 @@
 import { httpClient } from 'archon-ui';
 import type { IntegracaoAtributo, CreateIntegracaoAtributoRequest, UpdateIntegracaoAtributoRequest } from '../types/integracaoAtributo';
 
-const BASE_URL = '/integracaoatributo';
+const BASE_URL = '/IntegrationAttributes';
 
 export const integracaoAtributoService = {
   getByIntegracao: (integracaoId: number) =>
-    httpClient.get<IntegracaoAtributo[]>(`${BASE_URL}/integracao/${integracaoId}`),
+    httpClient.get<IntegracaoAtributo[]>(`${BASE_URL}/integration/${integracaoId}`),
 
   getById: (id: number) =>
     httpClient.get<IntegracaoAtributo>(`${BASE_URL}/${id}`),

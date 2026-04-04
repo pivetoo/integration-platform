@@ -121,7 +121,7 @@ export default function FilaProcessamento() {
 
   return (
     <PageLayout
-      title="Fila de Processamento"
+      title="Fila de Integração"
       onAdd={handleAdd}
       onDelete={handleDelete}
       onRefresh={loadItens}

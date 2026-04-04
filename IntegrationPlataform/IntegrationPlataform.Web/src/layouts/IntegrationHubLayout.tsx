@@ -11,7 +11,6 @@ import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
 import logoIntegrationHub from '../assets/logo-integration-hub.svg';
 import AboutIntegrationHubModal from '../components/modals/AboutIntegrationHubModal';
-import CopilotChatWidget from '../components/chat/CopilotChatWidget';
 
 export default function IntegrationHubLayout() {
   const { user: authUser, contract, logout } = useAuth();
@@ -42,7 +41,7 @@ export default function IntegrationHubLayout() {
     ]),
     createMenuGroup('Operacional', [
       { key: 'execucoes', label: 'Execuções', path: '/execucoes', icon: <Play size={20} /> },
-      { key: 'fila', label: 'Fila de Processamento', path: '/fila', icon: <ListOrdered size={20} /> },
+      { key: 'fila', label: 'Fila de Integração', path: '/fila', icon: <ListOrdered size={20} /> },
       { key: 'referencias', label: 'Referências', path: '/referencias', icon: <ExternalLink size={20} /> },
     ]),
   ];
@@ -64,7 +63,7 @@ export default function IntegrationHubLayout() {
       '/conexoes-banco': 'Conexões de Banco',
       '/pipelines': 'Pipelines',
       '/execucoes': 'Execuções',
-      '/fila': 'Fila de Processamento',
+      '/fila': 'Fila de Integração',
       '/referencias': 'Referências',
       '/automacao': 'Automação',
     };
@@ -93,37 +92,34 @@ export default function IntegrationHubLayout() {
   }, [location.pathname, navigate]);
 
   return (
-    <>
-      <AppLayout
-        title={contract?.systemApplicationName ?? 'IntegrationHub'}
-        subtitle={contract?.companyName ?? ''}
-        user={{
-          name: authUser?.name ?? '',
-          email: authUser?.email ?? '',
-          role: contract?.roleName,
-        }}
-        onLogout={handleLogout}
-        logo={<img src={logoIntegrationHub} alt="Logo" className="ih-sidebar-logo h-6 w-6 object-contain" />}
-        menuGroups={menuGroups}
-        breadcrumbs={breadcrumbs}
-        notifications={notifications}
-        onNotificationRead={markAsRead}
-        onMarkAllAsRead={markAllAsRead}
-        onClearAllNotifications={clearAll}
-        showAboutMenuItem
-        renderAboutModal={(close) => (
-          <AboutIntegrationHubModal
-            open
-            onOpenChange={(open) => { if (!open) { close(); } }}
-            systemName={contract?.systemApplicationName ?? 'IntegrationHub'}
-            companyName={contract?.companyName ?? '-'}
-            userName={authUser?.name ?? '-'}
-          />
-        )}
-      >
-        <Outlet />
-      </AppLayout>
-      <CopilotChatWidget />
-    </>
+    <AppLayout
+      title={contract?.systemApplicationName ?? 'IntegrationHub'}
+      subtitle={contract?.companyName ?? ''}
+      user={{
+        name: authUser?.name ?? '',
+        email: authUser?.email ?? '',
+        role: contract?.roleName,
+      }}
+      onLogout={handleLogout}
+      logo={<img src={logoIntegrationHub} alt="Logo" className="ih-sidebar-logo h-6 w-6 object-contain" />}
+      menuGroups={menuGroups}
+      breadcrumbs={breadcrumbs}
+      notifications={notifications}
+      onNotificationRead={markAsRead}
+      onMarkAllAsRead={markAllAsRead}
+      onClearAllNotifications={clearAll}
+      showAboutMenuItem
+      renderAboutModal={(close) => (
+        <AboutIntegrationHubModal
+          open
+          onOpenChange={(open) => { if (!open) { close(); } }}
+          systemName={contract?.systemApplicationName ?? 'IntegrationHub'}
+          companyName={contract?.companyName ?? '-'}
+          userName={authUser?.name ?? '-'}
+        />
+      )}
+    >
+      <Outlet />
+    </AppLayout>
   );
 }
