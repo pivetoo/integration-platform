@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Play } from 'lucide-react';
 import { PageLayout, DataTable, Badge, useApi } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';

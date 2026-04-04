@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { FileCode2 } from 'lucide-react';
 import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
