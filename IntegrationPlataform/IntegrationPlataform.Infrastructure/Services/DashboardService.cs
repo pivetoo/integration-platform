@@ -28,7 +28,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
         private async Task<DashboardKpis> GetKpis(CancellationToken cancellationToken)
         {
-            DateTimeOffset today = DateTimeOffset.UtcNow.Date;
+            DateTimeOffset today = new(DateTime.UtcNow.Date, TimeSpan.Zero);
 
             long activeIntegrations = await (
                 from integration in dbContext.Set<Integration>().AsNoTracking()
