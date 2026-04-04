@@ -18,7 +18,7 @@ export default function IntegrationHubLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { createMenuGroup } = useAppNavigation({});
-  const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications({ enabled: false });
 
   const handleLogout = async () => {
     await AuthService.logoutFromServer();
