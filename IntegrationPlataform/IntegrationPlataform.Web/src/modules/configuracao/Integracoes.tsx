@@ -1,0 +1,217 @@
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Cable, Download, Upload } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
+import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { integracaoService } from '../../services/integracaoService';
+import type { Integracao, IntegracaoExportModel } from '../../types/integracao';
+import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
+import IntegracaoFormModal from '../../components/modals/IntegracaoFormModal';
+
+export default function Integracoes() {
+  const navigate = useNavigate();
+  const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
+  const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integracao[]>([]);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingIntegracao, setEditingIntegracao] = useState<Integracao | null>(null);
+
+  const { execute: fetchIntegracoes, loading } = useApi<PaginatedResult<Integracao>>({
+    showErrorMessage: true,
+  });
+
+  const { execute: deleteIntegracoes } = useApi({
+    showSuccessMessage: false,
+    showErrorMessage: true,
+    onSuccess: () => {
+      toast({ title: 'Removido', description: 'Integração removida com sucesso', variant: 'success' });
+    },
+  });
+
+  const { execute: exportarIntegracao } = useApi<IntegracaoExportModel>({
+    showErrorMessage: true,
+  });
+
+  const { execute: importarIntegracao } = useApi<{ id: number; message: string }>({
+    showSuccessMessage: true,
+    showErrorMessage: true,
+  });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadIntegracoes = async () => {
+    const result = await fetchIntegracoes(() => integracaoService.getAll());
+    if (result) {
+      setIntegracoes(result.data);
+    }
+  };
+
+  useEffect(() => {
+    loadIntegracoes();
+  }, []);
+
+  const handleAdd = () => {
+    setEditingIntegracao(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = () => {
+    if (selectedIntegracoes.length === 1) {
+      setEditingIntegracao(selectedIntegracoes[0]);
+      setIsFormOpen(true);
+    }
+  };
+
+  const handleRowDoubleClick = (integracao: Integracao) => {
+    navigate(`/integracoes/${integracao.id}`);
+  };
+
+  const handleDelete = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    for (const integracao of selectedIntegracoes) {
+      await deleteIntegracoes(() => integracaoService.delete(integracao.id));
+    }
+    setIsConfirmOpen(false);
+    setSelectedIntegracoes([]);
+    loadIntegracoes();
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setEditingIntegracao(null);
+    setSelectedIntegracoes([]);
+    loadIntegracoes();
+  };
+
+  const handleExport = async () => {
+    if (selectedIntegracoes.length !== 1) {
+      return;
+    }
+
+    const result = await exportarIntegracao(() => integracaoService.exportar(selectedIntegracoes[0].id));
+    if (result) {
+      const json = JSON.stringify(result, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${result.identificador}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast({ title: 'Sucesso', description: 'Integração exportada com sucesso', variant: 'success' });
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const data: IntegracaoExportModel = JSON.parse(text);
+      await importarIntegracao(() => integracaoService.importar(data));
+      loadIntegracoes();
+    } catch {
+      toast({ title: 'Erro', description: 'Arquivo JSON inválido', variant: 'destructive' });
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const columns: DataTableColumn<Integracao>[] = [
+    { key: 'identificador', title: 'Identificador', dataIndex: 'identificador' },
+    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    {
+      key: 'categoria',
+      title: 'Categoria',
+      dataIndex: 'categoria',
+      render: (value: CategoriaIntegracao) => value?.nome || '-',
+    },
+    {
+      key: 'ativo',
+      title: 'Ativo',
+      dataIndex: 'ativo',
+      render: (value: boolean) => (
+        <Badge variant={value ? 'success' : 'destructive'}>
+          {value ? 'Sim' : 'Não'}
+        </Badge>
+      ),
+    },
+  ];
+
+  return (
+    <PageLayout
+      title="Integrações"
+      icon={<Cable size={24} />}
+      onAdd={handleAdd}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onRefresh={loadIntegracoes}
+      selectedRowsCount={selectedIntegracoes.length}
+      actions={[
+        {
+          key: 'exportar',
+          label: 'Exportar',
+          icon: <Download size={16} />,
+          variant: 'outline',
+          onClick: handleExport,
+          disabled: selectedIntegracoes.length !== 1,
+        },
+        {
+          key: 'importar',
+          label: 'Importar',
+          icon: <Upload size={16} />,
+          variant: 'outline',
+          onClick: handleImportClick,
+        },
+      ]}
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleImportFile}
+        style={{ display: 'none' }}
+      />
+      <DataTable
+        columns={columns}
+        data={integracoes}
+        rowKey="id"
+        selectedRows={selectedIntegracoes}
+        onSelectionChange={setSelectedIntegracoes}
+        onRowDoubleClick={handleRowDoubleClick}
+        emptyText="Nenhuma integração encontrada"
+        loading={loading}
+      />
+
+      <ConfirmModal
+        open={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir Integração"
+        description={`Tem certeza que deseja excluir ${selectedIntegracoes.length} integração(ões)?`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+
+      <IntegracaoFormModal
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        integracao={editingIntegracao}
+        onSuccess={handleFormSuccess}
+      />
+    </PageLayout>
+  );
+}

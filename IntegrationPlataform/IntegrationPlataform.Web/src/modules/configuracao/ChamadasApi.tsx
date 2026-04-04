@@ -1,0 +1,139 @@
+import { useState, useEffect } from 'react';
+import { Globe } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
+import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { chamadaApiService } from '../../services/chamadaApiService';
+import { MetodoHttpLabels } from '../../types/chamadaApi';
+import type { ChamadaApi, MetodoHttp } from '../../types/chamadaApi';
+import ChamadaApiFormModal from '../../components/modals/ChamadaApiFormModal';
+
+const metodoVariantMap: Record<number, string> = {
+  0: 'success',
+  1: 'default',
+  2: 'warning',
+  3: 'secondary',
+  4: 'destructive',
+};
+
+export default function ChamadasApi() {
+  const [chamadas, setChamadas] = useState<ChamadaApi[]>([]);
+  const [selectedChamadas, setSelectedChamadas] = useState<ChamadaApi[]>([]);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingChamada, setEditingChamada] = useState<ChamadaApi | null>(null);
+
+  const { execute: fetchChamadas, loading } = useApi<PaginatedResult<ChamadaApi>>({
+    showErrorMessage: true,
+  });
+
+  const { execute: deleteChamadas } = useApi({
+    showSuccessMessage: false,
+    showErrorMessage: true,
+    onSuccess: () => {
+      toast({ title: 'Removido', description: 'Chamada de API removida com sucesso', variant: 'success' });
+    },
+  });
+
+  const loadChamadas = async () => {
+    const result = await fetchChamadas(() => chamadaApiService.getAll());
+    if (result) {
+      setChamadas(result.data);
+    }
+  };
+
+  useEffect(() => {
+    loadChamadas();
+  }, []);
+
+  const handleAdd = () => {
+    setEditingChamada(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = async () => {
+    if (selectedChamadas.length === 1) {
+      try {
+        const resp = await chamadaApiService.getById(selectedChamadas[0].id);
+        setEditingChamada(resp.data ?? selectedChamadas[0]);
+      } catch {
+        setEditingChamada(selectedChamadas[0]);
+      }
+      setIsFormOpen(true);
+    }
+  };
+
+  const handleDelete = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    for (const chamada of selectedChamadas) {
+      await deleteChamadas(() => chamadaApiService.delete(chamada.id));
+    }
+    setIsConfirmOpen(false);
+    setSelectedChamadas([]);
+    loadChamadas();
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setEditingChamada(null);
+    setSelectedChamadas([]);
+    loadChamadas();
+  };
+
+  const columns: DataTableColumn<ChamadaApi>[] = [
+    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    {
+      key: 'metodo',
+      title: 'Método',
+      dataIndex: 'metodo',
+      render: (value: MetodoHttp) => (
+        <Badge variant={(metodoVariantMap[value] || 'outline') as 'success' | 'default' | 'warning' | 'secondary' | 'destructive'}>
+          {MetodoHttpLabels[value] || '-'}
+        </Badge>
+      ),
+    },
+    { key: 'url', title: 'URL', dataIndex: 'url' },
+  ];
+
+  return (
+    <PageLayout
+      title="Chamadas de API"
+      icon={<Globe size={24} />}
+      onAdd={handleAdd}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onRefresh={loadChamadas}
+      selectedRowsCount={selectedChamadas.length}
+    >
+      <DataTable
+        columns={columns}
+        data={chamadas}
+        rowKey="id"
+        selectedRows={selectedChamadas}
+        onSelectionChange={setSelectedChamadas}
+        emptyText="Nenhuma chamada de API encontrada"
+        loading={loading}
+      />
+
+      <ConfirmModal
+        open={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir Chamada de API"
+        description={`Tem certeza que deseja excluir ${selectedChamadas.length} chamada(s) de API?`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+
+      <ChamadaApiFormModal
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        chamadaApi={editingChamada}
+        onSuccess={handleFormSuccess}
+      />
+    </PageLayout>
+  );
+}
