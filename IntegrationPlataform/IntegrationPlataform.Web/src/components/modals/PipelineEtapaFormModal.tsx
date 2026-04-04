@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'd-rts';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
 import { pipelineEtapaService } from '../../services/pipelineEtapaService';
 import { chamadaApiService } from '../../services/chamadaApiService';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';

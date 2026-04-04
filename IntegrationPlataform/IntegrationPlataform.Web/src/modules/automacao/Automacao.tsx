@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Clock3 } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { rotinaPipelineService } from '../../services/rotinaPipelineService';
 import type { RotinaPipeline } from '../../types/rotinaPipeline';
 import type { Conector } from '../../types/conector';
@@ -124,7 +125,6 @@ export default function Automacao() {
   return (
     <PageLayout
       title="Automação"
-      icon={<Clock3 size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

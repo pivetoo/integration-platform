@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'd-rts';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
 import { TipoCampo, TipoCampoLabels } from '../../types/integracaoAtributo';
 import type { IntegracaoAtributo, CreateIntegracaoAtributoRequest } from '../../types/integracaoAtributo';

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Workflow } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { pipelineService } from '../../services/pipelineService';
 import type { Pipeline } from '../../types/pipeline';
 import type { Integracao } from '../../types/integracao';
@@ -114,7 +115,6 @@ export default function Pipelines() {
   return (
     <PageLayout
       title="Pipelines"
-      icon={<Workflow size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

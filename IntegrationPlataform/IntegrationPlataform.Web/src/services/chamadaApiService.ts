@@ -1,32 +1,74 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { ChamadaApi, CreateChamadaApiRequest, UpdateChamadaApiRequest } from '../types/chamadaApi';
 
-const BASE_URL = '/chamadaapi';
+const BASE_URL = '/ApiCalls';
+
+function mapChamadaApi(item: any): ChamadaApi {
+  return {
+    id: item.id,
+    nome: item.name,
+    descricao: item.description,
+    metodo: item.method,
+    url: item.url,
+    headersTemplate: item.headersTemplate,
+    bodyTemplate: item.bodyTemplate,
+  };
+}
 
 export const chamadaApiService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<ChamadaApi>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
 
-    if (params?.search) {
-      oDataParams.$filter = ODataHelper.createSearchFilter(params.search, ['nome']);
-    }
-
-    oDataParams.$select = 'Id,Nome,Descricao,Metodo,Url,CreatedAt,UpdatedAt';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<ChamadaApi[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<ChamadaApi>(response.data, params);
+    return {
+      data: (response.data ?? []).map(mapChamadaApi),
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
-  getById: (id: number) =>
-    httpClient.get<ChamadaApi>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => {
+    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
+    return {
+      ...response,
+      data: response.data ? mapChamadaApi(response.data) : response.data,
+    };
+  },
 
-  create: (data: CreateChamadaApiRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: async (data: CreateChamadaApiRequest) => {
+    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
+      name: data.nome,
+      description: data.descricao || undefined,
+      method: data.metodo,
+      url: data.url,
+      headersTemplate: data.headersTemplate || undefined,
+      bodyTemplate: data.bodyTemplate || undefined,
+    });
 
-  update: (id: number, data: UpdateChamadaApiRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+    return {
+      ...response,
+      data: response.data ? mapChamadaApi(response.data) : response.data,
+    };
+  },
+
+  update: async (id: number, data: UpdateChamadaApiRequest) => {
+    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+      id,
+      name: data.nome,
+      description: data.descricao || undefined,
+      method: data.metodo,
+      url: data.url,
+      headersTemplate: data.headersTemplate || undefined,
+      bodyTemplate: data.bodyTemplate || undefined,
+    });
+
+    return {
+      ...response,
+      data: response.data ? mapChamadaApi(response.data) : response.data,
+    };
+  },
 
   delete: (id: number) =>
     httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),

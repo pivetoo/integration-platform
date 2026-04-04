@@ -1,4 +1,4 @@
-import { httpClient } from 'd-rts';
+import { httpClient } from 'archon-ui';
 import type { IntegracaoAtributo, CreateIntegracaoAtributoRequest, UpdateIntegracaoAtributoRequest } from '../types/integracaoAtributo';
 
 const BASE_URL = '/integracaoatributo';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Tag } from 'lucide-react';
-import { PageLayout, DataTable, ConfirmModal, Badge, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, ConfirmModal, Badge, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
 import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
 import CategoriaIntegracaoFormModal from '../../components/modals/CategoriaIntegracaoFormModal';
@@ -87,22 +87,23 @@ export default function CategoriasIntegracao() {
   return (
     <PageLayout
       title="Categorias de Integração"
-      icon={<Tag size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
       onRefresh={loadCategorias}
       selectedRowsCount={selectedCategorias.length}
     >
-      <DataTable
-        columns={columns}
-        data={categorias}
-        rowKey="id"
-        selectedRows={selectedCategorias}
-        onSelectionChange={setSelectedCategorias}
-        emptyText="Nenhuma categoria encontrada"
-        loading={loading}
-      />
+      <div className="space-y-4">
+        <DataTable
+          columns={columns}
+          data={categorias}
+          rowKey="id"
+          selectedRows={selectedCategorias}
+          onSelectionChange={setSelectedCategorias}
+          emptyText="Nenhuma categoria encontrada"
+          loading={loading}
+        />
+      </div>
 
       <ConfirmModal
         open={isConfirmOpen}

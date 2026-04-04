@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link2 } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { conectorService } from '../../services/conectorService';
 import type { Conector } from '../../types/conector';
 import type { Integracao } from '../../types/integracao';
@@ -98,7 +99,6 @@ export default function Conectores() {
   return (
     <PageLayout
       title="Conectores"
-      icon={<Link2 size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

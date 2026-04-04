@@ -34,6 +34,19 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess]
+        [GetEndpoint("active")]
+        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        {
+            List<Integration> integrations = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.IsActive)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+
+            return Http200(integrations);
+        }
+
+        [RequireAccess]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationRequest request, CancellationToken cancellationToken)
         {
@@ -59,6 +72,19 @@ namespace IntegrationPlataform.Api.Controllers
 
             Integration integration = await integrationService.UpdateIntegration(id, request, cancellationToken);
             return Http200(integration, "Integration updated successfully.");
+        }
+
+        [RequireAccess]
+        [DeleteEndpoint("{id:long}")]
+        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        {
+            Integration? integration = await integrationService.Delete(id, cancellationToken);
+            if (integration is null)
+            {
+                return Http404(integrationService.GetErrorMessages());
+            }
+
+            return Http200(integration, "Integration deleted successfully.");
         }
     }
 }

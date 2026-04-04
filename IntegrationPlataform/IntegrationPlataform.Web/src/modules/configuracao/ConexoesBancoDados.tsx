@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Database } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
 import { TipoBancoDadosLabels } from '../../types/conexaoBancoDados';
 import type { ConexaoBancoDados, TipoBancoDados } from '../../types/conexaoBancoDados';
@@ -96,7 +97,6 @@ export default function ConexoesBancoDados() {
   return (
     <PageLayout
       title="Conexões de Banco de Dados"
-      icon={<Database size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { GripVertical, Plus, Pencil, Trash2, Workflow, Bug } from 'lucide-react';
-import { PageLayout, Badge, Button, Card, CardContent, CardHeader, CardTitle, ConfirmModal, useApi, toast } from 'd-rts';
+import { PageLayout, Badge, Button, Card, CardContent, CardHeader, CardTitle, ConfirmModal, useApi, toast } from 'archon-ui';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -240,7 +240,6 @@ export default function PipelineDetalhe() {
     <PageLayout
       title={pipeline?.nome || 'Pipeline'}
       subtitle="Builder linear de etapas"
-      icon={<Workflow size={24} />}
       onRefresh={() => {
         loadPipeline();
         loadEtapas();

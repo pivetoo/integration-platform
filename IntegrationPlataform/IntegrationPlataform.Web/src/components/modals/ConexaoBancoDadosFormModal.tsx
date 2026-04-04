@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, toast } from 'd-rts';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, toast } from 'archon-ui';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
 import type { CreateConexaoBancoDadosRequest } from '../../types/conexaoBancoDados';
 import { TipoBancoDados, TipoBancoDadosLabels } from '../../types/conexaoBancoDados';

@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
-import { AuthProvider, ThemeProvider, GlobalLoaderProvider, useGlobalLoader, setGlobalLoaderContext, Toaster, setApiBaseURL, setIdentityProviderURL } from 'd-rts';
+import { AuthProvider, ThemeProvider, GlobalLoaderProvider, useGlobalLoader, setGlobalLoaderContext, Toaster, setApiBaseURL, setIdentityManagementURL } from 'archon-ui';
 import AppRoutes from './routes';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-const identityProviderApiUrl = import.meta.env.VITE_IDENTITY_PROVIDER_API;
+const identityManagementApiUrl = import.meta.env.VITE_IDENTITY_PROVIDER_API;
 
 if (apiBaseUrl) {
   setApiBaseURL(apiBaseUrl);
 }
 
-if (identityProviderApiUrl) {
-  setIdentityProviderURL(identityProviderApiUrl);
+if (identityManagementApiUrl) {
+  setIdentityManagementURL(identityManagementApiUrl);
 }
 
 function AppContent() {

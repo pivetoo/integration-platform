@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Callback, ProtectedRoute, useAuth } from 'd-rts';
+import { Callback, ProtectedRoute, useAuth } from 'archon-ui';
 import IntegrationHubLayout from '../layouts/IntegrationHubLayout';
 import Dashboard from '../modules';
 import Integracoes from '../modules/configuracao/Integracoes';

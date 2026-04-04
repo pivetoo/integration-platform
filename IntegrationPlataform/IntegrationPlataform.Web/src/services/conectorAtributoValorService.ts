@@ -1,4 +1,4 @@
-import { httpClient } from 'd-rts';
+import { httpClient } from 'archon-ui';
 import type { ConectorAtributoValor, CreateConectorAtributoValorRequest, UpdateConectorAtributoValorRequest } from '../types/conectorAtributoValor';
 
 const BASE_URL = '/conectoratributovalor';

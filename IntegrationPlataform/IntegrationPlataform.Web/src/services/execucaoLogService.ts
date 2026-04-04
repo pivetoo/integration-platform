@@ -1,4 +1,4 @@
-import { httpClient } from 'd-rts';
+import { httpClient } from 'archon-ui';
 import type { ExecucaoLog } from '../types/execucaoLog';
 
 const BASE_URL = '/execucaolog';

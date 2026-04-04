@@ -1,4 +1,4 @@
-import { httpClient } from 'd-rts';
+import { httpClient } from 'archon-ui';
 import type { DashboardData } from '../types/dashboard';
 
 const BASE_URL = '/dashboard';
@@ -30,22 +30,38 @@ interface DashboardApiData {
 export const dashboardService = {
   async getData(): Promise<DashboardData> {
     const response = await httpClient.get<DashboardApiData>(`${BASE_URL}/GetDashboardData`);
+    const data = response.data;
+
+    if (!data) {
+      return {
+        kpis: {
+          integracoesAtivas: 0,
+          conectoresAtivos: 0,
+          pipelinesAtivos: 0,
+          execucoesHoje: 0,
+          taxaSucesso: 0,
+          errosHoje: 0,
+        },
+        execucoesMensais: [],
+        execucoesRecentes: [],
+      };
+    }
 
     return {
       kpis: {
-        integracoesAtivas: response.kpis.activeIntegrations,
-        conectoresAtivos: response.kpis.activeConnectors,
-        pipelinesAtivos: response.kpis.activePipelines,
-        execucoesHoje: response.kpis.executionsToday,
-        taxaSucesso: response.kpis.successRate,
-        errosHoje: response.kpis.errorsToday,
+        integracoesAtivas: data.kpis.activeIntegrations,
+        conectoresAtivos: data.kpis.activeConnectors,
+        pipelinesAtivos: data.kpis.activePipelines,
+        execucoesHoje: data.kpis.executionsToday,
+        taxaSucesso: data.kpis.successRate,
+        errosHoje: data.kpis.errorsToday,
       },
-      execucoesMensais: response.monthlyExecutions.map((item) => ({
+      execucoesMensais: data.monthlyExecutions.map((item) => ({
         mes: item.month,
         sucesso: item.success,
         erro: item.error,
       })),
-      execucoesRecentes: response.recentExecutions.map((item) => ({
+      execucoesRecentes: data.recentExecutions.map((item) => ({
         id: item.id,
         pipeline: item.pipeline,
         conector: item.connector,

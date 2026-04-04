@@ -34,6 +34,24 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess]
+        [GetEndpoint("pipeline/{pipelineId:long}")]
+        public async Task<IActionResult> GetByPipeline(long pipelineId, CancellationToken cancellationToken)
+        {
+            if (pipelineId <= 0)
+            {
+                return Http400("Pipeline id is required.");
+            }
+
+            List<PipelineStep> steps = await DbContext.Set<PipelineStep>()
+                .AsNoTracking()
+                .Where(item => item.PipelineId == pipelineId)
+                .OrderBy(item => item.Order)
+                .ToListAsync(cancellationToken);
+
+            return Http200(steps);
+        }
+
+        [RequireAccess]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreatePipelineStepRequest request, CancellationToken cancellationToken)
         {
@@ -59,6 +77,19 @@ namespace IntegrationPlataform.Api.Controllers
 
             PipelineStep step = await pipelineStepService.UpdatePipelineStep(id, request, cancellationToken);
             return Http200(step, "Pipeline step updated successfully.");
+        }
+
+        [RequireAccess]
+        [DeleteEndpoint("{id:long}")]
+        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        {
+            PipelineStep? step = await pipelineStepService.Delete(id, cancellationToken);
+            if (step is null)
+            {
+                return Http404(pipelineStepService.GetErrorMessages());
+            }
+
+            return Http200(step, "Pipeline step deleted successfully.");
         }
     }
 }

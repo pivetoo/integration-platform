@@ -1,32 +1,81 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { ScriptBancoDados, CreateScriptBancoDadosRequest, UpdateScriptBancoDadosRequest } from '../types/scriptBancoDados';
 
-const BASE_URL = '/ScriptBancoDados';
+const BASE_URL = '/DatabaseScripts';
+
+function mapScriptBancoDados(item: any): ScriptBancoDados {
+  return {
+    id: item.id,
+    conexaoBancoDados: {
+      id: item.databaseConnection?.id,
+      nome: item.databaseConnection?.name,
+      tipo: item.databaseConnection?.type,
+      host: item.databaseConnection?.host,
+      port: item.databaseConnection?.port,
+      database: item.databaseConnection?.database,
+      username: item.databaseConnection?.username,
+      password: item.databaseConnection?.password,
+      criadoEm: item.databaseConnection?.createdAt,
+      ultimaAlteracao: item.databaseConnection?.updatedAt,
+    },
+    nome: item.name,
+    descricao: item.description ?? null,
+    script: item.script,
+    criadoEm: item.createdAt,
+    ultimaAlteracao: item.updatedAt,
+  };
+}
 
 export const scriptBancoDadosService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<ScriptBancoDados>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
 
-    if (params?.search) {
-      oDataParams.$filter = ODataHelper.createSearchFilter(params.search, ['nome']);
-    }
-
-    oDataParams.$select = 'Id,Nome,Descricao,Script,CreatedAt,UpdatedAt';
-    oDataParams.$expand = 'ConexaoBancoDados($select=Id,Nome)';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<ScriptBancoDados[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<ScriptBancoDados>(response.data, params);
+    return {
+      data: (response.data ?? []).map(mapScriptBancoDados),
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
-  getById: (id: number) => httpClient.get<ScriptBancoDados>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => {
+    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
+    return {
+      ...response,
+      data: response.data ? mapScriptBancoDados(response.data) : response.data,
+    };
+  },
 
-  create: (data: CreateScriptBancoDadosRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: async (data: CreateScriptBancoDadosRequest) => {
+    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
+      databaseConnectionId: data.conexaoBancoDadosId,
+      name: data.nome,
+      description: data.descricao || undefined,
+      script: data.script,
+    });
 
-  update: (id: number, data: UpdateScriptBancoDadosRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+    return {
+      ...response,
+      data: response.data ? mapScriptBancoDados(response.data) : response.data,
+    };
+  },
+
+  update: async (id: number, data: UpdateScriptBancoDadosRequest) => {
+    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+      id,
+      databaseConnectionId: data.conexaoBancoDadosId,
+      name: data.nome,
+      description: data.descricao || undefined,
+      script: data.script,
+    });
+
+    return {
+      ...response,
+      data: response.data ? mapScriptBancoDados(response.data) : response.data,
+    };
+  },
 
   delete: (id: number) =>
     httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),

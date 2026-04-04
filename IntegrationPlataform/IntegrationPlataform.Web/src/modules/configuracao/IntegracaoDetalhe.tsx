@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Cable } from 'lucide-react';
-import { PageLayout, Badge, Button, ConfirmModal, useApi, toast } from 'd-rts';
+import { PageLayout, Badge, Button, ConfirmModal, useApi, toast } from 'archon-ui';
 import { integracaoService } from '../../services/integracaoService';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
 import type { Integracao } from '../../types/integracao';
@@ -100,7 +100,6 @@ export default function IntegracaoDetalhe() {
   return (
     <PageLayout
       title={integracao?.nome || 'Integração'}
-      icon={<Cable size={24} />}
       onRefresh={() => { loadIntegracao(); loadAtributos(); }}
       actions={[
         {

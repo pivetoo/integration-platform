@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Globe } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { chamadaApiService } from '../../services/chamadaApiService';
 import { MetodoHttpLabels } from '../../types/chamadaApi';
 import type { ChamadaApi, MetodoHttp } from '../../types/chamadaApi';
@@ -100,7 +101,6 @@ export default function ChamadasApi() {
   return (
     <PageLayout
       title="Chamadas de API"
-      icon={<Globe size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

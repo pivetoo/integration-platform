@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Card, CardContent, CardHeader, CardTitle, Badge,
   AreaChart, ChartContainer, useApi
-} from 'd-rts';
+} from 'archon-ui';
 import {
   LayoutDashboard, Cable, Plug, GitBranch, Play, CheckCircle,
   XCircle, Clock, TrendingUp, AlertTriangle, Zap

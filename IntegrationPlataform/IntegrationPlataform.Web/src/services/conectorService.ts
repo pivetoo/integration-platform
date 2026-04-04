@@ -1,37 +1,88 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { Conector, CreateConectorRequest, UpdateConectorRequest } from '../types/conector';
 
-const BASE_URL = '/conector';
+const BASE_URL = '/Connectors';
+
+function mapConector(item: any): Conector {
+  return {
+    id: item.id,
+    sistemaId: item.systemApplicationId,
+    integracao: item.integration ? {
+      id: item.integration.id,
+      identificador: item.integration.identifier,
+      nome: item.integration.name,
+      descricao: item.integration.description,
+      categoria: undefined,
+      ativo: item.integration.isActive,
+      criadoEm: item.integration.createdAt,
+      ultimaAlteracao: item.integration.updatedAt,
+    } : item.integration,
+    nome: item.name,
+    ativo: item.isActive,
+    criadoEm: item.createdAt,
+    ultimaAlteracao: item.updatedAt,
+  };
+}
 
 export const conectorService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Conector>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
 
-    if (params?.search) {
-      oDataParams.$filter = ODataHelper.createSearchFilter(params.search, ['nome']);
-    }
-
-    oDataParams.$select = 'Id,SistemaId,Nome,Ativo,CreatedAt,UpdatedAt';
-    oDataParams.$expand = 'Integracao($select=Id,Nome)';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<Conector[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<Conector>(response.data, params);
+    return {
+      data: (response.data ?? []).map(mapConector),
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
-  getByIntegracao: (integracaoId: number) =>
-    httpClient.get<Conector[]>(`${BASE_URL}/integracao/${integracaoId}`),
+  getByIntegracao: async (integracaoId: number) => {
+    const response = await httpClient.get<any[]>(`${BASE_URL}/integration/${integracaoId}`);
+    return response.data?.map(mapConector) ?? [];
+  },
 
-  getAtivos: () => httpClient.get<Conector[]>(`${BASE_URL}/ativos`),
+  getAtivos: async () => {
+    const response = await httpClient.get<any[]>(`${BASE_URL}/active`);
+    return response.data?.map(mapConector) ?? [];
+  },
 
-  getById: (id: number) => httpClient.get<Conector>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => {
+    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
+    return {
+      ...response,
+      data: response.data ? mapConector(response.data) : response.data,
+    };
+  },
 
-  create: (data: CreateConectorRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: async (data: CreateConectorRequest) => {
+    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
+      integrationId: data.integracaoId,
+      name: data.nome,
+      systemApplicationId: data.sistemaId || undefined,
+    });
 
-  update: (id: number, data: UpdateConectorRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+    return {
+      ...response,
+      data: response.data ? mapConector(response.data) : response.data,
+    };
+  },
+
+  update: async (id: number, data: UpdateConectorRequest) => {
+    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+      id,
+      integrationId: data.integracaoId,
+      name: data.nome,
+      systemApplicationId: data.sistemaId || undefined,
+      isActive: data.ativo,
+    });
+
+    return {
+      ...response,
+      data: response.data ? mapConector(response.data) : response.data,
+    };
+  },
 
   delete: (id: number) =>
     httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),

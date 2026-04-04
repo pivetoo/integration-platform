@@ -1,4 +1,4 @@
-import { httpClient } from 'd-rts';
+import { httpClient } from 'archon-ui';
 import type { CopilotPlanRequest, CopilotPlanResponse } from '../types/copilot';
 
 const BASE_URL = '/copilot';

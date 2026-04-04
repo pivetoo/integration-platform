@@ -1,23 +1,19 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { Referencia, CreateReferenciaRequest, UpdateReferenciaRequest } from '../types/referencia';
 
 const BASE_URL = '/referencia';
 
 export const referenciaService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Referencia>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
-
-    if (params?.search) {
-      oDataParams.$filter = ODataHelper.createSearchFilter(params.search, ['entidade', 'idInterno', 'idExterno']);
-    }
-
-    oDataParams.$select = 'Id,Entidade,IdInterno,IdExterno,CreatedAt,UpdatedAt';
-    oDataParams.$expand = 'Conector($select=Id,Nome)';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<Referencia[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<Referencia>(response.data, params);
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<Referencia[]>(`${BASE_URL}/Get${query}`);
+    return {
+      data: response.data ?? [],
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
   getById: (id: number) => httpClient.get<Referencia>(`${BASE_URL}/${id}`),

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Database } from 'lucide-react';
-import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { scriptBancoDadosService } from '../../services/scriptBancoDadosService';
 import type { ScriptBancoDados } from '../../types/scriptBancoDados';
 import type { ConexaoBancoDados } from '../../types/conexaoBancoDados';
@@ -83,7 +84,6 @@ export default function ScriptsBancoDados() {
   return (
     <PageLayout
       title="Scripts SQL"
-      icon={<Database size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { referenciaService } from '../../services/referenciaService';
 import type { Referencia } from '../../types/referencia';
 import type { Conector } from '../../types/conector';
@@ -109,7 +110,6 @@ export default function Referencias() {
   return (
     <PageLayout
       title="Referências"
-      icon={<ExternalLink size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

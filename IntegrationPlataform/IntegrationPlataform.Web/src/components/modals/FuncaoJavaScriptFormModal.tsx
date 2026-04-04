@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, useApi } from 'd-rts';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, useApi } from 'archon-ui';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';
 import type { FuncaoJavaScript, CreateFuncaoJavaScriptRequest } from '../../types/funcaoJavaScript';
 

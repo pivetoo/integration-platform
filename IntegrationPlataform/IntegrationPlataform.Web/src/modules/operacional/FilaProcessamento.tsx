@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ListOrdered } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { filaProcessamentoService } from '../../services/filaProcessamentoService';
 import { StatusProcessamentoLabels } from '../../types/filaProcessamento';
 import type { FilaProcessamento as FilaProcessamentoType, StatusProcessamento } from '../../types/filaProcessamento';
@@ -121,7 +122,6 @@ export default function FilaProcessamento() {
   return (
     <PageLayout
       title="Fila de Processamento"
-      icon={<ListOrdered size={24} />}
       onAdd={handleAdd}
       onDelete={handleDelete}
       onRefresh={loadItens}

@@ -1,31 +1,67 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { FuncaoJavaScript, CreateFuncaoJavaScriptRequest, UpdateFuncaoJavaScriptRequest } from '../types/funcaoJavaScript';
 
-const BASE_URL = '/funcaojavascript';
+const BASE_URL = '/JavaScriptFunctions';
+
+function mapFuncaoJavaScript(item: any): FuncaoJavaScript {
+  return {
+    id: item.id,
+    nome: item.name,
+    descricao: item.description ?? null,
+    codigo: item.code,
+    criadoEm: item.createdAt,
+    ultimaAlteracao: item.updatedAt,
+  };
+}
 
 export const funcaoJavaScriptService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<FuncaoJavaScript>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
 
-    if (params?.search) {
-      oDataParams.$filter = ODataHelper.createSearchFilter(params.search, ['nome']);
-    }
-
-    oDataParams.$select = 'Id,Nome,Descricao,Codigo,CreatedAt,UpdatedAt';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<FuncaoJavaScript[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<FuncaoJavaScript>(response.data, params);
+    return {
+      data: (response.data ?? []).map(mapFuncaoJavaScript),
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
-  getById: (id: number) => httpClient.get<FuncaoJavaScript>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => {
+    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
+    return {
+      ...response,
+      data: response.data ? mapFuncaoJavaScript(response.data) : response.data,
+    };
+  },
 
-  create: (data: CreateFuncaoJavaScriptRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: async (data: CreateFuncaoJavaScriptRequest) => {
+    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
+      name: data.nome,
+      description: data.descricao || undefined,
+      code: data.codigo,
+    });
 
-  update: (id: number, data: UpdateFuncaoJavaScriptRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+    return {
+      ...response,
+      data: response.data ? mapFuncaoJavaScript(response.data) : response.data,
+    };
+  },
+
+  update: async (id: number, data: UpdateFuncaoJavaScriptRequest) => {
+    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+      id,
+      name: data.nome,
+      description: data.descricao || undefined,
+      code: data.codigo,
+    });
+
+    return {
+      ...response,
+      data: response.data ? mapFuncaoJavaScript(response.data) : response.data,
+    };
+  },
 
   delete: (id: number) =>
     httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Cable, Download, Upload } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { integracaoService } from '../../services/integracaoService';
 import type { Integracao, IntegracaoExportModel } from '../../types/integracao';
 import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
@@ -153,7 +154,6 @@ export default function Integracoes() {
   return (
     <PageLayout
       title="Integrações"
-      icon={<Cable size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Play } from 'lucide-react';
-import { PageLayout, DataTable, Badge, useApi } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, Badge, useApi } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { execucaoService } from '../../services/execucaoService';
 import { TipoExecucaoLabels, StatusExecucaoLabels } from '../../types/execucao';
 import type { Execucao, TipoExecucao, StatusExecucao as StatusExecucaoType } from '../../types/execucao';
@@ -117,7 +118,6 @@ export default function Execucoes() {
   return (
     <PageLayout
       title="Execuções"
-      icon={<Play size={24} />}
       onRefresh={loadExecucoes}
     >
       <DataTable

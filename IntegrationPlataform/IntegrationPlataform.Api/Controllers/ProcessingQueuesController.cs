@@ -12,11 +12,17 @@ namespace IntegrationPlataform.Api.Controllers
     public sealed class ProcessingQueuesController : ReadOnlyController<ProcessingQueue>
     {
         private readonly IExecutionService executionService;
+        private readonly IProcessingQueueService processingQueueService;
         private readonly IQueueProcessorService queueProcessorService;
 
-        public ProcessingQueuesController(DbContext dbContext, IExecutionService executionService, IQueueProcessorService queueProcessorService) : base(dbContext)
+        public ProcessingQueuesController(
+            DbContext dbContext,
+            IExecutionService executionService,
+            IProcessingQueueService processingQueueService,
+            IQueueProcessorService queueProcessorService) : base(dbContext)
         {
             this.executionService = executionService;
+            this.processingQueueService = processingQueueService;
             this.queueProcessorService = queueProcessorService;
         }
 
@@ -73,6 +79,19 @@ namespace IntegrationPlataform.Api.Controllers
 
             await queueProcessorService.ProcessItem(processingQueueId, cancellationToken);
             return Http200(message: "Queue item processed successfully.");
+        }
+
+        [RequireAccess]
+        [DeleteEndpoint("{id:long}")]
+        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        {
+            ProcessingQueue? queue = await processingQueueService.Delete(id, cancellationToken);
+            if (queue is null)
+            {
+                return Http404(processingQueueService.GetErrorMessages());
+            }
+
+            return Http200(queue, "Processing queue deleted successfully.");
         }
     }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Clock, AlertCircle, Info as InfoIcon, Copy, Check } from 'lucide-react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi } from 'd-rts';
+import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi } from 'archon-ui';
 import type { Execucao } from '../../types/execucao';
 import type { ExecucaoLog } from '../../types/execucaoLog';
 import { NivelLogLabels } from '../../types/execucaoLog';

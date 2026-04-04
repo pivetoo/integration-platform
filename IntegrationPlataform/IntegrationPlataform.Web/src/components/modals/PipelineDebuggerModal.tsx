@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, Play, RefreshCcw, Filter, Bug } from 'lucide-react';
-import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi } from 'd-rts';
+import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi } from 'archon-ui';
 import { conectorService } from '../../services/conectorService';
 import { execucaoService } from '../../services/execucaoService';
 import { execucaoLogService } from '../../services/execucaoLogService';

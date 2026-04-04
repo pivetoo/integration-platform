@@ -1,5 +1,5 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type {
   DebugPipelineRequest,
   DebugPipelineResult,
@@ -15,15 +15,14 @@ const BASE_URL = '/execucao';
 
 export const execucaoService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Execucao>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
-
-    oDataParams.$select = 'Id,Tipo,Status,IniciadoEm,FinalizadoEm,Duracao,CreatedAt';
-    oDataParams.$expand = 'Conector($select=Id,Nome),Pipeline($select=Id,Nome)';
-    oDataParams.$orderby = 'IniciadoEm desc';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<Execucao[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<Execucao>(response.data, params);
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<Execucao[]>(`${BASE_URL}/Get${query}`);
+    return {
+      data: response.data ?? [],
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
   getById: (id: number) => httpClient.get<Execucao>(`${BASE_URL}/${id}`),

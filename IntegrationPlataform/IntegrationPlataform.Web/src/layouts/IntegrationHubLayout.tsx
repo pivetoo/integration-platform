@@ -6,8 +6,8 @@ import {
   useAppNavigation,
   useNotifications,
   AuthService
-} from 'd-rts';
-import type { BreadcrumbItem } from 'd-rts';
+} from 'archon-ui';
+import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
 import logoIntegrationHub from '../assets/logo-integration-hub.svg';
 import AboutIntegrationHubModal from '../components/modals/AboutIntegrationHubModal';

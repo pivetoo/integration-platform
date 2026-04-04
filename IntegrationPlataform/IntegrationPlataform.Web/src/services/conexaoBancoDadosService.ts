@@ -1,8 +1,8 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { ConexaoBancoDados, CreateConexaoBancoDadosRequest } from '../types/conexaoBancoDados';
 
-const BASE_URL = '/ConexaoBancoDados';
+const BASE_URL = '/DatabaseConnections';
 
 export interface UpdateConexaoBancoDadosRequest {
   nome: string;
@@ -14,33 +14,88 @@ export interface UpdateConexaoBancoDadosRequest {
   password: string;
 }
 
+function mapConexaoBancoDados(item: any): ConexaoBancoDados {
+  return {
+    id: item.id,
+    nome: item.name,
+    tipo: item.type,
+    host: item.host,
+    port: item.port,
+    database: item.database,
+    username: item.username,
+    password: item.password,
+    criadoEm: item.createdAt,
+    ultimaAlteracao: item.updatedAt,
+  };
+}
+
 export const conexaoBancoDadosService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<ConexaoBancoDados>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
 
-    if (params?.search) {
-      oDataParams.$filter = ODataHelper.createSearchFilter(params.search, ['nome', 'host', 'database']);
-    }
-
-    oDataParams.$select = 'Id,Nome,Tipo,Host,Port,Database,Username,CreatedAt,UpdatedAt';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<ConexaoBancoDados[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<ConexaoBancoDados>(response.data, params);
+    return {
+      data: (response.data ?? []).map(mapConexaoBancoDados),
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
-  getById: (id: number) =>
-    httpClient.get<ConexaoBancoDados>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => {
+    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
+    return {
+      ...response,
+      data: response.data ? mapConexaoBancoDados(response.data) : response.data,
+    };
+  },
 
-  create: (data: CreateConexaoBancoDadosRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: async (data: CreateConexaoBancoDadosRequest) => {
+    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
+      name: data.nome,
+      type: data.tipo,
+      host: data.host,
+      port: data.port,
+      database: data.database,
+      username: data.username,
+      password: data.password,
+    });
 
-  update: (id: number, data: UpdateConexaoBancoDadosRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+    return {
+      ...response,
+      data: response.data ? mapConexaoBancoDados(response.data) : response.data,
+    };
+  },
+
+  update: async (id: number, data: UpdateConexaoBancoDadosRequest) => {
+    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+      id,
+      name: data.nome,
+      type: data.tipo,
+      host: data.host,
+      port: data.port,
+      database: data.database,
+      username: data.username,
+      password: data.password,
+    });
+
+    return {
+      ...response,
+      data: response.data ? mapConexaoBancoDados(response.data) : response.data,
+    };
+  },
 
   delete: (id: number) =>
     httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
 
   testar: (data: CreateConexaoBancoDadosRequest) =>
-    httpClient.post<{ message: string }>(`${BASE_URL}/testar`, data),
+    httpClient.post<{ message: string }>(`${BASE_URL}/test`, {
+      name: data.nome,
+      type: data.tipo,
+      host: data.host,
+      port: data.port,
+      database: data.database,
+      username: data.username,
+      password: data.password,
+    }),
 };

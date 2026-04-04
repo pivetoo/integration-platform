@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link2, Save, Eye, EyeOff } from 'lucide-react';
-import { PageLayout, Badge, Button, Input, Checkbox, useApi, toast } from 'd-rts';
+import { PageLayout, Badge, Button, Input, Checkbox, useApi, toast } from 'archon-ui';
 import { conectorService } from '../../services/conectorService';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
 import { conectorAtributoValorService } from '../../services/conectorAtributoValorService';
@@ -272,7 +272,6 @@ export default function ConectorDetalhe() {
   return (
     <PageLayout
       title={conector?.nome || 'Conector'}
-      icon={<Link2 size={24} />}
       onRefresh={() => { loadConector(); loadValores(); }}
     >
       <div className="space-y-6">

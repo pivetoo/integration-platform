@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, useApi } from 'd-rts';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, useApi } from 'archon-ui';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
 import type { CategoriaIntegracao, CreateCategoriaIntegracaoRequest } from '../../types/categoriaIntegracao';
 

@@ -1,20 +1,19 @@
-import { httpClient, ODataHelper } from 'd-rts';
-import type { PaginatedResult, PaginationParams } from 'd-rts';
+import { buildPaginationQuery, httpClient } from 'archon-ui';
+import type { PaginatedResult, PaginationParams } from '../types/pagination';
 import type { FilaProcessamento, CreateFilaProcessamentoRequest, UpdateFilaProcessamentoRequest } from '../types/filaProcessamento';
 
 const BASE_URL = '/filaprocessamento';
 
 export const filaProcessamentoService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<FilaProcessamento>> => {
-    const oDataParams = params ? ODataHelper.fromPaginationParams(params) : { $count: true };
-
-    oDataParams.$select = 'Id,Prioridade,Status,UltimoErro,Agendamento,IniciadoEm,FinalizadoEm,CreatedAt';
-    oDataParams.$expand = 'Conector($select=Id,Nome),Pipeline($select=Id,Nome)';
-    oDataParams.$orderby = 'CreatedAt desc';
-
-    const query = ODataHelper.buildQuery(oDataParams);
-    const response = await httpClient.get<FilaProcessamento[]>(`${BASE_URL}/GetAll${query}`);
-    return ODataHelper.processResponse<FilaProcessamento>(response.data, params);
+    const query = buildPaginationQuery(params);
+    const response = await httpClient.get<FilaProcessamento[]>(`${BASE_URL}/Get${query}`);
+    return {
+      data: response.data ?? [],
+      total: response.pagination?.totalCount ?? 0,
+      page: response.pagination?.page ?? params?.page,
+      pageSize: response.pagination?.pageSize ?? params?.pageSize,
+    };
   },
 
   getById: (id: number) => httpClient.get<FilaProcessamento>(`${BASE_URL}/${id}`),

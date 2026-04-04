@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Activity, GitBranch, Plug2, ShieldCheck, Workflow } from 'lucide-react';
-import { Badge, Modal, ModalContent, ModalDescription, ModalHeader, ModalTitle } from 'd-rts';
+import { Badge, Modal, ModalContent, ModalDescription, ModalHeader, ModalTitle } from 'archon-ui';
 
 interface AboutIntegrationHubModalProps {
   open: boolean;

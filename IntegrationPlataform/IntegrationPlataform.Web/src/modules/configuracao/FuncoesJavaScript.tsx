@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FileCode2 } from 'lucide-react';
-import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'd-rts';
-import type { DataTableColumn, PaginatedResult } from 'd-rts';
+import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
+import type { DataTableColumn } from 'archon-ui';
+import type { PaginatedResult } from '../../types/pagination';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';
 import type { FuncaoJavaScript } from '../../types/funcaoJavaScript';
 import FuncaoJavaScriptFormModal from '../../components/modals/FuncaoJavaScriptFormModal';
@@ -76,7 +77,6 @@ export default function FuncoesJavaScript() {
   return (
     <PageLayout
       title="Funções JavaScript"
-      icon={<FileCode2 size={24} />}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
