@@ -2,8 +2,8 @@ using FluentMigrator;
 
 namespace IntegrationPlataform.Infrastructure.Migrations
 {
-    [Migration(1)]
-    public sealed class Migration_001_CreateIntegrationPlataformTables : Migration
+    [Migration(202604030002)]
+    public sealed class Migration_202604030002_CreateIntegrationPlataformTables : Migration
     {
         public override void Up()
         {
