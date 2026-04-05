@@ -14,22 +14,26 @@ namespace IntegrationPlataform.Api.Controllers
     public sealed class ExecutionsController : ApiControllerBase
     {
         private readonly DbContext dbContext;
-        private readonly IExecutionService executionService;
         private readonly IExecutionEngineService executionEngineService;
 
-        public ExecutionsController(DbContext dbContext, IExecutionService executionService, IExecutionEngineService executionEngineService)
+        public ExecutionsController(DbContext dbContext, IExecutionEngineService executionEngineService)
         {
             this.dbContext = dbContext;
-            this.executionService = executionService;
             this.executionEngineService = executionEngineService;
+        }
+
+        private IQueryable<ExecutionContract> QueryContracts()
+        {
+            return dbContext.Set<Execution>()
+                .AsNoTracking()
+                .Select(ExecutionContract.Projection);
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await dbContext.Set<Execution>()
-                .AsNoTracking()
+            var result = await QueryContracts()
                 .OrderByDescending(item => item.StartedAt)
                 .ToPagedResultAsync(request, cancellationToken);
 
@@ -45,8 +49,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400("Id is required.");
             }
 
-            Execution? execution = await dbContext.Set<Execution>()
-                .AsNoTracking()
+            ExecutionContract? execution = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
 
             return execution is null ? Http404("Record not found.") : Http200(execution);
@@ -61,7 +64,11 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400("Connector id is required.");
             }
 
-            var executions = await executionService.GetByConnector(connectorId, cancellationToken);
+            var executions = await QueryContracts()
+                .Where(item => item.ConnectorId == connectorId)
+                .OrderByDescending(item => item.StartedAt)
+                .ToListAsync(cancellationToken);
+
             return Http200(executions);
         }
 
@@ -69,7 +76,11 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint("status/{status}")]
         public async Task<IActionResult> GetByStatus(ExecutionStatus status, CancellationToken cancellationToken)
         {
-            var executions = await executionService.GetByStatus(status, cancellationToken);
+            var executions = await QueryContracts()
+                .Where(item => item.Status == status)
+                .OrderByDescending(item => item.StartedAt)
+                .ToListAsync(cancellationToken);
+
             return Http200(executions);
         }
 
@@ -77,7 +88,13 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint("recent")]
         public async Task<IActionResult> GetRecent([FromQuery] int take = 10, CancellationToken cancellationToken = default)
         {
-            var executions = await executionService.GetRecent(take, cancellationToken);
+            int normalizedTake = take <= 0 ? 10 : take;
+
+            var executions = await QueryContracts()
+                .OrderByDescending(item => item.StartedAt)
+                .Take(normalizedTake)
+                .ToListAsync(cancellationToken);
+
             return Http200(executions);
         }
 
@@ -102,6 +119,27 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess]
+        [PostEndpoint("debug")]
+        public async Task<IActionResult> Debug([FromBody] DebugPipelineRequest request, CancellationToken cancellationToken)
+        {
+            IActionResult? validationResult = ValidateBody(request);
+            if (validationResult is not null)
+            {
+                return validationResult;
+            }
+
+            Execution execution = await executionEngineService.ExecutePipeline(
+                request.ConnectorId,
+                request.PipelineId,
+                request.InputData,
+                ExecutionType.Manual,
+                initialStepId: request.InitialStepId,
+                cancellationToken: cancellationToken);
+
+            return Http200(CreateExecutionResponse(execution));
+        }
+
+        [RequireAccess]
         [PostEndpoint("debug/start")]
         public async Task<IActionResult> StartDebug([FromBody] DebugPipelineRequest request, CancellationToken cancellationToken)
         {
@@ -118,13 +156,20 @@ namespace IntegrationPlataform.Api.Controllers
                 request.InitialStepId,
                 cancellationToken);
 
+            int remainingSteps = session.ActiveSteps.Count - session.CurrentIndex;
+            PipelineStep? nextStep = remainingSteps > 0 ? session.ActiveSteps[session.CurrentIndex] : null;
+
             return Http200(new
             {
                 session.SessionId,
                 ExecutionId = session.Execution.Id,
                 PipelineId = session.Pipeline.Id,
                 ConnectorId = session.Connector.Id,
-                TotalSteps = session.ActiveSteps.Count
+                session.Execution.Status,
+                TotalSteps = session.ActiveSteps.Count,
+                RemainingSteps = remainingSteps,
+                NextStepId = nextStep?.Id,
+                NextStepName = nextStep?.Name
             });
         }
 

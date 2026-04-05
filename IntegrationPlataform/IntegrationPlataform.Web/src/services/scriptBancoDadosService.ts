@@ -7,7 +7,8 @@ const BASE_URL = '/DatabaseScripts';
 function mapScriptBancoDados(item: any): ScriptBancoDados {
   return {
     id: item.id,
-    conexaoBancoDados: {
+    conexaoBancoDadosId: item.databaseConnectionId,
+    conexaoBancoDados: item.databaseConnection ? {
       id: item.databaseConnection?.id,
       nome: item.databaseConnection?.name,
       tipo: item.databaseConnection?.type,
@@ -18,7 +19,7 @@ function mapScriptBancoDados(item: any): ScriptBancoDados {
       password: item.databaseConnection?.password,
       criadoEm: item.databaseConnection?.createdAt,
       ultimaAlteracao: item.databaseConnection?.updatedAt,
-    },
+    } : undefined,
     nome: item.name,
     descricao: item.description ?? null,
     script: item.script,

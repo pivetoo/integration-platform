@@ -38,13 +38,21 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
   };
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       ref={setNodeRef}
       style={style}
       onClick={() => onSelect(etapa.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect(etapa.id);
+        }
+      }}
       className={[
         'w-full rounded-lg border bg-card p-3 text-left transition-all',
+        'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30',
         selected ? 'border-primary ring-1 ring-primary/20' : 'border-border hover:border-primary/40 hover:bg-accent/30',
         isDragging ? 'shadow-lg ring-2 ring-primary/25' : '',
       ].join(' ')}
@@ -99,7 +107,7 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
           </Button>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 

@@ -1,9 +1,9 @@
 import type { Integracao } from './integracao';
 
 export const TipoEtapa = {
-  RequisicaoHttp: 0,
-  FuncaoJavaScript: 1,
-  ExecutarScript: 2,
+  RequisicaoHttp: 1,
+  FuncaoJavaScript: 2,
+  ExecutarScript: 3,
 } as const;
 
 export type TipoEtapa = typeof TipoEtapa[keyof typeof TipoEtapa];
@@ -15,8 +15,8 @@ export const TipoEtapaLabels: Record<TipoEtapa, string> = {
 };
 
 export const AcaoErro = {
-  Parar: 0,
-  Continuar: 1,
+  Parar: 1,
+  Continuar: 2,
 } as const;
 
 export type AcaoErro = typeof AcaoErro[keyof typeof AcaoErro];
@@ -28,7 +28,8 @@ export const AcaoErroLabels: Record<AcaoErro, string> = {
 
 export interface Pipeline {
   id: number;
-  integracao: Integracao;
+  integracaoId: number;
+  integracao?: Integracao;
   identificador: string;
   nome: string;
   descricao?: string;

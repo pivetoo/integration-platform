@@ -1,6 +1,8 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
+using IntegrationPlataform.Api.Contracts.Integrations;
 using IntegrationPlataform.Application.Requests.Integrations;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -23,24 +25,37 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            var result = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .OrderBy(item => item.Name)
+                .Select(IntegrationContract.Projection)
+                .ToPagedResultAsync(request, cancellationToken);
+
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            var integration = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.Id == id)
+                .Select(IntegrationContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return integration is null ? Http404("Record not found.") : Http200(integration);
         }
 
         [RequireAccess]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
-            List<Integration> integrations = await DbContext.Set<Integration>()
+            var integrations = await DbContext.Set<Integration>()
                 .AsNoTracking()
                 .Where(item => item.IsActive)
                 .OrderBy(item => item.Name)
+                .Select(IntegrationContract.Projection)
                 .ToListAsync(cancellationToken);
 
             return Http200(integrations);

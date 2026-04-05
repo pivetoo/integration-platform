@@ -1,6 +1,8 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
+using IntegrationPlataform.Api.Contracts.Execution;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -17,18 +19,32 @@ namespace IntegrationPlataform.Api.Controllers
             this.executionLogService = executionLogService;
         }
 
+        private IQueryable<ExecutionLogContract> QueryContracts()
+        {
+            return DbContext.Set<ExecutionLog>()
+                .AsNoTracking()
+                .Select(ExecutionLogContract.Projection);
+        }
+
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            var result = await QueryContracts()
+                .OrderByDescending(item => item.CreatedAt)
+                .ToPagedResultAsync(request, cancellationToken);
+
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            ExecutionLogContract? log = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            return log is null ? Http404("Record not found.") : Http200(log);
         }
 
         [RequireAccess]
@@ -40,10 +56,9 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400("Execution id is required.");
             }
 
-            List<ExecutionLog> logs = await DbContext.Set<ExecutionLog>()
-                .AsNoTracking()
+            List<ExecutionLogContract> logs = await QueryContracts()
                 .Where(item => item.ExecutionId == executionId)
-                .OrderBy(item => item.Id)
+                .OrderBy(item => item.CreatedAt)
                 .ToListAsync(cancellationToken);
 
             return Http200(logs);

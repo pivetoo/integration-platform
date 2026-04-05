@@ -46,7 +46,7 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
         identificador: integracao.identificador,
         nome: integracao.nome,
         descricao: integracao.descricao || '',
-        categoriaId: integracao.categoria?.id,
+        categoriaId: integracao.categoriaId ?? integracao.categoria?.id,
         ativo: integracao.ativo,
       });
     } else {

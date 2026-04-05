@@ -5,6 +5,7 @@ export interface Integracao {
   identificador: string;
   nome: string;
   descricao?: string;
+  categoriaId?: number;
   categoria?: CategoriaIntegracaoEntity;
   ativo: boolean;
   criadoEm: string;

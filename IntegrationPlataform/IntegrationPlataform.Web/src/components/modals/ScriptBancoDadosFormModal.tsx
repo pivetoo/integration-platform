@@ -42,7 +42,7 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
   useEffect(() => {
     if (scriptBancoDados) {
       setFormData({
-        conexaoBancoDadosId: scriptBancoDados.conexaoBancoDados?.id || 0,
+        conexaoBancoDadosId: scriptBancoDados.conexaoBancoDadosId || scriptBancoDados.conexaoBancoDados?.id || 0,
         nome: scriptBancoDados.nome,
         descricao: scriptBancoDados.descricao || '',
         script: scriptBancoDados.script,

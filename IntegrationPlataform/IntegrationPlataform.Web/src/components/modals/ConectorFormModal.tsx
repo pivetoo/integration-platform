@@ -43,7 +43,7 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
     if (conector) {
       setFormData({
         sistemaId: conector.sistemaId || '',
-        integracaoId: conector.integracao?.id || 0,
+        integracaoId: conector.integracaoId || conector.integracao?.id || 0,
         nome: conector.nome,
         ativo: conector.ativo,
       });

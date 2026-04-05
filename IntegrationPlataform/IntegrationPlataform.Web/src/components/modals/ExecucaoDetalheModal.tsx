@@ -14,24 +14,24 @@ interface ExecucaoDetalheModalProps {
 }
 
 const statusVariantMap: Record<number, string> = {
-  0: 'warning',
-  1: 'success',
-  2: 'destructive',
-  3: 'secondary',
+  1: 'warning',
+  2: 'success',
+  3: 'destructive',
+  4: 'secondary',
 };
 
 const nivelLogVariantMap: Record<number, string> = {
-  0: 'secondary',
-  1: 'default',
-  2: 'warning',
-  3: 'destructive',
+  1: 'secondary',
+  2: 'default',
+  3: 'warning',
+  4: 'destructive',
 };
 
 const nivelLogIconMap: Record<number, React.ReactNode> = {
-  0: <InfoIcon size={16} />,
   1: <InfoIcon size={16} />,
-  2: <AlertCircle size={16} />,
+  2: <InfoIcon size={16} />,
   3: <AlertCircle size={16} />,
+  4: <AlertCircle size={16} />,
 };
 
 function formatDuracao(ms?: number): string {

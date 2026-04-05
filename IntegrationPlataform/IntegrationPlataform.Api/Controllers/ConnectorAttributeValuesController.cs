@@ -1,6 +1,7 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Application.Requests.ConnectorAttributeValues;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,60 @@ namespace IntegrationPlataform.Api.Controllers
                 .ToListAsync(cancellationToken);
 
             return Http200(values);
+        }
+
+        [RequireAccess]
+        [PostEndpoint]
+        public async Task<IActionResult> Create([FromBody] CreateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
+        {
+            IActionResult? validationResult = ValidateBody(request);
+            if (validationResult is not null)
+            {
+                return validationResult;
+            }
+
+            ConnectorAttributeValue value = new(request.ConnectorId, request.IntegrationAttributeId, request.Value);
+            bool success = await connectorAttributeValueService.Insert(cancellationToken, value);
+            if (!success)
+            {
+                return Http400(connectorAttributeValueService.GetErrorMessages());
+            }
+
+            return Http201(value, "Connector attribute value created successfully.");
+        }
+
+        [RequireAccess]
+        [PutEndpoint("{id:long}")]
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
+        {
+            IActionResult? validationResult = ValidateBody(request);
+            if (validationResult is not null)
+            {
+                return validationResult;
+            }
+
+            if (id != request.Id)
+            {
+                return Http400("Route id and request id must match.");
+            }
+
+            ConnectorAttributeValue? value = await DbContext.Set<ConnectorAttributeValue>()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            if (value is null)
+            {
+                return Http404("Record not found.");
+            }
+
+            value.Update(request.IntegrationAttributeId, request.Value);
+
+            ConnectorAttributeValue? updatedValue = await connectorAttributeValueService.Update(value, cancellationToken);
+            if (updatedValue is null)
+            {
+                return Http400(connectorAttributeValueService.GetErrorMessages());
+            }
+
+            return Http200(updatedValue, "Connector attribute value updated successfully.");
         }
 
         [RequireAccess]

@@ -1,6 +1,8 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
+using IntegrationPlataform.Api.Contracts.Pipelines;
 using IntegrationPlataform.Application.Requests.Pipelines;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -19,18 +21,33 @@ namespace IntegrationPlataform.Api.Controllers
             this.pipelineService = pipelineService;
         }
 
+        private IQueryable<PipelineContract> QueryContracts()
+        {
+            return DbContext.Set<Pipeline>()
+                .AsNoTracking()
+                .Select(PipelineContract.Projection);
+        }
+
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            var result = await QueryContracts()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            var pipeline = await QueryContracts()
+                .Where(item => item.Id == id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return pipeline is null ? Http404("Record not found.") : Http200(pipeline);
         }
 
         [RequireAccess]
@@ -42,8 +59,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400("Integration id is required.");
             }
 
-            List<Pipeline> pipelines = await DbContext.Set<Pipeline>()
-                .AsNoTracking()
+            var pipelines = await QueryContracts()
                 .Where(item => item.IntegrationId == integrationId)
                 .OrderBy(item => item.Name)
                 .ToListAsync(cancellationToken);
@@ -55,8 +71,7 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
-            List<Pipeline> pipelines = await DbContext.Set<Pipeline>()
-                .AsNoTracking()
+            var pipelines = await QueryContracts()
                 .Where(item => item.IsActive)
                 .OrderBy(item => item.Name)
                 .ToListAsync(cancellationToken);
@@ -75,7 +90,10 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Pipeline pipeline = await pipelineService.CreatePipeline(request, cancellationToken);
-            return Http201(pipeline, "Pipeline created successfully.");
+            PipelineContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == pipeline.Id, cancellationToken);
+
+            return Http201(contract ?? PipelineContract.Projection.Compile()(pipeline), "Pipeline created successfully.");
         }
 
         [RequireAccess]
@@ -89,7 +107,10 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Pipeline pipeline = await pipelineService.UpdatePipeline(id, request, cancellationToken);
-            return Http200(pipeline, "Pipeline updated successfully.");
+            PipelineContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == pipeline.Id, cancellationToken);
+
+            return Http200(contract ?? PipelineContract.Projection.Compile()(pipeline), "Pipeline updated successfully.");
         }
 
         [RequireAccess]

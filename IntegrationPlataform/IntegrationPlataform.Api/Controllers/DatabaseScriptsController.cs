@@ -1,6 +1,8 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
+using IntegrationPlataform.Api.Contracts.DatabaseScripts;
 using IntegrationPlataform.Application.Requests.DatabaseScripts;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -18,18 +20,32 @@ namespace IntegrationPlataform.Api.Controllers
             this.databaseScriptService = databaseScriptService;
         }
 
+        private IQueryable<DatabaseScriptContract> QueryContracts()
+        {
+            return DbContext.Set<DatabaseScript>()
+                .AsNoTracking()
+                .Select(DatabaseScriptContract.Projection);
+        }
+
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            var result = await QueryContracts()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            DatabaseScriptContract? script = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            return script is null ? Http404("Record not found.") : Http200(script);
         }
 
         [RequireAccess]
@@ -43,7 +59,10 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseScript script = await databaseScriptService.CreateDatabaseScript(request, cancellationToken);
-            return Http201(script, "Database script created successfully.");
+            DatabaseScriptContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == script.Id, cancellationToken);
+
+            return Http201(contract ?? DatabaseScriptContract.Projection.Compile()(script), "Database script created successfully.");
         }
 
         [RequireAccess]
@@ -57,7 +76,10 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseScript script = await databaseScriptService.UpdateDatabaseScript(id, request, cancellationToken);
-            return Http200(script, "Database script updated successfully.");
+            DatabaseScriptContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == script.Id, cancellationToken);
+
+            return Http200(contract ?? DatabaseScriptContract.Projection.Compile()(script), "Database script updated successfully.");
         }
 
         [RequireAccess]

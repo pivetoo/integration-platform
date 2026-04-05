@@ -43,7 +43,7 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
   useEffect(() => {
     if (pipeline) {
       setFormData({
-        integracaoId: pipeline.integracao?.id || 0,
+        integracaoId: pipeline.integracaoId || pipeline.integracao?.id || 0,
         identificador: pipeline.identificador,
         nome: pipeline.nome,
         descricao: pipeline.descricao || '',

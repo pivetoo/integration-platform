@@ -1,10 +1,10 @@
-import type { PipelineEtapa } from './pipeline';
+import type { AcaoErro, TipoEtapa } from './pipeline';
 
 export const NivelLog = {
-  Debug: 0,
-  Info: 1,
-  Warning: 2,
-  Error: 3,
+  Debug: 1,
+  Info: 2,
+  Warning: 3,
+  Error: 4,
 } as const;
 
 export type NivelLog = typeof NivelLog[keyof typeof NivelLog];
@@ -16,10 +16,20 @@ export const NivelLogLabels: Record<NivelLog, string> = {
   [NivelLog.Error]: 'Error',
 };
 
+export interface ExecucaoLogEtapa {
+  id: number;
+  ordem: number;
+  nome: string;
+  tipo: TipoEtapa;
+  aoErro: AcaoErro;
+  ativo: boolean;
+  ignorarNoRetorno: boolean;
+}
+
 export interface ExecucaoLog {
   id: number;
   execucaoId: number;
-  pipelineEtapa?: PipelineEtapa;
+  pipelineEtapa?: ExecucaoLogEtapa;
   nivel: NivelLog;
   mensagem: string;
   contexto?: string;

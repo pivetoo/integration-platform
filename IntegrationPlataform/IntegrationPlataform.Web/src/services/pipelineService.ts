@@ -7,16 +7,18 @@ const BASE_URL = '/Pipelines';
 function mapPipeline(item: any): Pipeline {
   return {
     id: item.id,
+    integracaoId: item.integrationId,
     integracao: item.integration ? {
       id: item.integration.id,
       identificador: item.integration.identifier,
       nome: item.integration.name,
       descricao: item.integration.description,
+      categoriaId: item.integration.integrationCategoryId,
       categoria: undefined,
       ativo: item.integration.isActive,
       criadoEm: item.integration.createdAt,
       ultimaAlteracao: item.integration.updatedAt,
-    } : item.integration,
+    } : undefined,
     identificador: item.identifier,
     nome: item.name,
     descricao: item.description,

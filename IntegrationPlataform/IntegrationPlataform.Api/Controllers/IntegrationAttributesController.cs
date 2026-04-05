@@ -1,6 +1,7 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Application.Requests.IntegrationAttributes;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,82 @@ namespace IntegrationPlataform.Api.Controllers
                 .ToListAsync(cancellationToken);
 
             return Http200(attributes);
+        }
+
+        [RequireAccess]
+        [PostEndpoint]
+        public async Task<IActionResult> Create([FromBody] CreateIntegrationAttributeRequest request, CancellationToken cancellationToken)
+        {
+            IActionResult? validationResult = ValidateBody(request);
+            if (validationResult is not null)
+            {
+                return validationResult;
+            }
+
+            IntegrationAttribute attribute = new(
+                request.IntegrationId,
+                request.Field,
+                request.Label,
+                request.Type,
+                request.IsRequired,
+                request.Order,
+                request.Description,
+                request.Placeholder,
+                request.DefaultValue,
+                request.Group,
+                request.IsSensitive);
+
+            bool success = await integrationAttributeService.Insert(cancellationToken, attribute);
+            if (!success)
+            {
+                return Http400(integrationAttributeService.GetErrorMessages());
+            }
+
+            return Http201(attribute, "Integration attribute created successfully.");
+        }
+
+        [RequireAccess]
+        [PutEndpoint("{id:long}")]
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateIntegrationAttributeRequest request, CancellationToken cancellationToken)
+        {
+            IActionResult? validationResult = ValidateBody(request);
+            if (validationResult is not null)
+            {
+                return validationResult;
+            }
+
+            if (id != request.Id)
+            {
+                return Http400("Route id and request id must match.");
+            }
+
+            IntegrationAttribute? attribute = await DbContext.Set<IntegrationAttribute>()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            if (attribute is null)
+            {
+                return Http404("Record not found.");
+            }
+
+            attribute.Update(
+                request.Field,
+                request.Label,
+                request.Type,
+                request.IsRequired,
+                request.Order,
+                request.Description,
+                request.Placeholder,
+                request.DefaultValue,
+                request.Group,
+                request.IsSensitive);
+
+            IntegrationAttribute? updatedAttribute = await integrationAttributeService.Update(attribute, cancellationToken);
+            if (updatedAttribute is null)
+            {
+                return Http400(integrationAttributeService.GetErrorMessages());
+            }
+
+            return Http200(updatedAttribute, "Integration attribute updated successfully.");
         }
 
         [RequireAccess]

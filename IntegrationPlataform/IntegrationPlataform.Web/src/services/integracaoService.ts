@@ -10,6 +10,7 @@ function mapIntegracao(item: any): Integracao {
     identificador: item.identifier,
     nome: item.name,
     descricao: item.description,
+    categoriaId: item.integrationCategoryId,
     categoria: item.integrationCategory ? {
       id: item.integrationCategory.id,
       nome: item.integrationCategory.name,

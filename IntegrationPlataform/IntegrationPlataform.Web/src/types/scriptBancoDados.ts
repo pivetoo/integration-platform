@@ -2,12 +2,13 @@ import type { ConexaoBancoDados } from './conexaoBancoDados';
 
 export interface ScriptBancoDados {
   id: number;
-  conexaoBancoDados: ConexaoBancoDados;
+  conexaoBancoDadosId: number;
+  conexaoBancoDados?: ConexaoBancoDados;
   nome: string;
   descricao: string | null;
   script: string;
   criadoEm: string;
-  ultimaAlteracao: string;
+  ultimaAlteracao?: string;
 }
 
 export interface CreateScriptBancoDadosRequest {

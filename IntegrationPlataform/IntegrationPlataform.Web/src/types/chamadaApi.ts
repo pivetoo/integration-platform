@@ -1,9 +1,9 @@
 export const MetodoHttp = {
-  GET: 0,
-  POST: 1,
-  PUT: 2,
-  PATCH: 3,
-  DELETE: 4,
+  GET: 1,
+  POST: 2,
+  PUT: 3,
+  PATCH: 4,
+  DELETE: 5,
 } as const;
 
 export type MetodoHttp = typeof MetodoHttp[keyof typeof MetodoHttp];

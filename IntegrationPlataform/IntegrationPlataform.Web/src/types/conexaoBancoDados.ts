@@ -1,8 +1,8 @@
 export const TipoBancoDados = {
-  PostgreSQL: 0,
-  SqlServer: 1,
-  Oracle: 2,
-  MySQL: 3,
+  PostgreSQL: 1,
+  SqlServer: 2,
+  Oracle: 3,
+  MySQL: 4,
 } as const;
 
 export type TipoBancoDados = typeof TipoBancoDados[keyof typeof TipoBancoDados];

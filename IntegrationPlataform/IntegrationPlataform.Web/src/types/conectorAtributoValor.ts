@@ -3,8 +3,10 @@ import type { IntegracaoAtributo } from './integracaoAtributo';
 
 export interface ConectorAtributoValor {
   id: number;
-  conector: Conector;
-  integracaoAtributo: IntegracaoAtributo;
+  conectorId: number;
+  conector: Conector | null;
+  integracaoAtributoId: number;
+  integracaoAtributo: IntegracaoAtributo | null;
   valor: string;
 }
 
@@ -15,5 +17,6 @@ export interface CreateConectorAtributoValorRequest {
 }
 
 export interface UpdateConectorAtributoValorRequest {
+  integracaoAtributoId: number;
   valor: string;
 }

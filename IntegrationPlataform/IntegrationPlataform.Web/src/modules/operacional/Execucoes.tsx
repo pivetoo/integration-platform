@@ -10,10 +10,10 @@ import type { Pipeline } from '../../types/pipeline';
 import ExecucaoDetalheModal from '../../components/modals/ExecucaoDetalheModal';
 
 const statusVariantMap: Record<number, string> = {
-  0: 'warning',
-  1: 'success',
-  2: 'destructive',
-  3: 'secondary',
+  1: 'warning',
+  2: 'success',
+  3: 'destructive',
+  4: 'secondary',
 };
 
 function formatDuracao(ms?: number): string {

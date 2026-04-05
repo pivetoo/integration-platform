@@ -8,11 +8,13 @@ function mapConector(item: any): Conector {
   return {
     id: item.id,
     sistemaId: item.systemApplicationId,
+    integracaoId: item.integrationId,
     integracao: item.integration ? {
       id: item.integration.id,
       identificador: item.integration.identifier,
       nome: item.integration.name,
       descricao: item.integration.description,
+      categoriaId: item.integration.integrationCategoryId,
       categoria: undefined,
       ativo: item.integration.isActive,
       criadoEm: item.integration.createdAt,

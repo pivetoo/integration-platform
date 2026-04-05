@@ -74,7 +74,7 @@ export default function ConectorDetalhe() {
   useEffect(() => {
     const initial: Record<number, string> = {};
     for (const atributo of atributos) {
-      const existing = valores.find(v => v.integracaoAtributo?.id === atributo.id);
+      const existing = valores.find(v => v.integracaoAtributoId === atributo.id);
       if (existing) {
         initial[atributo.id] = existing.valor || '';
       } else {
@@ -87,8 +87,8 @@ export default function ConectorDetalhe() {
   const valorMap = useMemo(() => {
     const map: Record<number, ConectorAtributoValor> = {};
     for (const v of valores) {
-      if (v.integracaoAtributo?.id) {
-        map[v.integracaoAtributo.id] = v;
+      if (v.integracaoAtributoId) {
+        map[v.integracaoAtributoId] = v;
       }
     }
     return map;
@@ -130,7 +130,10 @@ export default function ConectorDetalhe() {
       if (existing) {
         if (value !== existing.valor) {
           const result = await saveValor(() =>
-            conectorAtributoValorService.update(existing.id, { valor: value })
+            conectorAtributoValorService.update(existing.id, {
+              integracaoAtributoId: atributo.id,
+              valor: value,
+            })
           );
           if (!result) {
             hasError = true;

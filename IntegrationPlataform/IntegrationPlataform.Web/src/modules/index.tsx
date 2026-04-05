@@ -13,24 +13,24 @@ import type { DashboardData, ExecucaoRecente } from '../types/dashboard';
 import type { StatusExecucao } from '../types/execucao';
 
 const statusVariantMap: Record<number, 'success' | 'destructive' | 'warning'> = {
-  0: 'warning',
-  1: 'success',
-  2: 'destructive',
-  3: 'warning',
+  1: 'warning',
+  2: 'success',
+  3: 'destructive',
+  4: 'warning',
 };
 
 const statusBorderMap: Record<number, string> = {
-  0: 'border-l-amber-500',
-  1: 'border-l-green-500',
-  2: 'border-l-red-500',
-  3: 'border-l-amber-500',
+  1: 'border-l-amber-500',
+  2: 'border-l-green-500',
+  3: 'border-l-red-500',
+  4: 'border-l-amber-500',
 };
 
 function getStatusIcon(status: number) {
-  if (status === 1) {
+  if (status === 2) {
     return <CheckCircle className="h-3.5 w-3.5" />;
   }
-  if (status === 2) {
+  if (status === 3) {
     return <XCircle className="h-3.5 w-3.5" />;
   }
   return <Clock className="h-3.5 w-3.5 animate-spin" />;

@@ -1,6 +1,8 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
+using IntegrationPlataform.Api.Contracts.Connectors;
 using IntegrationPlataform.Application.Requests.Connectors;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -22,14 +24,26 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            var result = await DbContext.Set<Connector>()
+                .AsNoTracking()
+                .OrderBy(item => item.Name)
+                .Select(ConnectorContract.Projection)
+                .ToPagedResultAsync(request, cancellationToken);
+
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            var connector = await DbContext.Set<Connector>()
+                .AsNoTracking()
+                .Where(item => item.Id == id)
+                .Select(ConnectorContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return connector is null ? Http404("Record not found.") : Http200(connector);
         }
 
         [RequireAccess]
@@ -41,10 +55,11 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400("Integration id is required.");
             }
 
-            List<Connector> connectors = await DbContext.Set<Connector>()
+            var connectors = await DbContext.Set<Connector>()
                 .AsNoTracking()
                 .Where(item => item.IntegrationId == integrationId)
                 .OrderBy(item => item.Name)
+                .Select(ConnectorContract.Projection)
                 .ToListAsync(cancellationToken);
 
             return Http200(connectors);
@@ -54,10 +69,11 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
-            List<Connector> connectors = await DbContext.Set<Connector>()
+            var connectors = await DbContext.Set<Connector>()
                 .AsNoTracking()
                 .Where(item => item.IsActive)
                 .OrderBy(item => item.Name)
+                .Select(ConnectorContract.Projection)
                 .ToListAsync(cancellationToken);
 
             return Http200(connectors);

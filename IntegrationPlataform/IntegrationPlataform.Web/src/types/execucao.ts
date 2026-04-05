@@ -2,8 +2,8 @@ import type { Conector } from './conector';
 import type { Pipeline } from './pipeline';
 
 export const TipoExecucao = {
-  Pipeline: 0,
-  Manual: 1,
+  Pipeline: 1,
+  Manual: 2,
 } as const;
 
 export type TipoExecucao = typeof TipoExecucao[keyof typeof TipoExecucao];
@@ -14,10 +14,10 @@ export const TipoExecucaoLabels: Record<TipoExecucao, string> = {
 };
 
 export const StatusExecucao = {
-  Executando: 0,
-  Sucesso: 1,
-  Erro: 2,
-  Parcial: 3,
+  Executando: 1,
+  Sucesso: 2,
+  Erro: 3,
+  Parcial: 4,
 } as const;
 
 export type StatusExecucao = typeof StatusExecucao[keyof typeof StatusExecucao];
@@ -32,7 +32,7 @@ export const StatusExecucaoLabels: Record<StatusExecucao, string> = {
 export interface Execucao {
   id: number;
   tipo: TipoExecucao;
-  conector: Conector;
+  conector?: Conector;
   pipeline?: Pipeline;
   status: StatusExecucao;
   dadosEntrada?: string;
@@ -42,6 +42,7 @@ export interface Execucao {
   finalizadoEm?: string;
   duracao?: number;
   criadoEm: string;
+  ultimaAlteracao?: string;
 }
 
 export interface DebugPipelineRequest {
@@ -53,7 +54,7 @@ export interface DebugPipelineRequest {
 
 export interface DebugPipelineResult {
   id: number;
-  status: string;
+  status: StatusExecucao;
   duracao?: number;
   dadosSaida?: unknown;
   erros?: string;
@@ -70,7 +71,7 @@ export interface StartDebugPipelineRequest {
 export interface StartDebugPipelineResult {
   debugSessionId: string;
   execucaoId: number;
-  status: string;
+  status: StatusExecucao;
   totalEtapas: number;
   etapasRestantes: number;
   proximaEtapaId?: number;
