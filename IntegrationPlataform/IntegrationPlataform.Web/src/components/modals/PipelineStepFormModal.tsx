@@ -122,15 +122,14 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => pipelineStepService.update(step.id, formData));
-      } else {
-        await execute(() => pipelineStepService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? pipelineStepService.update(step.id, formData)
+        : pipelineStepService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

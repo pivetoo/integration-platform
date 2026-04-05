@@ -5,16 +5,10 @@ import type { PaginatedResult } from '../../../types/pagination';
 import { referenceService } from '../../../services/referenceService';
 import type { Reference } from '../../../types/reference';
 import type { Conector } from '../../../types/connector';
-import ReferenciaFormModal from '../../../components/modals/ReferenceFormModal';
+import ReferenceFormModal from '../../../components/modals/ReferenceFormModal';
+import { formatDateTime } from '../../../utils/formatters';
 
-function formatDateTime(dateStr?: string): string {
-  if (!dateStr) {
-    return '-';
-  }
-  return new Date(dateStr).toLocaleString('pt-BR');
-}
-
-export default function Referencias() {
+export default function References() {
   const { t } = useI18n();
   const [referencias, setReferencias] = useState<Reference[]>([]);
   const [selectedReferencias, setSelectedReferencias] = useState<Reference[]>([]);
@@ -137,7 +131,7 @@ export default function Referencias() {
         variant="danger"
       />
 
-      <ReferenciaFormModal
+      <ReferenceFormModal
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         referencia={editingReferencia}

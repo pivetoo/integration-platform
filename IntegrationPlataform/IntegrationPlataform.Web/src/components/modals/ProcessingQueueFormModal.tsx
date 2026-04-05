@@ -68,16 +68,15 @@ export default function ProcessingQueueFormModal({ open, onOpenChange, onSuccess
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-        const data = {
-          ...formData,
-        scheduledAt: formData.scheduledAt || undefined,
-        payload: formData.payload || undefined,
-      };
-      await execute(() => processingQueueService.create(data));
+    const data = {
+      ...formData,
+      scheduledAt: formData.scheduledAt || undefined,
+      payload: formData.payload || undefined,
+    };
+    const result = await execute(() => processingQueueService.create(data));
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

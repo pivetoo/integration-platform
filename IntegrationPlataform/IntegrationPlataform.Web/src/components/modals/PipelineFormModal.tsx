@@ -68,15 +68,14 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => pipelineService.update(pipeline.id, formData));
-      } else {
-        await execute(() => pipelineService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? pipelineService.update(pipeline.id, formData)
+        : pipelineService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

@@ -8,6 +8,7 @@ import { integrationService } from '../../../services/integrationService';
 import type { Integration, IntegrationExportModel } from '../../../types/integration';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
 import IntegracaoFormModal from '../../../components/modals/IntegrationFormModal';
+import { parseJsonSafe } from '../../../utils/json';
 
 export default function Integracoes() {
   const { t } = useI18n();
@@ -117,13 +118,14 @@ export default function Integracoes() {
       return;
     }
 
-    try {
-      const text = await file.text();
-      const data: IntegrationExportModel = JSON.parse(text);
+    const text = await file.text();
+    const data = parseJsonSafe<IntegrationExportModel>(text);
+
+    if (!data) {
+      toast({ title: 'Erro', description: 'Arquivo JSON inválido', variant: 'destructive' });
+    } else {
       await importarIntegracao(() => integrationService.import(data));
       loadIntegracoes();
-    } catch {
-      toast({ title: 'Erro', description: 'Arquivo JSON inválido', variant: 'destructive' });
     }
 
     if (fileInputRef.current) {

@@ -7,7 +7,8 @@ import { ExecutionTypeLabels, ExecutionStatusLabels } from '../../../types/execu
 import type { Execution, ExecutionType, ExecutionStatus } from '../../../types/execution';
 import type { Conector } from '../../../types/connector';
 import type { Pipeline } from '../../../types/pipeline';
-import ExecucaoDetalheModal from '../../../components/modals/ExecutionDetailModal';
+import ExecutionDetailModal from '../../../components/modals/ExecutionDetailModal';
+import { formatDateTime, formatDuration } from '../../../utils/formatters';
 
 const statusVariantMap: Record<number, string> = {
   1: 'warning',
@@ -16,30 +17,7 @@ const statusVariantMap: Record<number, string> = {
   4: 'secondary',
 };
 
-function formatDuracao(ms?: number): string {
-  if (ms == null) {
-    return '-';
-  }
-  if (ms < 1000) {
-    return `${ms}ms`;
-  }
-  const seconds = Math.floor(ms / 1000);
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}m ${remainingSeconds}s`;
-}
-
-function formatDateTime(dateStr?: string): string {
-  if (!dateStr) {
-    return '-';
-  }
-  return new Date(dateStr).toLocaleString('pt-BR');
-}
-
-export default function Execucoes() {
+export default function Executions() {
   const { t } = useI18n();
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null);
@@ -99,7 +77,7 @@ export default function Execucoes() {
       key: 'duration',
       title: t('common.column.duration'),
       dataIndex: 'duration',
-      render: (value: number) => formatDuracao(value),
+      render: (value: number) => formatDuration(value),
     },
   ];
 
@@ -129,7 +107,7 @@ export default function Execucoes() {
         onRowClick={handleRowClick}
       />
 
-      <ExecucaoDetalheModal
+      <ExecutionDetailModal
         open={modalOpen}
         onOpenChange={handleModalOpenChange}
         execution={selectedExecution}

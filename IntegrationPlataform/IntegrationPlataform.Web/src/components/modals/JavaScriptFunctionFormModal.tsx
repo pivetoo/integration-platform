@@ -44,15 +44,14 @@ export default function JavaScriptFunctionFormModal({ open, onOpenChange, funcao
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => javaScriptFunctionService.update(funcaoJavaScript.id, formData));
-      } else {
-        await execute(() => javaScriptFunctionService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? javaScriptFunctionService.update(funcaoJavaScript.id, formData)
+        : javaScriptFunctionService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

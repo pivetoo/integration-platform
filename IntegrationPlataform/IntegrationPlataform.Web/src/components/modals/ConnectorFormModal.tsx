@@ -66,15 +66,14 @@ export default function ConnectorFormModal({ open, onOpenChange, connector, onSu
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => connectorService.update(connector.id, formData));
-      } else {
-        await execute(() => connectorService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? connectorService.update(connector.id, formData)
+        : connectorService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

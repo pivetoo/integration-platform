@@ -68,15 +68,14 @@ export default function IntegrationFormModal({ open, onOpenChange, integracao, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => integrationService.update(integracao.id, formData));
-      } else {
-        await execute(() => integrationService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? integrationService.update(integracao.id, formData)
+        : integrationService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

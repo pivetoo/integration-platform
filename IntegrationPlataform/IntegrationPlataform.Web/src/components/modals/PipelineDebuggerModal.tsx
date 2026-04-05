@@ -9,6 +9,7 @@ import type { DebugPipelineResult, ExecuteNextDebugStepResult, StartDebugPipelin
 import type { ExecutionLog } from '../../types/executionLog';
 import { LogLevel, LogLevelLabels } from '../../types/executionLog';
 import type { PipelineStep } from '../../types/pipeline';
+import { normalizeJsonString, parseJsonSafe as parseJsonStringSafe, prettyJson as formatPrettyJson } from '../../utils/json';
 
 interface PipelineDebuggerModalProps {
   open: boolean;
@@ -33,23 +34,6 @@ interface BinaryStepOutput {
   base64: string;
 }
 
-function prettyJson(value: unknown): string {
-  if (value == null) {
-    return 'null';
-  }
-
-  try {
-    if (typeof value === 'string') {
-      const parsed = JSON.parse(value);
-      return JSON.stringify(parsed, null, 2);
-    }
-
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
-
 function parseJsonSafe(value: unknown): unknown {
   if (value == null) {
     return null;
@@ -59,11 +43,8 @@ function parseJsonSafe(value: unknown): unknown {
     return value;
   }
 
-  try {
-    return JSON.parse(value);
-  } catch {
-    return value;
-  }
+  const parsed = parseJsonStringSafe(value);
+  return parsed === null ? value : parsed;
 }
 
 function getStepOutput(logs: ExecutionLog[]): unknown {
@@ -272,14 +253,14 @@ export default function PipelineDebuggerModal({
   const outputAtualText = outputAtual == null
     ? ''
     : binaryOutputAtual
-      ? prettyJson({
+      ? formatPrettyJson({
         isBinary: true,
         mimeType: binaryOutputAtual.mimeType,
         fileName: binaryOutputAtual.fileName,
         size: binaryOutputAtual.size,
         base64: '[omitted]',
       })
-      : prettyJson(outputAtual);
+      : formatPrettyJson(outputAtual);
   const loadingAnyAction = loadingConectores || loadingDebug || loadingLogs || loadingStartDebug || loadingNextDebugStep || loadingFinalizeDebug;
   const tipoEtapaLabels: Record<number, string> = {
     1: t('pipeline.step.type.httpRequest'),
@@ -297,14 +278,7 @@ export default function PipelineDebuggerModal({
     4: t('execution.log.level.error'),
   };
 
-  const normalizePayload = (): string => {
-    let normalizedPayload = payloadText;
-    try {
-      normalizedPayload = JSON.stringify(JSON.parse(payloadText));
-    } catch {
-    }
-    return normalizedPayload;
-  };
+  const normalizePayload = (): string => normalizeJsonString(payloadText);
 
   const refreshRunLogs = async (executionId: number, output?: unknown) => {
     const logs = await fetchLogs(() => executionLogService.getByExecution(executionId));

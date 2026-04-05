@@ -69,26 +69,19 @@ export default function DatabaseScriptFormModal({ open, onOpenChange, scriptBanc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      let result: { message?: string } | null = null;
+    const result = await execute(() =>
+      isEditing
+        ? databaseScriptService.update(scriptBancoDados.id, formData)
+        : databaseScriptService.create(formData)
+    );
 
-      if (isEditing) {
-        result = await execute(() => databaseScriptService.update(scriptBancoDados.id, formData));
-      } else {
-        result = await execute(() => databaseScriptService.create(formData));
-      }
-
-      if (result) {
-        toast({
-          title: t('common.toast.successTitle'),
-          description: result.message || t('database.script.form.saved'),
-          variant: 'success',
-        });
-      }
-
+    if (result !== null) {
+      toast({
+        title: t('common.toast.successTitle'),
+        description: t('database.script.form.saved'),
+        variant: 'success',
+      });
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

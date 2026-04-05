@@ -202,11 +202,11 @@ export default function PipelineDetalhe() {
     const normalized = reorderedSteps.map((step, index) => ({ ...step, order: index + 1 }));
     setSteps(normalized);
 
-    try {
-      await reorderSteps(() =>
-        pipelineStepService.reorder(normalized.map((step) => ({ id: step.id, order: step.order })))
-      );
-    } catch {
+    const result = await reorderSteps(() =>
+      pipelineStepService.reorder(normalized.map((step) => ({ id: step.id, order: step.order })))
+    );
+
+    if (result === null) {
       setSteps(previousSteps);
       loadSteps();
     }

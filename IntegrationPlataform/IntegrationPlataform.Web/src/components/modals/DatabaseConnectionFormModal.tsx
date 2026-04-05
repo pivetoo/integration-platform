@@ -74,15 +74,14 @@ export default function DatabaseConnectionFormModal({ open, onOpenChange, onSucc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => databaseConnectionService.update(conexao.id, formData));
-      } else {
-        await execute(() => databaseConnectionService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? databaseConnectionService.update(conexao.id, formData)
+        : databaseConnectionService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

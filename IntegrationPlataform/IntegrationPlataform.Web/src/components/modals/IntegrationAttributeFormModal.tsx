@@ -61,9 +61,9 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => integrationAttributeService.update(attribute.id, {
+    const result = await execute(() =>
+      isEditing
+        ? integrationAttributeService.update(attribute.id, {
           field: formData.field,
           label: formData.label,
           description: formData.description || undefined,
@@ -74,9 +74,8 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
           order: formData.order,
           group: formData.group || undefined,
           isSensitive: formData.isSensitive,
-        }));
-      } else {
-        await execute(() => integrationAttributeService.create({
+        })
+        : integrationAttributeService.create({
           integrationId,
           field: formData.field,
           label: formData.label,
@@ -88,11 +87,11 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
           order: formData.order,
           group: formData.group || undefined,
           isSensitive: formData.isSensitive,
-        }));
-      }
+        })
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

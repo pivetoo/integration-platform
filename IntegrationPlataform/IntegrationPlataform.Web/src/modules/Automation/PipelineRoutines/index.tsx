@@ -6,17 +6,10 @@ import { pipelineRoutineService } from '../../../services/pipelineRoutineService
 import type { PipelineRoutine } from '../../../types/pipelineRoutine';
 import type { Conector } from '../../../types/connector';
 import type { Pipeline } from '../../../types/pipeline';
-import RotinaPipelineFormModal from '../../../components/modals/PipelineRoutineFormModal';
+import PipelineRoutineFormModal from '../../../components/modals/PipelineRoutineFormModal';
+import { formatDateTime } from '../../../utils/formatters';
 
-function formatDateTime(dateStr?: string): string {
-  if (!dateStr) {
-    return '-';
-  }
-
-  return new Date(dateStr).toLocaleString('pt-BR');
-}
-
-export default function Automacao() {
+export default function PipelineRoutines() {
   const { t } = useI18n();
   const [rotinas, setRotinas] = useState<PipelineRoutine[]>([]);
   const [selectedRotinas, setSelectedRotinas] = useState<PipelineRoutine[]>([]);
@@ -152,7 +145,7 @@ export default function Automacao() {
         variant="danger"
       />
 
-      <RotinaPipelineFormModal
+      <PipelineRoutineFormModal
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         rotina={editingRotina}

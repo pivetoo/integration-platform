@@ -11,6 +11,7 @@ import { dashboardService } from '../../services/dashboardService';
 import { ExecutionStatusLabels } from '../../types/execution';
 import type { DashboardData, ExecucaoRecente } from '../../types/dashboard';
 import type { ExecutionStatus } from '../../types/execution';
+import { formatDuration, formatTime } from '../../utils/formatters';
 
 const statusVariantMap: Record<number, 'success' | 'destructive' | 'warning'> = {
   1: 'warning',
@@ -34,26 +35,6 @@ function getStatusIcon(status: number) {
     return <XCircle className="h-3.5 w-3.5" />;
   }
   return <Clock className="h-3.5 w-3.5 animate-spin" />;
-}
-
-function formatDuracao(ms?: number): string {
-  if (ms == null) {
-    return '-';
-  }
-  if (ms < 1000) {
-    return `${ms}ms`;
-  }
-  const seconds = Math.floor(ms / 1000);
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}m ${remainingSeconds}s`;
-}
-
-function formatHorario(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function Dashboard() {
@@ -200,8 +181,8 @@ export default function Dashboard() {
                       </span>
                     </Badge>
                     <div className="flex items-center gap-2 justify-end">
-                      <span className="text-xs text-muted-foreground">{formatDuracao(exec.duration)}</span>
-                      <span className="text-xs text-muted-foreground">{formatHorario(exec.startedAt)}</span>
+                      <span className="text-xs text-muted-foreground">{formatDuration(exec.duration)}</span>
+                      <span className="text-xs text-muted-foreground">{formatTime(exec.startedAt)}</span>
                     </div>
                   </div>
                 </div>

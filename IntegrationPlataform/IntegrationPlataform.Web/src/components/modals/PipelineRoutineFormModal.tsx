@@ -88,8 +88,7 @@ export default function PipelineRoutineFormModal({ open, onOpenChange, rotina, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
+    const result = await execute(() => {
       if (isEditing && rotina) {
         const payload: UpdatePipelineRoutineRequest = {
           isActive: formData.isActive,
@@ -98,20 +97,20 @@ export default function PipelineRoutineFormModal({ open, onOpenChange, rotina, o
           nextExecution: formData.nextExecution || undefined,
         };
 
-        await execute(() => pipelineRoutineService.update(rotina.id, payload));
-      } else {
-        const payload: CreatePipelineRoutineRequest = {
-          ...formData,
-          defaultPayload: formData.defaultPayload || undefined,
-          nextExecution: formData.nextExecution || undefined,
-        };
-
-        await execute(() => pipelineRoutineService.create(payload));
+        return pipelineRoutineService.update(rotina.id, payload);
       }
 
+      const payload: CreatePipelineRoutineRequest = {
+        ...formData,
+        defaultPayload: formData.defaultPayload || undefined,
+        nextExecution: formData.nextExecution || undefined,
+      };
+
+      return pipelineRoutineService.create(payload);
+    });
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // handled by useApi
     }
   };
 

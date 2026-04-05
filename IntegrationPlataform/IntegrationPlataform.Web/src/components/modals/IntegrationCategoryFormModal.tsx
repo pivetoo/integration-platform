@@ -45,15 +45,14 @@ export default function IntegrationCategoryFormModal({ open, onOpenChange, categ
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => integrationCategoryService.update(categoria.id, { ...formData, isActive }));
-      } else {
-        await execute(() => integrationCategoryService.create(formData));
-      }
+    const result = await execute(() =>
+      isEditing
+        ? integrationCategoryService.update(categoria.id, { ...formData, isActive })
+        : integrationCategoryService.create(formData)
+    );
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

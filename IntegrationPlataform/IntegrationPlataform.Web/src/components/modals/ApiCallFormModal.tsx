@@ -28,6 +28,9 @@ export default function ApiCallFormModal({ open, onOpenChange, chamadaApi, onSuc
   const { execute, loading } = useApi({
     showSuccessMessage: true,
     showErrorMessage: true,
+    onSuccess: () => {
+      onSuccess();
+    },
   });
 
   useEffect(() => {
@@ -51,16 +54,12 @@ export default function ApiCallFormModal({ open, onOpenChange, chamadaApi, onSuc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditing) {
-        await execute(() => apiCallService.update(chamadaApi.id, formData));
-      } else {
-        await execute(() => apiCallService.create(formData));
-      }
-      onSuccess();
-    } catch {
-      // Error handled by useApi
-    }
+
+    await execute(() =>
+      isEditing
+        ? apiCallService.update(chamadaApi.id, formData)
+        : apiCallService.create(formData)
+    );
   };
 
   const metodoOptions = Object.entries(HttpMethodLabels).map(([value, label]) => ({ value, label }));

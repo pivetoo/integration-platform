@@ -26,6 +26,9 @@ export default function ChamadasApi() {
   const { execute: fetchChamadas, loading } = useApi<PaginatedResult<ApiCall>>({
     showErrorMessage: true,
   });
+  const { execute: fetchApiCallById } = useApi<ApiCall>({
+    showErrorMessage: false,
+  });
 
   const { execute: deleteChamadas } = useApi({
     showSuccessMessage: false,
@@ -53,12 +56,8 @@ export default function ChamadasApi() {
 
   const handleEdit = async () => {
     if (selectedChamadas.length === 1) {
-      try {
-        const resp = await apiCallService.getById(selectedChamadas[0].id);
-        setEditingChamada(resp.data ?? selectedChamadas[0]);
-      } catch {
-        setEditingChamada(selectedChamadas[0]);
-      }
+      const result = await fetchApiCallById(() => apiCallService.getById(selectedChamadas[0].id));
+      setEditingChamada(result ?? selectedChamadas[0]);
       setIsFormOpen(true);
     }
   };

@@ -66,16 +66,17 @@ export default function ReferenceFormModal({ open, onOpenChange, referencia, onS
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
+    const result = await execute(() => {
       if (isEditing) {
         const { connectorId: _, ...updateData } = formData;
-        await execute(() => referenceService.update(referencia.id, updateData));
-      } else {
-        await execute(() => referenceService.create(formData));
+        return referenceService.update(referencia.id, updateData);
       }
+
+      return referenceService.create(formData);
+    });
+
+    if (result !== null) {
       onSuccess();
-    } catch {
-      // Error handled by useApi
     }
   };
 

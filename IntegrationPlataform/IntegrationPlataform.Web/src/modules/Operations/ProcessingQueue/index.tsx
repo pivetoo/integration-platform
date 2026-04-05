@@ -7,7 +7,8 @@ import { ProcessingStatusLabels } from '../../../types/processingQueue';
 import type { ProcessingQueueItem, ProcessingStatus } from '../../../types/processingQueue';
 import type { Conector } from '../../../types/connector';
 import type { Pipeline } from '../../../types/pipeline';
-import FilaFormModal from '../../../components/modals/ProcessingQueueFormModal';
+import ProcessingQueueFormModal from '../../../components/modals/ProcessingQueueFormModal';
+import { formatDateTime } from '../../../utils/formatters';
 
 const statusVariantMap: Record<number, string> = {
   0: 'warning',
@@ -17,14 +18,7 @@ const statusVariantMap: Record<number, string> = {
   4: 'secondary',
 };
 
-function formatDateTime(dateStr?: string): string {
-  if (!dateStr) {
-    return '-';
-  }
-  return new Date(dateStr).toLocaleString('pt-BR');
-}
-
-export default function FilaProcessamento() {
+export default function ProcessingQueue() {
   const { t } = useI18n();
   const [itens, setItens] = useState<ProcessingQueueItem[]>([]);
   const [selectedItens, setSelectedItens] = useState<ProcessingQueueItem[]>([]);
@@ -148,7 +142,7 @@ export default function FilaProcessamento() {
         variant="danger"
       />
 
-      <FilaFormModal
+      <ProcessingQueueFormModal
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         onSuccess={handleFormSuccess}
