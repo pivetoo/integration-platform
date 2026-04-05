@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.ApiCalls;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ApiCallsController : ReadOnlyController<ApiCall>
+    public sealed class ApiCallsController : IntegrationPlataformReadOnlyController<ApiCall>
     {
         private readonly IApiCallService apiCallService;
 
@@ -43,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             ApiCall apiCall = await apiCallService.CreateApiCall(request, cancellationToken);
-            return Http201(apiCall, "Api call created successfully.");
+            return Http201(apiCall, Localizer["apiCall.created"]);
         }
 
         [RequireAccess]
@@ -57,7 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             ApiCall apiCall = await apiCallService.UpdateApiCall(id, request, cancellationToken);
-            return Http200(apiCall, "Api call updated successfully.");
+            return Http200(apiCall, Localizer["apiCall.updated"]);
         }
 
         [RequireAccess]
@@ -70,7 +69,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(apiCallService.GetErrorMessages());
             }
 
-            return Http200(apiCall, "Api call deleted successfully.");
+            return Http200(apiCall, Localizer["apiCall.deleted"]);
         }
     }
 }

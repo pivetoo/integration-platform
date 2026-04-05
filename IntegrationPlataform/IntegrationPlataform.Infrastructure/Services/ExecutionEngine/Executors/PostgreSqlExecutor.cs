@@ -1,3 +1,5 @@
+using IntegrationPlataform.Application.Localization;
+using Microsoft.Extensions.Localization;
 using Npgsql;
 using System.Text.RegularExpressions;
 
@@ -5,6 +7,13 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 {
     internal sealed class PostgreSqlExecutor : IDatabaseExecutor
     {
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public PostgreSqlExecutor(IStringLocalizer<IntegrationPlataformResource> localizer)
+        {
+            Localizer = localizer;
+        }
+
         public async Task<object> ExecuteQueryAsync(string connectionString, string query, int timeoutSeconds = 60, CancellationToken cancellationToken = default)
         {
             ValidateQuery(query);
@@ -46,18 +55,18 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             return new Dictionary<string, object?> { ["rowsAffected"] = rowsAffected };
         }
 
-        private static void ValidateQuery(string query)
+        private void ValidateQuery(string query)
         {
             string normalized = Regex.Replace(query.Trim().ToUpperInvariant(), @"\s+", " ");
 
             if (normalized.StartsWith("UPDATE ", StringComparison.Ordinal) && !normalized.Contains(" WHERE ", StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("UPDATE without WHERE is not allowed.");
+                throw new InvalidOperationException(Localizer["database.query.updateWithoutWhereNotAllowed"]);
             }
 
             if (normalized.StartsWith("DELETE ", StringComparison.Ordinal) && !normalized.Contains(" WHERE ", StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("DELETE without WHERE is not allowed.");
+                throw new InvalidOperationException(Localizer["database.query.deleteWithoutWhereNotAllowed"]);
             }
         }
     }

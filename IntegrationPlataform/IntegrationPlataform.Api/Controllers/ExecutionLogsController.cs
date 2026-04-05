@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Execution;
@@ -10,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ExecutionLogsController : ReadOnlyController<ExecutionLog>
+    public sealed class ExecutionLogsController : IntegrationPlataformReadOnlyController<ExecutionLog>
     {
         private readonly IExecutionLogService executionLogService;
 
@@ -44,7 +43,7 @@ namespace IntegrationPlataform.Api.Controllers
             ExecutionLogContract? log = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
 
-            return log is null ? Http404("Record not found.") : Http200(log);
+            return log is null ? Http404(Localizer["execution.log.notFound"]) : Http200(log);
         }
 
         [RequireAccess]
@@ -53,7 +52,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (executionId <= 0)
             {
-                return Http400("Execution id is required.");
+                return Http400(Localizer["request.execution.id.required"]);
             }
 
             List<ExecutionLogContract> logs = await QueryContracts()
@@ -74,7 +73,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(executionLogService.GetErrorMessages());
             }
 
-            return Http200(log, "Execution log deleted successfully.");
+            return Http200(log, Localizer["execution.log.deleted"]);
         }
     }
 }

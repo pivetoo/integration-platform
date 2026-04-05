@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Api.Contracts.ProcessingQueues;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ProcessingQueuesController : ReadOnlyController<ProcessingQueue>
+    public sealed class ProcessingQueuesController : IntegrationPlataformReadOnlyController<ProcessingQueue>
     {
         private readonly IExecutionService executionService;
         private readonly IProcessingQueueService processingQueueService;
@@ -65,7 +64,7 @@ namespace IntegrationPlataform.Api.Controllers
                 request.Priority,
                 cancellationToken);
 
-            return Http201(item, "Pipeline enqueued successfully.");
+            return Http201(item, Localizer["processingQueue.enqueued"]);
         }
 
         [RequireAccess]
@@ -74,11 +73,11 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (processingQueueId <= 0)
             {
-                return Http400("Processing queue id is required.");
+                return Http400(Localizer["request.processingQueue.id.required"]);
             }
 
             await queueProcessorService.ProcessItem(processingQueueId, cancellationToken);
-            return Http200(message: "Queue item processed successfully.");
+            return Http200(message: Localizer["processingQueue.processed"]);
         }
 
         [RequireAccess]
@@ -91,7 +90,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(processingQueueService.GetErrorMessages());
             }
 
-            return Http200(queue, "Processing queue deleted successfully.");
+            return Http200(queue, Localizer["processingQueue.deleted"]);
         }
     }
 }

@@ -1,15 +1,20 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Integrations;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class IntegrationService : CrudService<Integration>, IIntegrationService
     {
-        public IntegrationService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public IntegrationService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<Integration> CreateIntegration(CreateIntegrationRequest request, CancellationToken cancellationToken = default)
@@ -30,7 +35,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             Integration? integration = await DbContext.Set<Integration>()
@@ -39,7 +44,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (integration is null)
             {
-                throw new InvalidOperationException("Integration not found.");
+                throw new InvalidOperationException(Localizer["integration.notFound"]);
             }
 
             await EnsureUniqueIdentifier(request.Identifier, id, cancellationToken);
@@ -66,8 +71,25 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (identifierExists)
             {
-                throw new InvalidOperationException("Integration identifier already exists.");
+                throw new InvalidOperationException(Localizer["integration.identifier.alreadyExists"]);
             }
+        }
+
+        public override async Task<Integration?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            Integration? integration = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (integration is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["integration.notFound"]));
+                return null;
+            }
+
+            return await Delete([integration], cancellationToken) ? integration : null;
         }
     }
 }

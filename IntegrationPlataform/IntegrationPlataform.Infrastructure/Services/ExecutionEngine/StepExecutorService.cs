@@ -1,10 +1,12 @@
 using Archon.Core.Http;
 using Archon.Core.Templating;
 using IntegrationPlataform.Application.Models;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Jint;
+using Microsoft.Extensions.Localization;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -14,10 +16,12 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
     public sealed class StepExecutorService : IStepExecutorService
     {
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
 
-        public StepExecutorService(IHttpClientFactory httpClientFactory)
+        public StepExecutorService(IHttpClientFactory httpClientFactory, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.httpClientFactory = httpClientFactory;
+            Localizer = localizer;
         }
 
         public Task<PipelineStepExecutionResult> Execute(PipelineStep step, PipelineExecutionContext context, CancellationToken cancellationToken = default)
@@ -30,7 +34,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 _ => Task.FromResult(new PipelineStepExecutionResult
                 {
                     Success = false,
-                    Error = $"Unknown pipeline step type: {step.Type}"
+                    Error = Localizer["step.type.unknown", step.Type].Value
                 })
             };
         }
@@ -43,7 +47,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 return new PipelineStepExecutionResult
                 {
                     Success = false,
-                    Error = "HTTP step without configured ApiCall."
+                    Error = Localizer["step.apiCall.notConfigured"]
                 };
             }
 
@@ -126,7 +130,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 return new PipelineStepExecutionResult
                 {
                     Success = false,
-                    Error = "JavaScript step without configured code."
+                    Error = Localizer["step.javaScript.notConfigured"]
                 };
             }
 
@@ -193,7 +197,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 return new PipelineStepExecutionResult
                 {
                     Success = false,
-                    Error = "Database script step without configured script."
+                    Error = Localizer["step.databaseScript.notConfigured"]
                 };
             }
 
@@ -203,7 +207,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 return new PipelineStepExecutionResult
                 {
                     Success = false,
-                    Error = "Database script not informed."
+                    Error = Localizer["step.databaseScript.notInformed"]
                 };
             }
 
@@ -372,23 +376,23 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             }
         }
 
-        private static string BuildConnectionString(DatabaseConnection connection)
+        private string BuildConnectionString(DatabaseConnection connection)
         {
             return connection.Type switch
             {
                 DatabaseType.PostgreSql => $"Host={connection.Host};Port={connection.Port};Database={connection.Database};Username={connection.Username};Password={connection.Password}",
                 DatabaseType.SqlServer => $"Server={connection.Host},{connection.Port};Database={connection.Database};User Id={connection.Username};Password={connection.Password};TrustServerCertificate=True",
-                _ => throw new NotSupportedException($"Unsupported database type: {connection.Type}")
+                _ => throw new NotSupportedException(Localizer["step.database.type.unsupported", connection.Type])
             };
         }
 
-        private static IDatabaseExecutor ResolveDatabaseExecutor(DatabaseType databaseType)
+        private IDatabaseExecutor ResolveDatabaseExecutor(DatabaseType databaseType)
         {
             return databaseType switch
             {
-                DatabaseType.PostgreSql => new PostgreSqlExecutor(),
-                DatabaseType.SqlServer => new SqlServerExecutor(),
-                _ => throw new NotSupportedException($"Unsupported database type: {databaseType}")
+                DatabaseType.PostgreSql => new PostgreSqlExecutor(Localizer),
+                DatabaseType.SqlServer => new SqlServerExecutor(Localizer),
+                _ => throw new NotSupportedException(Localizer["step.database.type.unsupported", databaseType])
             };
         }
     }

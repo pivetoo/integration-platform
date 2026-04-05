@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ReferencesController : ReadOnlyController<Reference>
+    public sealed class ReferencesController : IntegrationPlataformReadOnlyController<Reference>
     {
         private readonly IReferenceService referenceService;
 
@@ -37,7 +36,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (connectorId <= 0)
             {
-                return Http400("Connector id is required.");
+                return Http400(Localizer["request.connector.id.required"]);
             }
 
             List<Reference> references = await DbContext.Set<Reference>()
@@ -59,7 +58,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(referenceService.GetErrorMessages());
             }
 
-            return Http200(reference, "Reference deleted successfully.");
+            return Http200(reference, Localizer["reference.deleted"]);
         }
     }
 }

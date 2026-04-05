@@ -1,16 +1,21 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.DatabaseConnections;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class DatabaseConnectionService : CrudService<DatabaseConnection>, IDatabaseConnectionService
     {
-        public DatabaseConnectionService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public DatabaseConnectionService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<DatabaseConnection> CreateDatabaseConnection(CreateDatabaseConnectionRequest request, CancellationToken cancellationToken = default)
@@ -37,7 +42,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             DatabaseConnection? connection = await DbContext.Set<DatabaseConnection>()
@@ -46,7 +51,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (connection is null)
             {
-                throw new InvalidOperationException("Database connection not found.");
+                throw new InvalidOperationException(Localizer["database.connection.notFound"]);
             }
 
             connection.Update(
@@ -67,7 +72,7 @@ namespace IntegrationPlataform.Infrastructure.Services
             return result;
         }
 
-        private static DatabaseType NormalizeDatabaseType(int value)
+        private DatabaseType NormalizeDatabaseType(int value)
         {
             int normalizedValue = Enum.IsDefined(typeof(DatabaseType), value)
                 ? value
@@ -75,10 +80,27 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (!Enum.IsDefined(typeof(DatabaseType), normalizedValue))
             {
-                throw new InvalidOperationException("Invalid database type.");
+                throw new InvalidOperationException(Localizer["database.connection.type.invalid"]);
             }
 
             return (DatabaseType)normalizedValue;
+        }
+
+        public override async Task<DatabaseConnection?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            DatabaseConnection? connection = await DbContext.Set<DatabaseConnection>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (connection is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["database.connection.notFound"]));
+                return null;
+            }
+
+            return await Delete([connection], cancellationToken) ? connection : null;
         }
     }
 }

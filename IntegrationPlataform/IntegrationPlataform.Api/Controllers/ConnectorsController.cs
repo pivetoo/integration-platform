@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Connectors;
@@ -11,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ConnectorsController : ReadOnlyController<Connector>
+    public sealed class ConnectorsController : IntegrationPlataformReadOnlyController<Connector>
     {
         private readonly IConnectorService connectorService;
 
@@ -43,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
                 .Select(ConnectorContract.Projection)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return connector is null ? Http404("Record not found.") : Http200(connector);
+            return connector is null ? Http404(Localizer["connector.notFound"]) : Http200(connector);
         }
 
         [RequireAccess]
@@ -52,7 +51,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (integrationId <= 0)
             {
-                return Http400("Integration id is required.");
+                return Http400(Localizer["request.integration.id.required"]);
             }
 
             var connectors = await DbContext.Set<Connector>()
@@ -90,7 +89,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Connector connector = await connectorService.CreateConnector(request, cancellationToken);
-            return Http201(connector, "Connector created successfully.");
+            return Http201(connector, Localizer["connector.created"]);
         }
 
         [RequireAccess]
@@ -104,7 +103,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Connector connector = await connectorService.UpdateConnector(id, request, cancellationToken);
-            return Http200(connector, "Connector updated successfully.");
+            return Http200(connector, Localizer["connector.updated"]);
         }
 
         [RequireAccess]
@@ -117,7 +116,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(connectorService.GetErrorMessages());
             }
 
-            return Http200(connector, "Connector deleted successfully.");
+            return Http200(connector, Localizer["connector.deleted"]);
         }
     }
 }

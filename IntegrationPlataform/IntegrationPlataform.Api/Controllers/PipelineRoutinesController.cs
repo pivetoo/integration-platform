@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class PipelineRoutinesController : ReadOnlyController<PipelineRoutine>
+    public sealed class PipelineRoutinesController : IntegrationPlataformReadOnlyController<PipelineRoutine>
     {
         private readonly IPipelineRoutineService pipelineRoutineService;
 
@@ -41,7 +40,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(pipelineRoutineService.GetErrorMessages());
             }
 
-            return Http200(routine, "Pipeline routine deleted successfully.");
+            return Http200(routine, Localizer["pipeline.routine.deleted"]);
         }
     }
 }

@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Pipelines;
@@ -11,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class PipelinesController : ReadOnlyController<Pipeline>
+    public sealed class PipelinesController : IntegrationPlataformReadOnlyController<Pipeline>
     {
         private readonly IPipelineService pipelineService;
 
@@ -47,7 +46,7 @@ namespace IntegrationPlataform.Api.Controllers
                 .Where(item => item.Id == id)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return pipeline is null ? Http404("Record not found.") : Http200(pipeline);
+            return pipeline is null ? Http404(Localizer["pipeline.notFound"]) : Http200(pipeline);
         }
 
         [RequireAccess]
@@ -56,7 +55,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (integrationId <= 0)
             {
-                return Http400("Integration id is required.");
+                return Http400(Localizer["request.integration.id.required"]);
             }
 
             var pipelines = await QueryContracts()
@@ -93,7 +92,7 @@ namespace IntegrationPlataform.Api.Controllers
             PipelineContract? contract = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == pipeline.Id, cancellationToken);
 
-            return Http201(contract ?? PipelineContract.Projection.Compile()(pipeline), "Pipeline created successfully.");
+            return Http201(contract ?? PipelineContract.Projection.Compile()(pipeline), Localizer["pipeline.created"]);
         }
 
         [RequireAccess]
@@ -110,7 +109,7 @@ namespace IntegrationPlataform.Api.Controllers
             PipelineContract? contract = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == pipeline.Id, cancellationToken);
 
-            return Http200(contract ?? PipelineContract.Projection.Compile()(pipeline), "Pipeline updated successfully.");
+            return Http200(contract ?? PipelineContract.Projection.Compile()(pipeline), Localizer["pipeline.updated"]);
         }
 
         [RequireAccess]
@@ -123,7 +122,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(pipelineService.GetErrorMessages());
             }
 
-            return Http200(pipeline, "Pipeline deleted successfully.");
+            return Http200(pipeline, Localizer["pipeline.deleted"]);
         }
     }
 }

@@ -1,16 +1,21 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.ApiCalls;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class ApiCallService : CrudService<ApiCall>, IApiCallService
     {
-        public ApiCallService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public ApiCallService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<ApiCall> CreateApiCall(CreateApiCallRequest request, CancellationToken cancellationToken = default)
@@ -36,7 +41,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             ApiCall? apiCall = await DbContext.Set<ApiCall>()
@@ -45,7 +50,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (apiCall is null)
             {
-                throw new InvalidOperationException("Api call not found.");
+                throw new InvalidOperationException(Localizer["apiCall.notFound"]);
             }
 
             apiCall.Update(
@@ -65,7 +70,7 @@ namespace IntegrationPlataform.Infrastructure.Services
             return result;
         }
 
-        private static HttpMethodType NormalizeHttpMethod(int value)
+        private HttpMethodType NormalizeHttpMethod(int value)
         {
             int normalizedValue = Enum.IsDefined(typeof(HttpMethodType), value)
                 ? value
@@ -73,10 +78,27 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (!Enum.IsDefined(typeof(HttpMethodType), normalizedValue))
             {
-                throw new InvalidOperationException("Invalid http method.");
+                throw new InvalidOperationException(Localizer["apiCall.method.invalid"]);
             }
 
             return (HttpMethodType)normalizedValue;
+        }
+
+        public override async Task<ApiCall?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            ApiCall? apiCall = await DbContext.Set<ApiCall>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (apiCall is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["apiCall.notFound"]));
+                return null;
+            }
+
+            return await Delete([apiCall], cancellationToken) ? apiCall : null;
         }
     }
 }

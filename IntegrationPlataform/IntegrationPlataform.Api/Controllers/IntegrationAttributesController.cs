@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.IntegrationAttributes;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class IntegrationAttributesController : ReadOnlyController<IntegrationAttribute>
+    public sealed class IntegrationAttributesController : IntegrationPlataformReadOnlyController<IntegrationAttribute>
     {
         private readonly IIntegrationAttributeService integrationAttributeService;
 
@@ -38,7 +37,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (integrationId <= 0)
             {
-                return Http400("Integration id is required.");
+                return Http400(Localizer["request.integration.id.required"]);
             }
 
             List<IntegrationAttribute> attributes = await DbContext.Set<IntegrationAttribute>()
@@ -79,7 +78,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http201(attribute, "Integration attribute created successfully.");
+            return Http201(attribute, Localizer["integration.attribute.created"]);
         }
 
         [RequireAccess]
@@ -94,7 +93,7 @@ namespace IntegrationPlataform.Api.Controllers
 
             if (id != request.Id)
             {
-                return Http400("Route id and request id must match.");
+                return Http400(Localizer["request.route.idMismatch"]);
             }
 
             IntegrationAttribute? attribute = await DbContext.Set<IntegrationAttribute>()
@@ -102,7 +101,7 @@ namespace IntegrationPlataform.Api.Controllers
 
             if (attribute is null)
             {
-                return Http404("Record not found.");
+                return Http404(Localizer["integration.attribute.notFound"]);
             }
 
             attribute.Update(
@@ -123,7 +122,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http200(updatedAttribute, "Integration attribute updated successfully.");
+            return Http200(updatedAttribute, Localizer["integration.attribute.updated"]);
         }
 
         [RequireAccess]
@@ -136,7 +135,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http200(attribute, "Integration attribute deleted successfully.");
+            return Http200(attribute, Localizer["integration.attribute.deleted"]);
         }
     }
 }

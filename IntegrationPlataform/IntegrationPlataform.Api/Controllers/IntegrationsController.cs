@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Integrations;
@@ -11,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class IntegrationsController : ReadOnlyController<Integration>
+    public sealed class IntegrationsController : IntegrationPlataformReadOnlyController<Integration>
     {
         private readonly IIntegrationService integrationService;
 
@@ -44,7 +43,7 @@ namespace IntegrationPlataform.Api.Controllers
                 .Select(IntegrationContract.Projection)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return integration is null ? Http404("Record not found.") : Http200(integration);
+            return integration is null ? Http404(Localizer["integration.notFound"]) : Http200(integration);
         }
 
         [RequireAccess]
@@ -72,7 +71,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Integration integration = await integrationService.CreateIntegration(request, cancellationToken);
-            return Http201(integration, "Integration created successfully.");
+            return Http201(integration, Localizer["integration.created"]);
         }
 
         [RequireAccess]
@@ -86,7 +85,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Integration integration = await integrationService.UpdateIntegration(id, request, cancellationToken);
-            return Http200(integration, "Integration updated successfully.");
+            return Http200(integration, Localizer["integration.updated"]);
         }
 
         [RequireAccess]
@@ -99,7 +98,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(integrationService.GetErrorMessages());
             }
 
-            return Http200(integration, "Integration deleted successfully.");
+            return Http200(integration, Localizer["integration.deleted"]);
         }
     }
 }

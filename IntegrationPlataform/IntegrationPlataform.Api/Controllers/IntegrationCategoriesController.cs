@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.IntegrationCategories;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class IntegrationCategoriesController : ReadOnlyController<IntegrationCategory>
+    public sealed class IntegrationCategoriesController : IntegrationPlataformReadOnlyController<IntegrationCategory>
     {
         private readonly IIntegrationCategoryService integrationCategoryService;
 
@@ -43,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             IntegrationCategory category = await integrationCategoryService.CreateIntegrationCategory(request, cancellationToken);
-            return Http201(category, "Integration category created successfully.");
+            return Http201(category, Localizer["integration.category.created"]);
         }
 
         [RequireAccess]
@@ -57,7 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             IntegrationCategory category = await integrationCategoryService.UpdateIntegrationCategory(id, request, cancellationToken);
-            return Http200(category, "Integration category updated successfully.");
+            return Http200(category, Localizer["integration.category.updated"]);
         }
 
         [RequireAccess]
@@ -83,7 +82,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(integrationCategoryService.GetErrorMessages());
             }
 
-            return Http200(category, "Integration category deleted successfully.");
+            return Http200(category, Localizer["integration.category.deleted"]);
         }
     }
 }

@@ -1,15 +1,20 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.IntegrationCategories;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class IntegrationCategoryService : CrudService<IntegrationCategory>, IIntegrationCategoryService
     {
-        public IntegrationCategoryService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public IntegrationCategoryService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<IntegrationCategory> CreateIntegrationCategory(CreateIntegrationCategoryRequest request, CancellationToken cancellationToken = default)
@@ -28,7 +33,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             IntegrationCategory? category = await DbContext.Set<IntegrationCategory>()
@@ -37,7 +42,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (category is null)
             {
-                throw new InvalidOperationException("Integration category not found.");
+                throw new InvalidOperationException(Localizer["integration.category.notFound"]);
             }
 
             category.Update(request.Name, request.Description, request.IsActive);
@@ -49,6 +54,23 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return result;
+        }
+
+        public override async Task<IntegrationCategory?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            IntegrationCategory? category = await DbContext.Set<IntegrationCategory>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (category is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["integration.category.notFound"]));
+                return null;
+            }
+
+            return await Delete([category], cancellationToken) ? category : null;
         }
     }
 }

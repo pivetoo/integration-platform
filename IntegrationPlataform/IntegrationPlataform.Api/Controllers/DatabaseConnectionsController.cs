@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.DatabaseConnections;
 using IntegrationPlataform.Application.Services;
@@ -12,7 +11,7 @@ using Npgsql;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class DatabaseConnectionsController : ReadOnlyController<DatabaseConnection>
+    public sealed class DatabaseConnectionsController : IntegrationPlataformReadOnlyController<DatabaseConnection>
     {
         private readonly IDatabaseConnectionService databaseConnectionService;
 
@@ -46,7 +45,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseConnection connection = await databaseConnectionService.CreateDatabaseConnection(request, cancellationToken);
-            return Http201(connection, "Database connection created successfully.");
+            return Http201(connection, Localizer["database.connection.created"]);
         }
 
         [RequireAccess]
@@ -60,7 +59,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseConnection connection = await databaseConnectionService.UpdateDatabaseConnection(id, request, cancellationToken);
-            return Http200(connection, "Database connection updated successfully.");
+            return Http200(connection, Localizer["database.connection.updated"]);
         }
 
         [RequireAccess]
@@ -93,14 +92,14 @@ namespace IntegrationPlataform.Api.Controllers
                         break;
                     }
                     default:
-                        return Http400($"Database type {databaseType} is not supported for connection tests.");
+                        return Http400(Localizer["database.connection.test.unsupportedType", databaseType]);
                 }
 
-                return Http200(new { message = "Database connection tested successfully." });
+                return Http200(new { message = Localizer["database.connection.test.success"].Value });
             }
             catch (Exception ex)
             {
-                return Http400($"Error testing database connection: {ex.Message}");
+                return Http400(Localizer["database.connection.test.failed", ex.Message]);
             }
         }
 
@@ -114,10 +113,10 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(databaseConnectionService.GetErrorMessages());
             }
 
-            return Http200(connection, "Database connection deleted successfully.");
+            return Http200(connection, Localizer["database.connection.deleted"]);
         }
 
-        private static DatabaseType NormalizeDatabaseType(int value)
+        private DatabaseType NormalizeDatabaseType(int value)
         {
             int normalizedValue = Enum.IsDefined(typeof(DatabaseType), value)
                 ? value
@@ -125,13 +124,13 @@ namespace IntegrationPlataform.Api.Controllers
 
             if (!Enum.IsDefined(typeof(DatabaseType), normalizedValue))
             {
-                throw new InvalidOperationException("Invalid database type.");
+                throw new InvalidOperationException(Localizer["database.connection.type.invalid"]);
             }
 
             return (DatabaseType)normalizedValue;
         }
 
-        private static string BuildConnectionString(CreateDatabaseConnectionRequest request, DatabaseType databaseType)
+        private string BuildConnectionString(CreateDatabaseConnectionRequest request, DatabaseType databaseType)
         {
             return databaseType switch
             {
@@ -139,7 +138,7 @@ namespace IntegrationPlataform.Api.Controllers
                     $"Host={request.Host};Port={request.Port};Database={request.Database};Username={request.Username};Password={request.Password}",
                 DatabaseType.SqlServer =>
                     $"Server={request.Host},{request.Port};Database={request.Database};User Id={request.Username};Password={request.Password};TrustServerCertificate=true;Encrypt=false",
-                _ => throw new InvalidOperationException("Unsupported database type.")
+                _ => throw new InvalidOperationException(Localizer["database.connection.type.unsupported"])
             };
         }
     }

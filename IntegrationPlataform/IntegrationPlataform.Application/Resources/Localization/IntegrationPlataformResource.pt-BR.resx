@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="connector.created" xml:space="preserve">
+    <value>Conector criado com sucesso.</value>
+  </data>
+  <data name="connector.deleted" xml:space="preserve">
+    <value>Conector excluído com sucesso.</value>
+  </data>
+  <data name="connector.notFound" xml:space="preserve">
+    <value>Conector não encontrado.</value>
+  </data>
+  <data name="connector.updated" xml:space="preserve">
+    <value>Conector atualizado com sucesso.</value>
+  </data>
+  <data name="connector.attributeValue.created" xml:space="preserve">
+    <value>Valor de atributo do conector criado com sucesso.</value>
+  </data>
+  <data name="connector.attributeValue.deleted" xml:space="preserve">
+    <value>Valor de atributo do conector excluído com sucesso.</value>
+  </data>
+  <data name="connector.attributeValue.notFound" xml:space="preserve">
+    <value>Valor de atributo do conector não encontrado.</value>
+  </data>
+  <data name="connector.attributeValue.updated" xml:space="preserve">
+    <value>Valor de atributo do conector atualizado com sucesso.</value>
+  </data>
+  <data name="execution.log.deleted" xml:space="preserve">
+    <value>Log de execução excluído com sucesso.</value>
+  </data>
+  <data name="execution.log.notFound" xml:space="preserve">
+    <value>Log de execução não encontrado.</value>
+  </data>
+  <data name="execution.notFound" xml:space="preserve">
+    <value>Execução não encontrada.</value>
+  </data>
+  <data name="execution.unknownError" xml:space="preserve">
+    <value>Erro de execução desconhecido.</value>
+  </data>
+  <data name="execution.debug.initialStep.notFound" xml:space="preserve">
+    <value>Etapa inicial do pipeline não encontrada.</value>
+  </data>
+  <data name="execution.debug.session.notFound" xml:space="preserve">
+    <value>Sessão de depuração não encontrada.</value>
+  </data>
+  <data name="execution.debug.noMoreSteps" xml:space="preserve">
+    <value>Não há mais etapas para executar nesta sessão.</value>
+  </data>
+  <data name="execution.integration.notFoundByIdentifier" xml:space="preserve">
+    <value>A integração '{0}' não foi encontrada.</value>
+  </data>
+  <data name="execution.connector.notFoundByIntegration" xml:space="preserve">
+    <value>O conector da integração '{0}' não foi encontrado.</value>
+  </data>
+  <data name="execution.pipeline.notFoundByIntegration" xml:space="preserve">
+    <value>O pipeline '{0}' não foi encontrado para a integração '{1}'.</value>
+  </data>
+  <data name="execution.inputData.invalid" xml:space="preserve">
+    <value>Os dados de entrada são inválidos: {0}</value>
+  </data>
+  <data name="execution.log.debug.finished" xml:space="preserve">
+    <value>Sessão de depuração finalizada com status '{0}' em {1}ms.</value>
+  </data>
+  <data name="execution.log.debug.started" xml:space="preserve">
+    <value>Sessão de depuração iniciada para o pipeline '{0}' com {1} etapa(s).</value>
+  </data>
+  <data name="execution.log.debug.startedFromStep" xml:space="preserve">
+    <value>Depuração iniciada a partir da etapa '{0}'.</value>
+  </data>
+  <data name="execution.log.pipeline.finished" xml:space="preserve">
+    <value>Pipeline finalizado com status '{0}' em {1}ms.</value>
+  </data>
+  <data name="execution.log.pipeline.starting" xml:space="preserve">
+    <value>Iniciando o pipeline '{0}' com {1} etapa(s).</value>
+  </data>
+  <data name="execution.log.pipeline.stoppedDueToError" xml:space="preserve">
+    <value>O pipeline foi interrompido devido a um erro na etapa '{0}': {1}</value>
+  </data>
+  <data name="execution.log.step.continueAfterError" xml:space="preserve">
+    <value>Erro na etapa '{0}', continuando a execução: {1}</value>
+  </data>
+  <data name="execution.log.step.executing" xml:space="preserve">
+    <value>Executando a etapa '{0}' (Tipo: {1}).</value>
+  </data>
+  <data name="execution.log.step.failed" xml:space="preserve">
+    <value>Etapa '{0}' falhou: {1}</value>
+  </data>
+  <data name="execution.log.step.succeeded" xml:space="preserve">
+    <value>Etapa '{0}' executada com sucesso.</value>
+  </data>
+  <data name="apiCall.created" xml:space="preserve">
+    <value>Chamada de API criada com sucesso.</value>
+  </data>
+  <data name="apiCall.deleted" xml:space="preserve">
+    <value>Chamada de API excluída com sucesso.</value>
+  </data>
+  <data name="apiCall.method.invalid" xml:space="preserve">
+    <value>O método HTTP informado é inválido.</value>
+  </data>
+  <data name="apiCall.notFound" xml:space="preserve">
+    <value>Chamada de API não encontrada.</value>
+  </data>
+  <data name="apiCall.updated" xml:space="preserve">
+    <value>Chamada de API atualizada com sucesso.</value>
+  </data>
+  <data name="database.connection.created" xml:space="preserve">
+    <value>Conexão de banco de dados criada com sucesso.</value>
+  </data>
+  <data name="database.connection.deleted" xml:space="preserve">
+    <value>Conexão de banco de dados excluída com sucesso.</value>
+  </data>
+  <data name="database.connection.notFound" xml:space="preserve">
+    <value>Conexão de banco de dados não encontrada.</value>
+  </data>
+  <data name="database.connection.test.failed" xml:space="preserve">
+    <value>Erro ao testar a conexão com o banco de dados: {0}</value>
+  </data>
+  <data name="database.connection.test.success" xml:space="preserve">
+    <value>Conexão com o banco de dados testada com sucesso.</value>
+  </data>
+  <data name="database.connection.test.unsupportedType" xml:space="preserve">
+    <value>O tipo de banco de dados {0} não é suportado para testes de conexão.</value>
+  </data>
+  <data name="database.connection.type.invalid" xml:space="preserve">
+    <value>O tipo de banco de dados informado é inválido.</value>
+  </data>
+  <data name="database.connection.type.unsupported" xml:space="preserve">
+    <value>O tipo de banco de dados informado não é suportado.</value>
+  </data>
+  <data name="database.connection.updated" xml:space="preserve">
+    <value>Conexão de banco de dados atualizada com sucesso.</value>
+  </data>
+  <data name="database.query.deleteWithoutWhereNotAllowed" xml:space="preserve">
+    <value>Instruções DELETE sem cláusula WHERE não são permitidas.</value>
+  </data>
+  <data name="database.query.updateWithoutWhereNotAllowed" xml:space="preserve">
+    <value>Instruções UPDATE sem cláusula WHERE não são permitidas.</value>
+  </data>
+  <data name="database.script.created" xml:space="preserve">
+    <value>Script SQL criado com sucesso.</value>
+  </data>
+  <data name="database.script.deleted" xml:space="preserve">
+    <value>Script SQL excluído com sucesso.</value>
+  </data>
+  <data name="database.script.notFound" xml:space="preserve">
+    <value>Script SQL não encontrado.</value>
+  </data>
+  <data name="database.script.updated" xml:space="preserve">
+    <value>Script SQL atualizado com sucesso.</value>
+  </data>
+  <data name="integration.notFound" xml:space="preserve">
+    <value>Integração não encontrada.</value>
+  </data>
+  <data name="integration.created" xml:space="preserve">
+    <value>Integração criada com sucesso.</value>
+  </data>
+  <data name="integration.deleted" xml:space="preserve">
+    <value>Integração excluída com sucesso.</value>
+  </data>
+  <data name="integration.identifier.alreadyExists" xml:space="preserve">
+    <value>Já existe uma integração com este identificador.</value>
+  </data>
+  <data name="integration.updated" xml:space="preserve">
+    <value>Integração atualizada com sucesso.</value>
+  </data>
+  <data name="integration.category.created" xml:space="preserve">
+    <value>Categoria de integração criada com sucesso.</value>
+  </data>
+  <data name="integration.category.deleted" xml:space="preserve">
+    <value>Categoria de integração excluída com sucesso.</value>
+  </data>
+  <data name="integration.category.notFound" xml:space="preserve">
+    <value>Categoria de integração não encontrada.</value>
+  </data>
+  <data name="integration.category.updated" xml:space="preserve">
+    <value>Categoria de integração atualizada com sucesso.</value>
+  </data>
+  <data name="integration.attribute.created" xml:space="preserve">
+    <value>Atributo de integração criado com sucesso.</value>
+  </data>
+  <data name="integration.attribute.deleted" xml:space="preserve">
+    <value>Atributo de integração excluído com sucesso.</value>
+  </data>
+  <data name="integration.attribute.notFound" xml:space="preserve">
+    <value>Atributo de integração não encontrado.</value>
+  </data>
+  <data name="integration.attribute.updated" xml:space="preserve">
+    <value>Atributo de integração atualizado com sucesso.</value>
+  </data>
+  <data name="javaScriptFunction.created" xml:space="preserve">
+    <value>Função JavaScript criada com sucesso.</value>
+  </data>
+  <data name="javaScriptFunction.deleted" xml:space="preserve">
+    <value>Função JavaScript excluída com sucesso.</value>
+  </data>
+  <data name="javaScriptFunction.notFound" xml:space="preserve">
+    <value>Função JavaScript não encontrada.</value>
+  </data>
+  <data name="javaScriptFunction.updated" xml:space="preserve">
+    <value>Função JavaScript atualizada com sucesso.</value>
+  </data>
+  <data name="step.apiCall.notConfigured" xml:space="preserve">
+    <value>Etapa HTTP sem ApiCall configurada.</value>
+  </data>
+  <data name="step.databaseScript.notConfigured" xml:space="preserve">
+    <value>Etapa de script SQL sem script configurado.</value>
+  </data>
+  <data name="step.databaseScript.notInformed" xml:space="preserve">
+    <value>O script SQL não foi informado.</value>
+  </data>
+  <data name="step.database.type.unsupported" xml:space="preserve">
+    <value>O tipo de banco de dados '{0}' não é suportado.</value>
+  </data>
+  <data name="step.javaScript.notConfigured" xml:space="preserve">
+    <value>Etapa JavaScript sem código configurado.</value>
+  </data>
+  <data name="step.type.unknown" xml:space="preserve">
+    <value>Tipo de etapa do pipeline desconhecido: {0}</value>
+  </data>
+  <data name="pipeline.created" xml:space="preserve">
+    <value>Pipeline criado com sucesso.</value>
+  </data>
+  <data name="pipeline.deleted" xml:space="preserve">
+    <value>Pipeline excluído com sucesso.</value>
+  </data>
+  <data name="pipeline.routine.deleted" xml:space="preserve">
+    <value>Rotina do pipeline excluída com sucesso.</value>
+  </data>
+  <data name="pipeline.identifier.alreadyExistsForIntegration" xml:space="preserve">
+    <value>Já existe um pipeline com este identificador para a integração informada.</value>
+  </data>
+  <data name="pipeline.notFound" xml:space="preserve">
+    <value>Pipeline não encontrado.</value>
+  </data>
+  <data name="pipeline.step.created" xml:space="preserve">
+    <value>Etapa do pipeline criada com sucesso.</value>
+  </data>
+  <data name="pipeline.step.deleted" xml:space="preserve">
+    <value>Etapa do pipeline excluída com sucesso.</value>
+  </data>
+  <data name="pipeline.step.databaseScriptId.required" xml:space="preserve">
+    <value>O DatabaseScriptId é obrigatório para etapas do tipo executar script SQL.</value>
+  </data>
+  <data name="pipeline.step.javaScriptFunctionId.required" xml:space="preserve">
+    <value>O JavaScriptFunctionId é obrigatório para etapas do tipo função JavaScript.</value>
+  </data>
+  <data name="pipeline.step.apiCallId.required" xml:space="preserve">
+    <value>O ApiCallId é obrigatório para etapas do tipo requisição HTTP.</value>
+  </data>
+  <data name="pipeline.step.notFound" xml:space="preserve">
+    <value>Etapa do pipeline não encontrada.</value>
+  </data>
+  <data name="pipeline.step.order.alreadyExists" xml:space="preserve">
+    <value>Já existe uma etapa do pipeline com esta ordem.</value>
+  </data>
+  <data name="pipeline.step.updated" xml:space="preserve">
+    <value>Etapa do pipeline atualizada com sucesso.</value>
+  </data>
+  <data name="pipeline.updated" xml:space="preserve">
+    <value>Pipeline atualizado com sucesso.</value>
+  </data>
+  <data name="processingQueue.deleted" xml:space="preserve">
+    <value>Item da fila de processamento excluído com sucesso.</value>
+  </data>
+  <data name="processingQueue.enqueued" xml:space="preserve">
+    <value>Pipeline enfileirado com sucesso.</value>
+  </data>
+  <data name="processingQueue.notFound" xml:space="preserve">
+    <value>Item da fila de processamento não encontrado.</value>
+  </data>
+  <data name="processingQueue.processed" xml:space="preserve">
+    <value>Item da fila processado com sucesso.</value>
+  </data>
+  <data name="reference.deleted" xml:space="preserve">
+    <value>Referência excluída com sucesso.</value>
+  </data>
+  <data name="reference.notFound" xml:space="preserve">
+    <value>Referência não encontrada.</value>
+  </data>
+  <data name="request.connector.id.required" xml:space="preserve">
+    <value>O identificador do conector é obrigatório.</value>
+  </data>
+  <data name="request.execution.id.required" xml:space="preserve">
+    <value>O identificador da execução é obrigatório.</value>
+  </data>
+  <data name="request.executionLog.id.required" xml:space="preserve">
+    <value>O identificador do log de execução é obrigatório.</value>
+  </data>
+  <data name="request.integration.id.required" xml:space="preserve">
+    <value>O identificador da integração é obrigatório.</value>
+  </data>
+  <data name="request.integration.identifier.required" xml:space="preserve">
+    <value>O identificador da integração é obrigatório.</value>
+  </data>
+  <data name="request.pipeline.id.required" xml:space="preserve">
+    <value>O identificador do pipeline é obrigatório.</value>
+  </data>
+  <data name="request.pipeline.identifier.required" xml:space="preserve">
+    <value>O identificador do pipeline é obrigatório.</value>
+  </data>
+  <data name="request.processingQueue.id.required" xml:space="preserve">
+    <value>O identificador da fila de processamento é obrigatório.</value>
+  </data>
+  <data name="request.route.idMismatch" xml:space="preserve">
+    <value>O identificador da rota deve ser igual ao identificador do corpo da requisição.</value>
+  </data>
+</root>

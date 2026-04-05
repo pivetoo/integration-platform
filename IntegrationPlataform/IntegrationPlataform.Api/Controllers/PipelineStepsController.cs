@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.PipelineSteps;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class PipelineStepsController : ReadOnlyController<PipelineStep>
+    public sealed class PipelineStepsController : IntegrationPlataformReadOnlyController<PipelineStep>
     {
         private readonly IPipelineStepService pipelineStepService;
 
@@ -39,7 +38,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (pipelineId <= 0)
             {
-                return Http400("Pipeline id is required.");
+                return Http400(Localizer["request.pipeline.id.required"]);
             }
 
             List<PipelineStep> steps = await DbContext.Set<PipelineStep>()
@@ -62,7 +61,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             PipelineStep step = await pipelineStepService.CreatePipelineStep(request, cancellationToken);
-            return Http201(step, "Pipeline step created successfully.");
+            return Http201(step, Localizer["pipeline.step.created"]);
         }
 
         [RequireAccess]
@@ -76,7 +75,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             PipelineStep step = await pipelineStepService.UpdatePipelineStep(id, request, cancellationToken);
-            return Http200(step, "Pipeline step updated successfully.");
+            return Http200(step, Localizer["pipeline.step.updated"]);
         }
 
         [RequireAccess]
@@ -89,7 +88,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(pipelineStepService.GetErrorMessages());
             }
 
-            return Http200(step, "Pipeline step deleted successfully.");
+            return Http200(step, Localizer["pipeline.step.deleted"]);
         }
     }
 }

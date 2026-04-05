@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.JavaScriptFunctions;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class JavaScriptFunctionsController : ReadOnlyController<JavaScriptFunction>
+    public sealed class JavaScriptFunctionsController : IntegrationPlataformReadOnlyController<JavaScriptFunction>
     {
         private readonly IJavaScriptFunctionService javaScriptFunctionService;
 
@@ -43,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             JavaScriptFunction function = await javaScriptFunctionService.CreateJavaScriptFunction(request, cancellationToken);
-            return Http201(function, "JavaScript function created successfully.");
+            return Http201(function, Localizer["javaScriptFunction.created"]);
         }
 
         [RequireAccess]
@@ -57,7 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             JavaScriptFunction function = await javaScriptFunctionService.UpdateJavaScriptFunction(id, request, cancellationToken);
-            return Http200(function, "JavaScript function updated successfully.");
+            return Http200(function, Localizer["javaScriptFunction.updated"]);
         }
 
         [RequireAccess]
@@ -70,7 +69,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(javaScriptFunctionService.GetErrorMessages());
             }
 
-            return Http200(function, "JavaScript function deleted successfully.");
+            return Http200(function, Localizer["javaScriptFunction.deleted"]);
         }
     }
 }

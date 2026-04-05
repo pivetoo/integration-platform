@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlataform.Application.Requests.ConnectorAttributeValues;
 using IntegrationPlataform.Application.Services;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ConnectorAttributeValuesController : ReadOnlyController<ConnectorAttributeValue>
+    public sealed class ConnectorAttributeValuesController : IntegrationPlataformReadOnlyController<ConnectorAttributeValue>
     {
         private readonly IConnectorAttributeValueService connectorAttributeValueService;
 
@@ -38,7 +37,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (connectorId <= 0)
             {
-                return Http400("Connector id is required.");
+                return Http400(Localizer["request.connector.id.required"]);
             }
 
             List<ConnectorAttributeValue> values = await DbContext.Set<ConnectorAttributeValue>()
@@ -67,7 +66,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(connectorAttributeValueService.GetErrorMessages());
             }
 
-            return Http201(value, "Connector attribute value created successfully.");
+            return Http201(value, Localizer["connector.attributeValue.created"]);
         }
 
         [RequireAccess]
@@ -82,7 +81,7 @@ namespace IntegrationPlataform.Api.Controllers
 
             if (id != request.Id)
             {
-                return Http400("Route id and request id must match.");
+                return Http400(Localizer["request.route.idMismatch"]);
             }
 
             ConnectorAttributeValue? value = await DbContext.Set<ConnectorAttributeValue>()
@@ -90,7 +89,7 @@ namespace IntegrationPlataform.Api.Controllers
 
             if (value is null)
             {
-                return Http404("Record not found.");
+                return Http404(Localizer["connector.attributeValue.notFound"]);
             }
 
             value.Update(request.IntegrationAttributeId, request.Value);
@@ -101,7 +100,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(connectorAttributeValueService.GetErrorMessages());
             }
 
-            return Http200(updatedValue, "Connector attribute value updated successfully.");
+            return Http200(updatedValue, Localizer["connector.attributeValue.updated"]);
         }
 
         [RequireAccess]
@@ -114,7 +113,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(connectorAttributeValueService.GetErrorMessages());
             }
 
-            return Http200(value, "Connector attribute value deleted successfully.");
+            return Http200(value, Localizer["connector.attributeValue.deleted"]);
         }
     }
 }

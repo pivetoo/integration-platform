@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Execution;
@@ -11,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ExecutionsController : ApiControllerBase
+    public sealed class ExecutionsController : IntegrationPlataformControllerBase
     {
         private readonly DbContext dbContext;
         private readonly IExecutionEngineService executionEngineService;
@@ -46,13 +45,13 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (id <= 0)
             {
-                return Http400("Id is required.");
+                return Http400(Localizer["request.execution.id.required"]);
             }
 
             ExecutionContract? execution = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
 
-            return execution is null ? Http404("Record not found.") : Http200(execution);
+            return execution is null ? Http404(Localizer["execution.notFound"]) : Http200(execution);
         }
 
         [RequireAccess]
@@ -61,7 +60,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (connectorId <= 0)
             {
-                return Http400("Connector id is required.");
+                return Http400(Localizer["request.connector.id.required"]);
             }
 
             var executions = await QueryContracts()
@@ -211,12 +210,12 @@ namespace IntegrationPlataform.Api.Controllers
         {
             if (string.IsNullOrWhiteSpace(integrationIdentifier))
             {
-                return Http400("Integration identifier is required.");
+                return Http400(Localizer["request.integration.identifier.required"]);
             }
 
             if (string.IsNullOrWhiteSpace(pipelineIdentifier))
             {
-                return Http400("Pipeline identifier is required.");
+                return Http400(Localizer["request.pipeline.identifier.required"]);
             }
 
             Execution execution = await executionEngineService.ExecutePipelineByIdentifier(

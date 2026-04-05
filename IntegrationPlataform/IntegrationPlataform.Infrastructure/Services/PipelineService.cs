@@ -1,15 +1,20 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Pipelines;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class PipelineService : CrudService<Pipeline>, IPipelineService
     {
-        public PipelineService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public PipelineService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<Pipeline> CreatePipeline(CreatePipelineRequest request, CancellationToken cancellationToken = default)
@@ -31,7 +36,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             Pipeline? pipeline = await DbContext.Set<Pipeline>()
@@ -40,7 +45,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (pipeline is null)
             {
-                throw new InvalidOperationException("Pipeline not found.");
+                throw new InvalidOperationException(Localizer["pipeline.notFound"]);
             }
 
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);
@@ -65,7 +70,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException("Integration not found.");
+                throw new InvalidOperationException(Localizer["integration.notFound"]);
             }
         }
 
@@ -81,8 +86,25 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (exists)
             {
-                throw new InvalidOperationException("Pipeline identifier already exists for this integration.");
+                throw new InvalidOperationException(Localizer["pipeline.identifier.alreadyExistsForIntegration"]);
             }
+        }
+
+        public override async Task<Pipeline?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            Pipeline? pipeline = await DbContext.Set<Pipeline>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (pipeline is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["pipeline.notFound"]));
+                return null;
+            }
+
+            return await Delete([pipeline], cancellationToken) ? pipeline : null;
         }
     }
 }

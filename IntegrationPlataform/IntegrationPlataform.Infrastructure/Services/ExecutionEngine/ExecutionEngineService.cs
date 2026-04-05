@@ -1,8 +1,10 @@
 using IntegrationPlataform.Application.Models;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -17,11 +19,13 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
         private readonly DbContext dbContext;
         private readonly IStepExecutorService stepExecutorService;
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
 
-        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService)
+        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.dbContext = dbContext;
             this.stepExecutorService = stepExecutorService;
+            Localizer = localizer;
         }
 
         public async Task<Execution> ExecutePipeline(long connectorId, long pipelineId, string? inputData, ExecutionType type, ProcessingQueue? queueItem = null, long? initialStepId = null, CancellationToken cancellationToken = default)
@@ -55,7 +59,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 PipelineStep? initialStep = activeSteps.FirstOrDefault(step => step.Id == initialStepId.Value);
                 if (initialStep is null)
                 {
-                    throw new KeyNotFoundException("Initial pipeline step not found.");
+                    throw new KeyNotFoundException(Localizer["execution.debug.initialStep.notFound"]);
                 }
 
                 activeSteps = activeSteps
@@ -63,10 +67,10 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                     .OrderBy(step => step.Order)
                     .ToList();
 
-                AddLog(logs, execution, null, LogLevelType.Info, $"Debug started from step '{initialStep.Name}'.");
+                AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.debug.startedFromStep", initialStep.Name]);
             }
 
-            AddLog(logs, execution, null, LogLevelType.Info, $"Starting pipeline '{pipeline.Name}' with {activeSteps.Count} step(s).");
+            AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.pipeline.starting", pipeline.Name, activeSteps.Count]);
 
             foreach (PipelineStep step in activeSteps)
             {
@@ -75,7 +79,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                     break;
                 }
 
-                AddLog(logs, execution, step, LogLevelType.Info, $"Executing step '{step.Name}' (Type: {step.Type}).");
+                AddLog(logs, execution, step, LogLevelType.Info, Localizer["execution.log.step.executing", step.Name, step.Type]);
 
                 PipelineStepExecutionResult result = await stepExecutorService.Execute(step, context, cancellationToken);
                 AddResultLog(logs, execution, step, result);
@@ -97,12 +101,12 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                     {
                         context.HasError = true;
                         stopped = true;
-                        AddLog(logs, execution, step, LogLevelType.Error, $"Pipeline stopped due to error on step '{step.Name}': {result.Error}");
+                        AddLog(logs, execution, step, LogLevelType.Error, Localizer["execution.log.pipeline.stoppedDueToError", step.Name, result.Error ?? string.Empty]);
                     }
                     else
                     {
                         context.HasError = true;
-                        AddLog(logs, execution, step, LogLevelType.Warning, $"Error on step '{step.Name}', continuing: {result.Error}");
+                        AddLog(logs, execution, step, LogLevelType.Warning, Localizer["execution.log.step.continueAfterError", step.Name, result.Error ?? string.Empty]);
                     }
                 }
             }
@@ -116,7 +120,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                     : ExecutionStatus.Success;
 
             execution.Complete(finalStatus, DateTimeOffset.UtcNow, SerializeSafely(stepOutputs), context.LastError);
-            AddLog(logs, execution, null, LogLevelType.Info, $"Pipeline finished with status '{finalStatus}' in {stopwatch.ElapsedMilliseconds}ms.");
+            AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.pipeline.finished", finalStatus, stopwatch.ElapsedMilliseconds]);
 
             await PersistResults(execution, logs, trackedQueueItem, finalStatus, context.LastError, cancellationToken);
             return execution;
@@ -143,7 +147,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 PipelineStep? initialStep = activeSteps.FirstOrDefault(step => step.Id == initialStepId.Value);
                 if (initialStep is null)
                 {
-                    throw new KeyNotFoundException("Initial pipeline step not found.");
+                    throw new KeyNotFoundException(Localizer["execution.debug.initialStep.notFound"]);
                 }
 
                 activeSteps = activeSteps
@@ -155,10 +159,10 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             List<ExecutionLog> logs = [];
             if (initialStepId.HasValue && activeSteps.Count > 0)
             {
-                AddLog(logs, execution, null, LogLevelType.Info, $"Debug started from step '{activeSteps[0].Name}'.");
+                AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.debug.startedFromStep", activeSteps[0].Name]);
             }
 
-            AddLog(logs, execution, null, LogLevelType.Info, $"Debug session started for pipeline '{pipeline.Name}' with {activeSteps.Count} step(s).");
+            AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.debug.started", pipeline.Name, activeSteps.Count]);
             await InsertLogs(logs, cancellationToken);
 
             DebugSessionState state = new()
@@ -183,7 +187,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
         {
             if (!DebugSessions.TryGetValue(debugSessionId, out DebugSessionState? state))
             {
-                throw new KeyNotFoundException("Debug session not found.");
+                throw new KeyNotFoundException(Localizer["execution.debug.session.notFound"]);
             }
 
             if (state.Stopped || state.CurrentIndex >= state.ActiveSteps.Count)
@@ -195,14 +199,14 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                     executedStep = false,
                     finishedFlow = true,
                     remainingSteps = 0,
-                    message = "There are no more steps to execute in this session."
+                    message = Localizer["execution.debug.noMoreSteps"].Value
                 };
             }
 
             PipelineStep step = state.ActiveSteps[state.CurrentIndex];
             List<ExecutionLog> logs = [];
 
-            AddLog(logs, state.Execution, step, LogLevelType.Info, $"Executing step '{step.Name}' (Type: {step.Type}).");
+            AddLog(logs, state.Execution, step, LogLevelType.Info, Localizer["execution.log.step.executing", step.Name, step.Type]);
 
             PipelineStepExecutionResult result = await stepExecutorService.Execute(step, state.Context, cancellationToken);
             AddResultLog(logs, state.Execution, step, result);
@@ -224,12 +228,12 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 {
                     state.Context.HasError = true;
                     state.Stopped = true;
-                    AddLog(logs, state.Execution, step, LogLevelType.Error, $"Pipeline stopped due to error on step '{step.Name}': {result.Error}");
+                    AddLog(logs, state.Execution, step, LogLevelType.Error, Localizer["execution.log.pipeline.stoppedDueToError", step.Name, result.Error ?? string.Empty]);
                 }
                 else
                 {
                     state.Context.HasError = true;
-                    AddLog(logs, state.Execution, step, LogLevelType.Warning, $"Error on step '{step.Name}', continuing: {result.Error}");
+                    AddLog(logs, state.Execution, step, LogLevelType.Warning, Localizer["execution.log.step.continueAfterError", step.Name, result.Error ?? string.Empty]);
                 }
             }
 
@@ -259,7 +263,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
         {
             if (!DebugSessions.TryRemove(debugSessionId, out DebugSessionState? state))
             {
-                throw new KeyNotFoundException("Debug session not found.");
+                throw new KeyNotFoundException(Localizer["execution.debug.session.notFound"]);
             }
 
             state.Stopwatch.Stop();
@@ -274,7 +278,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
             List<ExecutionLog> logs =
             [
-                CreateLog(state.Execution, null, LogLevelType.Info, $"Debug session finished with status '{finalStatus}' in {state.Stopwatch.ElapsedMilliseconds}ms.")
+                CreateLog(state.Execution, null, LogLevelType.Info, Localizer["execution.log.debug.finished", finalStatus, state.Stopwatch.ElapsedMilliseconds])
             ];
 
             await PersistResults(state.Execution, logs, null, finalStatus, state.Context.LastError, cancellationToken);
@@ -291,7 +295,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
             if (integration is null)
             {
-                throw new KeyNotFoundException($"Integration '{integrationIdentifier}' was not found.");
+                throw new KeyNotFoundException(Localizer["execution.integration.notFoundByIdentifier", integrationIdentifier]);
             }
 
             Connector? connector = await (
@@ -303,7 +307,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
             if (connector is null)
             {
-                throw new KeyNotFoundException($"Connector for integration '{integrationIdentifier}' was not found.");
+                throw new KeyNotFoundException(Localizer["execution.connector.notFoundByIntegration", integrationIdentifier]);
             }
 
             Pipeline? pipeline = await (
@@ -314,7 +318,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
             if (pipeline is null)
             {
-                throw new KeyNotFoundException($"Pipeline '{pipelineIdentifier}' was not found for integration '{integrationIdentifier}'.");
+                throw new KeyNotFoundException(Localizer["execution.pipeline.notFoundByIntegration", pipelineIdentifier, integrationIdentifier]);
             }
 
             string inputDataJson = JsonSerializer.Serialize(inputData);
@@ -329,7 +333,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                     .ThenInclude(item => item.IntegrationAttribute)
                 .FirstOrDefaultAsync(item => item.Id == connectorId, cancellationToken);
 
-            return connector ?? throw new KeyNotFoundException("Connector not found.");
+            return connector ?? throw new KeyNotFoundException(Localizer["connector.notFound"]);
         }
 
         private async Task<Pipeline> GetPipeline(long pipelineId, CancellationToken cancellationToken)
@@ -345,10 +349,10 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                         .ThenInclude(item => item!.DatabaseConnection)
                 .FirstOrDefaultAsync(item => item.Id == pipelineId, cancellationToken);
 
-            return pipeline ?? throw new KeyNotFoundException("Pipeline not found.");
+            return pipeline ?? throw new KeyNotFoundException(Localizer["pipeline.notFound"]);
         }
 
-        private static PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, string? inputData)
+        private PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, string? inputData)
         {
             PipelineExecutionContext context = new()
             {
@@ -374,7 +378,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 }
                 catch (Exception exception)
                 {
-                    throw new ValidationException($"Invalid input data: {exception.Message}");
+                    throw new ValidationException(Localizer["execution.inputData.invalid", exception.Message]);
                 }
             }
 
@@ -392,7 +396,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             {
                 if (finalStatus == ExecutionStatus.Error)
                 {
-                    queueItem.Fail(lastError ?? "Unknown execution error.", DateTimeOffset.UtcNow);
+                    queueItem.Fail(lastError ?? Localizer["execution.unknownError"].Value, DateTimeOffset.UtcNow);
                 }
                 else
                 {
@@ -435,14 +439,14 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             logs.Add(CreateLog(execution, step, level, message));
         }
 
-        private static void AddResultLog(List<ExecutionLog> logs, Execution execution, PipelineStep step, PipelineStepExecutionResult result)
+        private void AddResultLog(List<ExecutionLog> logs, Execution execution, PipelineStep step, PipelineStepExecutionResult result)
         {
             ExecutionLog log = new(
                 execution.Id,
                 result.Success ? LogLevelType.Info : LogLevelType.Error,
                 result.Success
-                    ? $"Step '{step.Name}' completed successfully."
-                    : $"Step '{step.Name}' failed: {result.Error}",
+                    ? Localizer["execution.log.step.succeeded", step.Name]
+                    : Localizer["execution.log.step.failed", step.Name, result.Error ?? string.Empty],
                 step.Id,
                 request: result.RequestInfo,
                 response: result.ResponseBody,

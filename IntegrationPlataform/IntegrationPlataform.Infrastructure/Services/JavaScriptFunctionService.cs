@@ -1,15 +1,20 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.JavaScriptFunctions;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class JavaScriptFunctionService : CrudService<JavaScriptFunction>, IJavaScriptFunctionService
     {
-        public JavaScriptFunctionService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public JavaScriptFunctionService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<JavaScriptFunction> CreateJavaScriptFunction(CreateJavaScriptFunctionRequest request, CancellationToken cancellationToken = default)
@@ -28,7 +33,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             JavaScriptFunction? function = await DbContext.Set<JavaScriptFunction>()
@@ -37,7 +42,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (function is null)
             {
-                throw new InvalidOperationException("JavaScript function not found.");
+                throw new InvalidOperationException(Localizer["javaScriptFunction.notFound"]);
             }
 
             function.Update(request.Name, request.Code, request.Description);
@@ -49,6 +54,23 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return result;
+        }
+
+        public override async Task<JavaScriptFunction?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            JavaScriptFunction? function = await DbContext.Set<JavaScriptFunction>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (function is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["javaScriptFunction.notFound"]));
+                return null;
+            }
+
+            return await Delete([function], cancellationToken) ? function : null;
         }
     }
 }

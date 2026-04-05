@@ -1,16 +1,21 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.PipelineSteps;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class PipelineStepService : CrudService<PipelineStep>, IPipelineStepService
     {
-        public PipelineStepService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public PipelineStepService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<PipelineStep> CreatePipelineStep(CreatePipelineStepRequest request, CancellationToken cancellationToken = default)
@@ -43,7 +48,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             PipelineStep? step = await DbContext.Set<PipelineStep>()
@@ -52,7 +57,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (step is null)
             {
-                throw new InvalidOperationException("Pipeline step not found.");
+                throw new InvalidOperationException(Localizer["pipeline.step.notFound"]);
             }
 
             await ValidateLinkedResource(request.Type, request.ApiCallId, request.JavaScriptFunctionId, request.DatabaseScriptId, cancellationToken);
@@ -86,7 +91,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException("Pipeline not found.");
+                throw new InvalidOperationException(Localizer["pipeline.notFound"]);
             }
         }
 
@@ -102,7 +107,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (exists)
             {
-                throw new InvalidOperationException("There is already a pipeline step with this order.");
+                throw new InvalidOperationException(Localizer["pipeline.step.order.alreadyExists"]);
             }
         }
 
@@ -118,28 +123,28 @@ namespace IntegrationPlataform.Infrastructure.Services
                 case PipelineStepType.HttpRequest:
                     if (!apiCallId.HasValue)
                     {
-                        throw new InvalidOperationException("ApiCallId is required for HTTP request steps.");
+                        throw new InvalidOperationException(Localizer["pipeline.step.apiCallId.required"]);
                     }
 
-                    await EnsureEntityExists<ApiCall>(apiCallId.Value, "Api call not found.", cancellationToken);
+                    await EnsureEntityExists<ApiCall>(apiCallId.Value, Localizer["apiCall.notFound"], cancellationToken);
                     break;
 
                 case PipelineStepType.JavaScriptFunction:
                     if (!javaScriptFunctionId.HasValue)
                     {
-                        throw new InvalidOperationException("JavaScriptFunctionId is required for JavaScript steps.");
+                        throw new InvalidOperationException(Localizer["pipeline.step.javaScriptFunctionId.required"]);
                     }
 
-                    await EnsureEntityExists<JavaScriptFunction>(javaScriptFunctionId.Value, "JavaScript function not found.", cancellationToken);
+                    await EnsureEntityExists<JavaScriptFunction>(javaScriptFunctionId.Value, Localizer["javaScriptFunction.notFound"], cancellationToken);
                     break;
 
                 case PipelineStepType.ExecuteScript:
                     if (!databaseScriptId.HasValue)
                     {
-                        throw new InvalidOperationException("DatabaseScriptId is required for script execution steps.");
+                        throw new InvalidOperationException(Localizer["pipeline.step.databaseScriptId.required"]);
                     }
 
-                    await EnsureEntityExists<DatabaseScript>(databaseScriptId.Value, "Database script not found.", cancellationToken);
+                    await EnsureEntityExists<DatabaseScript>(databaseScriptId.Value, Localizer["database.script.notFound"], cancellationToken);
                     break;
             }
         }
@@ -151,6 +156,23 @@ namespace IntegrationPlataform.Infrastructure.Services
             {
                 throw new InvalidOperationException(message);
             }
+        }
+
+        public override async Task<PipelineStep?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            PipelineStep? step = await DbContext.Set<PipelineStep>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (step is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["pipeline.step.notFound"]));
+                return null;
+            }
+
+            return await Delete([step], cancellationToken) ? step : null;
         }
     }
 }

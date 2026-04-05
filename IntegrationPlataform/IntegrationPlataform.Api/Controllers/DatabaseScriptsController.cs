@@ -1,5 +1,4 @@
 using Archon.Api.Attributes;
-using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.DatabaseScripts;
@@ -11,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class DatabaseScriptsController : ReadOnlyController<DatabaseScript>
+    public sealed class DatabaseScriptsController : IntegrationPlataformReadOnlyController<DatabaseScript>
     {
         private readonly IDatabaseScriptService databaseScriptService;
 
@@ -45,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             DatabaseScriptContract? script = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
 
-            return script is null ? Http404("Record not found.") : Http200(script);
+            return script is null ? Http404(Localizer["database.script.notFound"]) : Http200(script);
         }
 
         [RequireAccess]
@@ -62,7 +61,7 @@ namespace IntegrationPlataform.Api.Controllers
             DatabaseScriptContract? contract = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == script.Id, cancellationToken);
 
-            return Http201(contract ?? DatabaseScriptContract.Projection.Compile()(script), "Database script created successfully.");
+            return Http201(contract ?? DatabaseScriptContract.Projection.Compile()(script), Localizer["database.script.created"]);
         }
 
         [RequireAccess]
@@ -79,7 +78,7 @@ namespace IntegrationPlataform.Api.Controllers
             DatabaseScriptContract? contract = await QueryContracts()
                 .FirstOrDefaultAsync(item => item.Id == script.Id, cancellationToken);
 
-            return Http200(contract ?? DatabaseScriptContract.Projection.Compile()(script), "Database script updated successfully.");
+            return Http200(contract ?? DatabaseScriptContract.Projection.Compile()(script), Localizer["database.script.updated"]);
         }
 
         [RequireAccess]
@@ -92,7 +91,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(databaseScriptService.GetErrorMessages());
             }
 
-            return Http200(script, "Database script deleted successfully.");
+            return Http200(script, Localizer["database.script.deleted"]);
         }
     }
 }

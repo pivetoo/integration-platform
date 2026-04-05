@@ -1,15 +1,20 @@
 using Archon.Infrastructure.Services;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.DatabaseScripts;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
     public sealed class DatabaseScriptService : CrudService<DatabaseScript>, IDatabaseScriptService
     {
-        public DatabaseScriptService(DbContext dbContext) : base(dbContext)
+        private readonly IStringLocalizer<IntegrationPlataformResource> Localizer;
+
+        public DatabaseScriptService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
+            Localizer = localizer;
         }
 
         public async Task<DatabaseScript> CreateDatabaseScript(CreateDatabaseScriptRequest request, CancellationToken cancellationToken = default)
@@ -30,7 +35,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException("Route id does not match body id.");
+                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
             }
 
             DatabaseScript? script = await DbContext.Set<DatabaseScript>()
@@ -39,7 +44,7 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (script is null)
             {
-                throw new InvalidOperationException("Database script not found.");
+                throw new InvalidOperationException(Localizer["database.script.notFound"]);
             }
 
             await EnsureDatabaseConnectionExists(request.DatabaseConnectionId, cancellationToken);
@@ -63,8 +68,25 @@ namespace IntegrationPlataform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException("Database connection not found.");
+                throw new InvalidOperationException(Localizer["database.connection.notFound"]);
             }
+        }
+
+        public override async Task<DatabaseScript?> Delete(long id, CancellationToken cancellationToken = default)
+        {
+            MutableMessages.Clear();
+
+            DatabaseScript? script = await DbContext.Set<DatabaseScript>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+
+            if (script is null)
+            {
+                MutableMessages.Add(new KeyNotFoundException(Localizer["database.script.notFound"]));
+                return null;
+            }
+
+            return await Delete([script], cancellationToken) ? script : null;
         }
     }
 }
