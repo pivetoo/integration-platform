@@ -13,9 +13,9 @@ import ChamadasApi from '../modules/Configuracao/ChamadasApi';
 import FuncoesJavaScript from '../modules/Configuracao/FuncoesJavaScript';
 import ScriptsBancoDados from '../modules/Configuracao/ScriptsBancoDados';
 import ConexoesBancoDados from '../modules/Configuracao/ConexoesBancoDados';
-import Execucoes from '../modules/operacional/Execucoes';
-import FilaProcessamento from '../modules/operacional/FilaProcessamento';
-import Referencias from '../modules/operacional/Referencias';
+import Execucoes from '../modules/Operacional/Execucoes';
+import FilaProcessamento from '../modules/Operacional/FilaProcessamento';
+import Referencias from '../modules/Operacional/Referencias';
 import Automacao from '../modules/Automacao/Automacao';
 
 const identityProviderUrl = import.meta.env.VITE_IDENTITY_PROVIDER_WEB;
