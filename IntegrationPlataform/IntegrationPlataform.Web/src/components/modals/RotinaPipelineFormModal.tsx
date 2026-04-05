@@ -3,29 +3,29 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Inpu
 import { rotinaPipelineService } from '../../services/rotinaPipelineService';
 import { conectorService } from '../../services/conectorService';
 import { pipelineService } from '../../services/pipelineService';
-import type { RotinaPipeline, CreateRotinaPipelineRequest, UpdateRotinaPipelineRequest } from '../../types/rotinaPipeline';
+import type { PipelineRoutine, CreatePipelineRoutineRequest, UpdatePipelineRoutineRequest } from '../../types/rotinaPipeline';
 import type { Conector } from '../../types/conector';
 import type { Pipeline } from '../../types/pipeline';
 
 interface RotinaPipelineFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  rotina: RotinaPipeline | null;
+  rotina: PipelineRoutine | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreateRotinaPipelineRequest = {
-  conectorId: 0,
+const initialFormData: CreatePipelineRoutineRequest = {
+  connectorId: 0,
   pipelineId: 0,
-  ativo: true,
-  intervaloMinutos: 60,
-  payloadPadrao: '',
-  proximaExecucao: '',
+  isActive: true,
+  intervalMinutes: 60,
+  defaultPayload: '',
+  nextExecution: '',
 };
 
 export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, onSuccess }: RotinaPipelineFormModalProps) {
   const isEditing = !!rotina;
-  const [formData, setFormData] = useState<CreateRotinaPipelineRequest>(initialFormData);
+  const [formData, setFormData] = useState<CreatePipelineRoutineRequest>(initialFormData);
   const [conectores, setConectores] = useState<Conector[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const { t } = useI18n();
@@ -55,12 +55,12 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
   useEffect(() => {
     if (rotina) {
       setFormData({
-        conectorId: rotina.conector?.id || 0,
+        connectorId: rotina.connector?.id || 0,
         pipelineId: rotina.pipeline?.id || 0,
-        ativo: rotina.ativo,
-        intervaloMinutos: rotina.intervaloMinutos,
-        payloadPadrao: rotina.payloadPadrao || '',
-        proximaExecucao: rotina.proximaExecucao ? rotina.proximaExecucao.slice(0, 16) : '',
+        isActive: rotina.isActive,
+        intervalMinutes: rotina.intervalMinutes,
+        defaultPayload: rotina.defaultPayload || '',
+        nextExecution: rotina.nextExecution ? rotina.nextExecution.slice(0, 16) : '',
       });
       return;
     }
@@ -69,20 +69,20 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
   }, [rotina]);
 
   const loadConectores = async () => {
-    const result = await fetchConectores(() => conectorService.getAtivos());
+    const result = await fetchConectores(() => conectorService.getActive());
     if (result) {
       setConectores(result);
     }
   };
 
   const loadPipelines = async () => {
-    const result = await fetchPipelines(() => pipelineService.getAtivos());
+    const result = await fetchPipelines(() => pipelineService.getActive());
     if (result) {
       setPipelines(result);
     }
   };
 
-  const handleChange = (field: keyof CreateRotinaPipelineRequest, value: string | number | boolean) => {
+  const handleChange = (field: keyof CreatePipelineRoutineRequest, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -91,19 +91,19 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
 
     try {
       if (isEditing && rotina) {
-        const payload: UpdateRotinaPipelineRequest = {
-          ativo: formData.ativo,
-          intervaloMinutos: formData.intervaloMinutos,
-          payloadPadrao: formData.payloadPadrao || undefined,
-          proximaExecucao: formData.proximaExecucao || undefined,
+        const payload: UpdatePipelineRoutineRequest = {
+          isActive: formData.isActive,
+          intervalMinutes: formData.intervalMinutes,
+          defaultPayload: formData.defaultPayload || undefined,
+          nextExecution: formData.nextExecution || undefined,
         };
 
         await execute(() => rotinaPipelineService.update(rotina.id, payload));
       } else {
-        const payload: CreateRotinaPipelineRequest = {
+        const payload: CreatePipelineRoutineRequest = {
           ...formData,
-          payloadPadrao: formData.payloadPadrao || undefined,
-          proximaExecucao: formData.proximaExecucao || undefined,
+          defaultPayload: formData.defaultPayload || undefined,
+          nextExecution: formData.nextExecution || undefined,
         };
 
         await execute(() => rotinaPipelineService.create(payload));
@@ -127,8 +127,8 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.connector')}</label>
               <Select
-                value={formData.conectorId ? formData.conectorId.toString() : ''}
-                onValueChange={(value) => handleChange('conectorId', parseInt(value, 10))}
+                value={formData.connectorId ? formData.connectorId.toString() : ''}
+                onValueChange={(value) => handleChange('connectorId', parseInt(value, 10))}
                 disabled={isEditing}
               >
                 <SelectTrigger>
@@ -137,7 +137,7 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
                 <SelectContent>
                   {conectores.map((conector) => (
                     <SelectItem key={conector.id} value={conector.id.toString()}>
-                      {conector.nome}
+                      {conector.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -157,7 +157,7 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
                 <SelectContent>
                   {pipelines.map((pipeline) => (
                     <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
-                      {pipeline.nome}
+                      {pipeline.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -165,46 +165,46 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="intervaloMinutos" className="text-sm font-medium">{t('pipeline.routine.form.intervalMinutes')}</label>
+              <label htmlFor="intervalMinutes" className="text-sm font-medium">{t('pipeline.routine.form.intervalMinutes')}</label>
               <Input
-                id="intervaloMinutos"
+                id="intervalMinutes"
                 type="number"
                 min={1}
-                value={formData.intervaloMinutos}
-                onChange={(e) => handleChange('intervaloMinutos', parseInt(e.target.value, 10) || 1)}
+                value={formData.intervalMinutes}
+                onChange={(e) => handleChange('intervalMinutes', parseInt(e.target.value, 10) || 1)}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="proximaExecucao" className="text-sm font-medium">{t('pipeline.routine.form.nextExecution')}</label>
+              <label htmlFor="nextExecution" className="text-sm font-medium">{t('pipeline.routine.form.nextExecution')}</label>
               <Input
-                id="proximaExecucao"
+                id="nextExecution"
                 type="datetime-local"
-                value={formData.proximaExecucao || ''}
-                onChange={(e) => handleChange('proximaExecucao', e.target.value)}
+                value={formData.nextExecution || ''}
+                onChange={(e) => handleChange('nextExecution', e.target.value)}
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="payloadPadrao" className="text-sm font-medium">{t('pipeline.routine.form.defaultPayload')}</label>
+              <label htmlFor="defaultPayload" className="text-sm font-medium">{t('pipeline.routine.form.defaultPayload')}</label>
               <textarea
-                id="payloadPadrao"
+                id="defaultPayload"
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 rows={3}
-                value={formData.payloadPadrao || ''}
-                onChange={(e) => handleChange('payloadPadrao', e.target.value)}
+                value={formData.defaultPayload || ''}
+                onChange={(e) => handleChange('defaultPayload', e.target.value)}
               />
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="ativo"
-              checked={formData.ativo}
-              onCheckedChange={(checked) => handleChange('ativo', !!checked)}
+              id="isActive"
+              checked={formData.isActive}
+              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
+            <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>

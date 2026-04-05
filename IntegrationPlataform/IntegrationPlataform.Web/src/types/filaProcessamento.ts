@@ -1,50 +1,43 @@
 import type { Conector } from './conector';
 import type { Pipeline } from './pipeline';
 
-export const StatusProcessamento = {
-  Pendente: 0,
-  Processando: 1,
-  Concluido: 2,
-  Erro: 3,
-  Cancelado: 4,
+export const ProcessingStatus = {
+  Pending: 1,
+  Processing: 2,
+  Completed: 3,
+  Error: 4,
+  Cancelled: 5,
 } as const;
 
-export type StatusProcessamento = typeof StatusProcessamento[keyof typeof StatusProcessamento];
+export type ProcessingStatus = typeof ProcessingStatus[keyof typeof ProcessingStatus];
 
-export const StatusProcessamentoLabels: Record<StatusProcessamento, string> = {
-  [StatusProcessamento.Pendente]: 'Pendente',
-  [StatusProcessamento.Processando]: 'Processando',
-  [StatusProcessamento.Concluido]: 'Concluído',
-  [StatusProcessamento.Erro]: 'Erro',
-  [StatusProcessamento.Cancelado]: 'Cancelado',
+export const ProcessingStatusLabels: Record<ProcessingStatus, string> = {
+  [ProcessingStatus.Pending]: 'Pendente',
+  [ProcessingStatus.Processing]: 'Processando',
+  [ProcessingStatus.Completed]: 'Concluído',
+  [ProcessingStatus.Error]: 'Erro',
+  [ProcessingStatus.Cancelled]: 'Cancelado',
 };
 
-export interface FilaProcessamento {
+export interface ProcessingQueueItem {
   id: number;
-  conector: Conector;
-  pipeline: Pipeline;
-  prioridade: number;
-  status: StatusProcessamento;
+  connector?: Conector;
+  pipeline?: Pipeline;
+  priority: number;
+  status: ProcessingStatus;
   payload?: string;
-  ultimoErro?: string;
-  agendamento?: string;
-  iniciadoEm?: string;
-  finalizadoEm?: string;
-  criadoEm: string;
+  lastError?: string;
+  scheduledAt?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateFilaProcessamentoRequest {
-  conectorId: number;
+export interface CreateProcessingQueueItemRequest {
+  connectorId: number;
   pipelineId: number;
-  prioridade: number;
+  priority: number;
   payload?: string;
-  agendamento?: string;
-}
-
-export interface UpdateFilaProcessamentoRequest {
-  prioridade: number;
-  status: StatusProcessamento;
-  payload?: string;
-  ultimoErro?: string;
-  agendamento?: string;
+  scheduledAt?: string;
 }

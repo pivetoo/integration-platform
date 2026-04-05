@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
-import type { CreateConexaoBancoDadosRequest } from '../../types/conexaoBancoDados';
-import { TipoBancoDados, TipoBancoDadosLabels } from '../../types/conexaoBancoDados';
-import type { ConexaoBancoDados } from '../../types/conexaoBancoDados';
+import type { CreateDatabaseConnectionRequest } from '../../types/conexaoBancoDados';
+import { DatabaseType, DatabaseTypeLabels } from '../../types/conexaoBancoDados';
+import type { DatabaseConnection } from '../../types/conexaoBancoDados';
 
 interface ConexaoBancoDadosFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-  conexao: ConexaoBancoDados | null;
+  conexao: DatabaseConnection | null;
 }
 
-const initialFormData: CreateConexaoBancoDadosRequest = {
-  nome: '',
-  tipo: TipoBancoDados.PostgreSQL,
+const initialFormData: CreateDatabaseConnectionRequest = {
+  name: '',
+  type: DatabaseType.PostgreSQL,
   host: '',
   port: 5432,
   database: '',
@@ -25,7 +25,7 @@ const initialFormData: CreateConexaoBancoDadosRequest = {
 export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSuccess, conexao }: ConexaoBancoDadosFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!conexao;
-  const [formData, setFormData] = useState<CreateConexaoBancoDadosRequest>(initialFormData);
+  const [formData, setFormData] = useState<CreateDatabaseConnectionRequest>(initialFormData);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
@@ -40,8 +40,8 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
   useEffect(() => {
     if (conexao) {
       setFormData({
-        nome: conexao.nome,
-        tipo: conexao.tipo,
+        name: conexao.name,
+        type: conexao.type,
         host: conexao.host,
         port: conexao.port,
         database: conexao.database,
@@ -53,7 +53,7 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
     }
   }, [conexao]);
 
-  const handleChange = (field: keyof CreateConexaoBancoDadosRequest, value: string | number) => {
+  const handleChange = (field: keyof CreateDatabaseConnectionRequest, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -62,7 +62,7 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
       toast({ title: t('database.connection.form.testMissingFields'), variant: 'destructive' });
       return;
     }
-    const result = await testarConexao(() => conexaoBancoDadosService.testar(formData));
+    const result = await testarConexao(() => conexaoBancoDadosService.test(formData));
     if (result) {
       toast({
         title: 'Sucesso',
@@ -96,11 +96,11 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 placeholder={t('database.connection.form.namePlaceholder')}
                 required
               />
@@ -109,14 +109,14 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('database.connection.form.databaseType')}</label>
               <Select
-                value={formData.tipo.toString()}
-                onValueChange={(value) => handleChange('tipo', parseInt(value))}
+                value={formData.type.toString()}
+                onValueChange={(value) => handleChange('type', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(TipoBancoDadosLabels).map(([key, label]) => (
+                  {Object.entries(DatabaseTypeLabels).map(([key, label]) => (
                     <SelectItem key={key} value={key}>
                       {label}
                     </SelectItem>

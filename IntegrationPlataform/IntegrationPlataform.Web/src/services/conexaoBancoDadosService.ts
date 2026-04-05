@@ -1,41 +1,16 @@
 import { buildPaginationQuery, httpClient } from 'archon-ui';
 import type { PaginatedResult, PaginationParams } from '../types/pagination';
-import type { ConexaoBancoDados, CreateConexaoBancoDadosRequest } from '../types/conexaoBancoDados';
+import type { DatabaseConnection, CreateDatabaseConnectionRequest, UpdateDatabaseConnectionRequest } from '../types/conexaoBancoDados';
 
 const BASE_URL = '/DatabaseConnections';
 
-export interface UpdateConexaoBancoDadosRequest {
-  nome: string;
-  tipo: number;
-  host: string;
-  port: number;
-  database: string;
-  username: string;
-  password: string;
-}
-
-function mapConexaoBancoDados(item: any): ConexaoBancoDados {
-  return {
-    id: item.id,
-    nome: item.name,
-    tipo: item.type,
-    host: item.host,
-    port: item.port,
-    database: item.database,
-    username: item.username,
-    password: item.password,
-    criadoEm: item.createdAt,
-    ultimaAlteracao: item.updatedAt,
-  };
-}
-
 export const conexaoBancoDadosService = {
-  getAll: async (params?: PaginationParams): Promise<PaginatedResult<ConexaoBancoDados>> => {
+  getAll: async (params?: PaginationParams): Promise<PaginatedResult<DatabaseConnection>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
+    const response = await httpClient.get<DatabaseConnection[]>(`${BASE_URL}/Get${query}`);
 
     return {
-      data: (response.data ?? []).map(mapConexaoBancoDados),
+      data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,
       page: response.pagination?.page ?? params?.page,
       pageSize: response.pagination?.pageSize ?? params?.pageSize,
@@ -43,55 +18,41 @@ export const conexaoBancoDadosService = {
   },
 
   getById: async (id: number) => {
-    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
-    return {
-      ...response,
-      data: response.data ? mapConexaoBancoDados(response.data) : response.data,
-    };
+    return httpClient.get<DatabaseConnection>(`${BASE_URL}/${id}`);
   },
 
-  create: async (data: CreateConexaoBancoDadosRequest) => {
-    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
-      name: data.nome,
-      type: data.tipo,
+  create: async (data: CreateDatabaseConnectionRequest) => {
+    return httpClient.post<DatabaseConnection>(`${BASE_URL}/Create`, {
+      name: data.name,
+      type: data.type,
       host: data.host,
       port: data.port,
       database: data.database,
       username: data.username,
       password: data.password,
     });
-
-    return {
-      ...response,
-      data: response.data ? mapConexaoBancoDados(response.data) : response.data,
-    };
   },
 
-  update: async (id: number, data: UpdateConexaoBancoDadosRequest) => {
-    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+  update: async (id: number, data: UpdateDatabaseConnectionRequest) => {
+    return httpClient.put<DatabaseConnection>(`${BASE_URL}/${id}`, {
       id,
-      name: data.nome,
-      type: data.tipo,
+      name: data.name,
+      type: data.type,
       host: data.host,
       port: data.port,
       database: data.database,
       username: data.username,
       password: data.password,
     });
-
-    return {
-      ...response,
-      data: response.data ? mapConexaoBancoDados(response.data) : response.data,
-    };
   },
 
   delete: (id: number) =>
     httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
 
-  testar: (data: CreateConexaoBancoDadosRequest) =>
+  test: (data: CreateDatabaseConnectionRequest) =>
     httpClient.post<{ message: string }>(`${BASE_URL}/test`, {
-      name: data.nome,
-      type: data.tipo,
+      name: data.name,
+      type: data.type,
       host: data.host,
       port: data.port,
       database: data.database,

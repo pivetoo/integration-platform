@@ -114,7 +114,7 @@ namespace IntegrationPlataform.Api.Controllers
                 ExecutionType.Manual,
                 cancellationToken: cancellationToken);
 
-            return Http200(CreateExecutionResponse(execution));
+            return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
         [RequireAccess]
@@ -135,7 +135,7 @@ namespace IntegrationPlataform.Api.Controllers
                 initialStepId: request.InitialStepId,
                 cancellationToken: cancellationToken);
 
-            return Http200(CreateExecutionResponse(execution));
+            return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
         [RequireAccess]
@@ -158,13 +158,11 @@ namespace IntegrationPlataform.Api.Controllers
             int remainingSteps = session.ActiveSteps.Count - session.CurrentIndex;
             PipelineStep? nextStep = remainingSteps > 0 ? session.ActiveSteps[session.CurrentIndex] : null;
 
-            return Http200(new
+            return Http200(new StartDebugPipelineResultContract
             {
-                session.SessionId,
+                DebugSessionId = session.SessionId,
                 ExecutionId = session.Execution.Id,
-                PipelineId = session.Pipeline.Id,
-                ConnectorId = session.Connector.Id,
-                session.Execution.Status,
+                Status = session.Execution.Status,
                 TotalSteps = session.ActiveSteps.Count,
                 RemainingSteps = remainingSteps,
                 NextStepId = nextStep?.Id,
@@ -183,7 +181,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             var result = await executionEngineService.ExecuteNextDebugStep(request.DebugSessionId, cancellationToken);
-            return Http200(result);
+            return Http200(ExecuteNextDebugStepResultContract.FromModel(result));
         }
 
         [RequireAccess]
@@ -197,7 +195,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Execution execution = await executionEngineService.FinishDebugPipeline(request.DebugSessionId, cancellationToken);
-            return Http200(CreateExecutionResponse(execution));
+            return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
         [RequireAccess]
@@ -225,22 +223,7 @@ namespace IntegrationPlataform.Api.Controllers
                 ExecutionType.Manual,
                 cancellationToken);
 
-            return Http200(CreateExecutionResponse(execution));
-        }
-
-        private static object CreateExecutionResponse(Execution execution)
-        {
-            return new
-            {
-                execution.Id,
-                execution.Status,
-                execution.Type,
-                execution.StartedAt,
-                execution.FinishedAt,
-                execution.Duration,
-                execution.OutputData,
-                execution.Errors
-            };
+            return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
     }
 }

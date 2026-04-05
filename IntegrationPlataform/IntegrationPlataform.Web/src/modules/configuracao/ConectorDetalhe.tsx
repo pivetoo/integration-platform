@@ -8,14 +8,14 @@ import { conectorAtributoValorService } from '../../services/conectorAtributoVal
 import type { Conector } from '../../types/conector';
 import type { IntegracaoAtributo } from '../../types/integracaoAtributo';
 import { TipoCampo } from '../../types/integracaoAtributo';
-import type { ConectorAtributoValor } from '../../types/conectorAtributoValor';
+import type { ConnectorAttributeValue } from '../../types/conectorAtributoValor';
 
 export default function ConectorDetalhe() {
   const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const [conector, setConector] = useState<Conector | null>(null);
   const [atributos, setAtributos] = useState<IntegracaoAtributo[]>([]);
-  const [valores, setValores] = useState<ConectorAtributoValor[]>([]);
+  const [valores, setValores] = useState<ConnectorAttributeValue[]>([]);
   const [formValues, setFormValues] = useState<Record<number, string>>({});
   const [visibleSensitiveFields, setVisibleSensitiveFields] = useState<Record<number, boolean>>({});
 
@@ -27,7 +27,7 @@ export default function ConectorDetalhe() {
     showErrorMessage: true,
   });
 
-  const { execute: fetchValores } = useApi<ConectorAtributoValor[]>({
+  const { execute: fetchValores } = useApi<ConnectorAttributeValue[]>({
     showErrorMessage: true,
   });
 
@@ -44,16 +44,16 @@ export default function ConectorDetalhe() {
     }
   };
 
-  const loadAtributos = async (integracaoId: number) => {
-    const result = await fetchAtributos(() => integracaoAtributoService.getByIntegracao(integracaoId));
+  const loadAtributos = async (integrationId: number) => {
+    const result = await fetchAtributos(() => integracaoAtributoService.getByIntegration(integrationId));
     if (result) {
-      const sorted = [...result].sort((a, b) => a.ordem - b.ordem);
+      const sorted = [...result].sort((a, b) => a.order - b.order);
       setAtributos(sorted);
     }
   };
 
   const loadValores = async () => {
-    const result = await fetchValores(() => conectorAtributoValorService.getByConector(conectorId));
+    const result = await fetchValores(() => conectorAtributoValorService.getByConnector(conectorId));
     if (result) {
       setValores(result);
     }
@@ -67,29 +67,29 @@ export default function ConectorDetalhe() {
   }, [conectorId]);
 
   useEffect(() => {
-    if (conector?.integracao?.id) {
-      loadAtributos(conector.integracao.id);
+    if (conector?.integration?.id) {
+      loadAtributos(conector.integration.id);
     }
-  }, [conector?.integracao?.id]);
+  }, [conector?.integration?.id]);
 
   useEffect(() => {
     const initial: Record<number, string> = {};
     for (const atributo of atributos) {
-      const existing = valores.find(v => v.integracaoAtributoId === atributo.id);
+      const existing = valores.find(v => v.integrationAttributeId === atributo.id);
       if (existing) {
-        initial[atributo.id] = existing.valor || '';
+        initial[atributo.id] = existing.value || '';
       } else {
-        initial[atributo.id] = atributo.valorPadrao || '';
+        initial[atributo.id] = atributo.defaultValue || '';
       }
     }
     setFormValues(initial);
   }, [atributos, valores]);
 
   const valorMap = useMemo(() => {
-    const map: Record<number, ConectorAtributoValor> = {};
+    const map: Record<number, ConnectorAttributeValue> = {};
     for (const v of valores) {
-      if (v.integracaoAtributoId) {
-        map[v.integracaoAtributoId] = v;
+      if (v.integrationAttributeId) {
+        map[v.integrationAttributeId] = v;
       }
     }
     return map;
@@ -98,7 +98,7 @@ export default function ConectorDetalhe() {
   const groupedAtributos = useMemo(() => {
     const groups: Record<string, IntegracaoAtributo[]> = {};
     for (const atributo of atributos) {
-      const grupo = atributo.grupo || 'Geral';
+      const grupo = atributo.group || 'Geral';
       if (!groups[grupo]) {
         groups[grupo] = [];
       }
@@ -122,18 +122,18 @@ export default function ConectorDetalhe() {
       const value = formValues[atributo.id] || '';
       const existing = valorMap[atributo.id];
 
-      if (atributo.obrigatorio && !value.trim()) {
+      if (atributo.isRequired && !value.trim()) {
         toast({ title: t('common.toast.errorTitle'), description: t('connector.detail.requiredField').replace('{0}', atributo.label), variant: 'destructive' });
         hasError = true;
         break;
       }
 
       if (existing) {
-        if (value !== existing.valor) {
+        if (value !== existing.value) {
           const result = await saveValor(() =>
             conectorAtributoValorService.update(existing.id, {
-              integracaoAtributoId: atributo.id,
-              valor: value,
+              integrationAttributeId: atributo.id,
+              value,
             })
           );
           if (!result) {
@@ -144,9 +144,9 @@ export default function ConectorDetalhe() {
       } else if (value.trim()) {
         const result = await saveValor(() =>
           conectorAtributoValorService.create({
-            conectorId,
-            integracaoAtributoId: atributo.id,
-            valor: value,
+            connectorId: conectorId,
+            integrationAttributeId: atributo.id,
+            value,
           })
         );
         if (!result) {
@@ -165,7 +165,7 @@ export default function ConectorDetalhe() {
   const renderInput = (atributo: IntegracaoAtributo) => {
     const value = formValues[atributo.id] || '';
 
-    switch (atributo.tipo) {
+    switch (atributo.type) {
       case TipoCampo.TextoLongo:
         return (
           <textarea
@@ -241,7 +241,7 @@ export default function ConectorDetalhe() {
         );
 
       default:
-        if (atributo.sensivel) {
+        if (atributo.isSensitive) {
           const isVisible = visibleSensitiveFields[atributo.id] || false;
           return (
             <div className="relative">
@@ -275,7 +275,7 @@ export default function ConectorDetalhe() {
 
   return (
     <PageLayout
-      title={conector?.nome || t('connector.detail.fallbackTitle')}
+      title={conector?.name || t('connector.detail.fallbackTitle')}
       onRefresh={() => { loadConector(); loadValores(); }}
     >
       <div className="space-y-6">
@@ -284,17 +284,17 @@ export default function ConectorDetalhe() {
           <div className="grid grid-cols-2 gap-4 rounded-lg border bg-card p-4 md:grid-cols-4">
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.name')}</span>
-              <p className="font-medium">{conector.nome}</p>
+              <p className="font-medium">{conector.name}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.integration')}</span>
-              <p className="font-medium">{conector.integracao?.nome || '-'}</p>
+              <p className="font-medium">{conector.integration?.name || '-'}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
-                <Badge variant={conector.ativo ? 'success' : 'destructive'}>
-                  {conector.ativo ? t('common.status.active') : t('common.status.inactive')}
+                <Badge variant={conector.isActive ? 'success' : 'destructive'}>
+                  {conector.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>
             </div>
@@ -329,11 +329,11 @@ export default function ConectorDetalhe() {
                     <div key={atributo.id} className="space-y-2">
                       <label className="text-sm font-medium flex items-baseline gap-1">
                         {atributo.label}
-                        {atributo.obrigatorio && <span className="text-destructive">*</span>}
+                        {atributo.isRequired && <span className="text-destructive">*</span>}
                       </label>
-                      {atributo.descricao && (
+                      {atributo.description && (
                         <p className="text-sm text-muted-foreground/80 leading-relaxed italic">
-                          {atributo.descricao}
+                          {atributo.description}
                         </p>
                       )}
                       {renderInput(atributo)}

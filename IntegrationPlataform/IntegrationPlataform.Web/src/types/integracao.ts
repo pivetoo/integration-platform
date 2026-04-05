@@ -1,86 +1,86 @@
-import type { CategoriaIntegracao as CategoriaIntegracaoEntity } from './categoriaIntegracao';
+import type { IntegrationCategory } from './categoriaIntegracao';
 
-export interface Integracao {
+export interface Integration {
   id: number;
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  categoriaId?: number;
-  categoria?: CategoriaIntegracaoEntity;
-  ativo: boolean;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  identifier: string;
+  name: string;
+  description?: string;
+  integrationCategoryId?: number;
+  integrationCategory?: IntegrationCategory;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateIntegracaoRequest {
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  categoriaId?: number;
-  ativo: boolean;
+export interface CreateIntegrationRequest {
+  identifier: string;
+  name: string;
+  description?: string;
+  integrationCategoryId?: number;
+  isActive: boolean;
 }
 
-export interface UpdateIntegracaoRequest {
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  categoriaId?: number;
-  ativo: boolean;
+export interface UpdateIntegrationRequest {
+  identifier: string;
+  name: string;
+  description?: string;
+  integrationCategoryId?: number;
+  isActive: boolean;
 }
 
-export interface IntegracaoExportModel {
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  atributos: IntegracaoAtributoExportModel[];
-  chamadas: ChamadaApiExportModel[];
-  funcoesJs: FuncaoJsExportModel[];
+export interface IntegrationExportModel {
+  identifier: string;
+  name: string;
+  description?: string;
+  attributes: IntegrationAttributeExportModel[];
+  apiCalls: ApiCallExportModel[];
+  javaScriptFunctions: JavaScriptFunctionExportModel[];
   pipelines: PipelineExportModel[];
 }
 
-export interface IntegracaoAtributoExportModel {
-  campo: string;
+export interface IntegrationAttributeExportModel {
+  field: string;
   label: string;
-  descricao?: string;
+  description?: string;
   placeholder?: string;
-  tipo: number;
-  valorPadrao?: string;
-  obrigatorio: boolean;
-  ordem: number;
-  grupo?: string;
-  sensivel: boolean;
+  type: number;
+  defaultValue?: string;
+  isRequired: boolean;
+  order: number;
+  group?: string;
+  isSensitive: boolean;
 }
 
-export interface ChamadaApiExportModel {
-  nome: string;
-  descricao?: string;
-  metodo: number;
+export interface ApiCallExportModel {
+  name: string;
+  description?: string;
+  method: number;
   url: string;
   headersTemplate?: string;
   bodyTemplate?: string;
 }
 
-export interface FuncaoJsExportModel {
-  nome: string;
-  descricao?: string;
-  codigo: string;
+export interface JavaScriptFunctionExportModel {
+  name: string;
+  description?: string;
+  code: string;
 }
 
 export interface PipelineExportModel {
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  gatilho: number;
-  ativo: boolean;
-  etapas: PipelineEtapaExportModel[];
+  identifier: string;
+  name: string;
+  description?: string;
+  trigger: number;
+  isActive: boolean;
+  steps: PipelineStepExportModel[];
 }
 
-export interface PipelineEtapaExportModel {
-  ordem: number;
-  nome: string;
-  tipo: number;
-  chamadaApiNome?: string;
-  funcaoJsNome?: string;
-  aoErro: number;
-  ativo: boolean;
+export interface PipelineStepExportModel {
+  order: number;
+  name: string;
+  type: number;
+  apiCallName?: string;
+  javaScriptFunctionName?: string;
+  errorAction: number;
+  isActive: boolean;
 }

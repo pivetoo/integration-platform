@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { chamadaApiService } from '../../services/chamadaApiService';
-import { MetodoHttp, MetodoHttpLabels } from '../../types/chamadaApi';
-import type { ChamadaApi, CreateChamadaApiRequest } from '../../types/chamadaApi';
+import { HttpMethod, HttpMethodLabels } from '../../types/chamadaApi';
+import type { ApiCall, CreateApiCallRequest } from '../../types/chamadaApi';
 
 interface ChamadaApiFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  chamadaApi: ChamadaApi | null;
+  chamadaApi: ApiCall | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreateChamadaApiRequest = {
-  nome: '',
-  descricao: '',
-  metodo: MetodoHttp.GET,
+const initialFormData: CreateApiCallRequest = {
+  name: '',
+  description: '',
+  method: HttpMethod.GET,
   url: '',
   headersTemplate: '',
   bodyTemplate: '',
@@ -23,7 +23,7 @@ const initialFormData: CreateChamadaApiRequest = {
 export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, onSuccess }: ChamadaApiFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!chamadaApi;
-  const [formData, setFormData] = useState<CreateChamadaApiRequest>(initialFormData);
+  const [formData, setFormData] = useState<CreateApiCallRequest>(initialFormData);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
@@ -33,9 +33,9 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
   useEffect(() => {
     if (chamadaApi) {
       setFormData({
-        nome: chamadaApi.nome,
-        descricao: chamadaApi.descricao || '',
-        metodo: chamadaApi.metodo,
+        name: chamadaApi.name,
+        description: chamadaApi.description || '',
+        method: chamadaApi.method,
         url: chamadaApi.url,
         headersTemplate: chamadaApi.headersTemplate || '',
         bodyTemplate: chamadaApi.bodyTemplate || '',
@@ -45,7 +45,7 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
     }
   }, [chamadaApi]);
 
-  const handleChange = (field: keyof CreateChamadaApiRequest, value: string | number) => {
+  const handleChange = (field: keyof CreateApiCallRequest, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -63,9 +63,9 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
     }
   };
 
-  const metodoOptions = Object.entries(MetodoHttpLabels).map(([value, label]) => ({ value, label }));
+  const metodoOptions = Object.entries(HttpMethodLabels).map(([value, label]) => ({ value, label }));
 
-  const showBody = formData.metodo !== MetodoHttp.GET && formData.metodo !== MetodoHttp.DELETE;
+  const showBody = formData.method !== HttpMethod.GET && formData.method !== HttpMethod.DELETE;
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
@@ -77,30 +77,30 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 placeholder=""
                 required
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
+              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
-                id="descricao"
-                value={formData.descricao || ''}
-                onChange={(e) => handleChange('descricao', e.target.value)}
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.method')}</label>
               <Select
-                value={formData.metodo.toString()}
-                onValueChange={(value) => handleChange('metodo', parseInt(value))}
+                value={formData.method.toString()}
+                onValueChange={(value) => handleChange('method', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue />

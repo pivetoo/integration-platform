@@ -6,7 +6,7 @@ import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { pipelineService } from '../../services/pipelineService';
 import type { Pipeline } from '../../types/pipeline';
-import type { Integracao } from '../../types/integracao';
+import type { Integration } from '../../types/integracao';
 import PipelineFormModal from '../../components/modals/PipelineFormModal';
 
 export default function Pipelines() {
@@ -78,18 +78,18 @@ export default function Pipelines() {
   };
 
   const columns: DataTableColumn<Pipeline>[] = [
-    { key: 'identificador', title: t('common.column.identifier'), dataIndex: 'identificador' },
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+    { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {
-      key: 'integracao',
+      key: 'integration',
       title: t('common.column.integration'),
-      dataIndex: 'integracao',
-      render: (value: Integracao) => value?.nome || '-',
+      dataIndex: 'integration',
+      render: (value: Integration) => value?.name || '-',
     },
     {
-      key: 'ativo',
+      key: 'isActive',
       title: t('common.column.active'),
-      dataIndex: 'ativo',
+      dataIndex: 'isActive',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
           {value ? t('common.boolean.yes') : t('common.boolean.no')}

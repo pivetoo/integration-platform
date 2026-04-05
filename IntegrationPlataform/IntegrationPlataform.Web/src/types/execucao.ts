@@ -1,81 +1,81 @@
 import type { Conector } from './conector';
 import type { Pipeline } from './pipeline';
 
-export const TipoExecucao = {
+export const ExecutionType = {
   Pipeline: 1,
   Manual: 2,
 } as const;
 
-export type TipoExecucao = typeof TipoExecucao[keyof typeof TipoExecucao];
+export type ExecutionType = typeof ExecutionType[keyof typeof ExecutionType];
 
-export const TipoExecucaoLabels: Record<TipoExecucao, string> = {
-  [TipoExecucao.Pipeline]: 'Pipeline',
-  [TipoExecucao.Manual]: 'Manual',
+export const ExecutionTypeLabels: Record<ExecutionType, string> = {
+  [ExecutionType.Pipeline]: 'Pipeline',
+  [ExecutionType.Manual]: 'Manual',
 };
 
-export const StatusExecucao = {
-  Executando: 1,
-  Sucesso: 2,
-  Erro: 3,
-  Parcial: 4,
+export const ExecutionStatus = {
+  Running: 1,
+  Success: 2,
+  Error: 3,
+  Partial: 4,
 } as const;
 
-export type StatusExecucao = typeof StatusExecucao[keyof typeof StatusExecucao];
+export type ExecutionStatus = typeof ExecutionStatus[keyof typeof ExecutionStatus];
 
-export const StatusExecucaoLabels: Record<StatusExecucao, string> = {
-  [StatusExecucao.Executando]: 'Executando',
-  [StatusExecucao.Sucesso]: 'Sucesso',
-  [StatusExecucao.Erro]: 'Erro',
-  [StatusExecucao.Parcial]: 'Parcial',
+export const ExecutionStatusLabels: Record<ExecutionStatus, string> = {
+  [ExecutionStatus.Running]: 'Executando',
+  [ExecutionStatus.Success]: 'Sucesso',
+  [ExecutionStatus.Error]: 'Erro',
+  [ExecutionStatus.Partial]: 'Parcial',
 };
 
-export interface Execucao {
+export interface Execution {
   id: number;
-  tipo: TipoExecucao;
-  conector?: Conector;
+  type: ExecutionType;
+  connector?: Conector;
   pipeline?: Pipeline;
-  status: StatusExecucao;
-  dadosEntrada?: string;
-  dadosSaida?: string;
-  erros?: string;
-  iniciadoEm: string;
-  finalizadoEm?: string;
-  duracao?: number;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  status: ExecutionStatus;
+  inputData?: string;
+  outputData?: string;
+  errors?: string;
+  startedAt: string;
+  finishedAt?: string;
+  duration?: number;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface DebugPipelineRequest {
-  conectorId: number;
+  connectorId: number;
   pipelineId: number;
-  dadosEntrada?: string;
-  etapaInicialId?: number;
+  inputData?: string;
+  initialStepId?: number;
 }
 
 export interface DebugPipelineResult {
   id: number;
-  status: StatusExecucao;
-  duracao?: number;
-  dadosSaida?: unknown;
-  erros?: string;
-  etapaInicialId?: number;
+  status: ExecutionStatus;
+  duration?: number;
+  outputData?: unknown;
+  errors?: string;
+  initialStepId?: number;
 }
 
 export interface StartDebugPipelineRequest {
-  conectorId: number;
+  connectorId: number;
   pipelineId: number;
-  dadosEntrada?: string;
-  etapaInicialId?: number;
+  inputData?: string;
+  initialStepId?: number;
 }
 
 export interface StartDebugPipelineResult {
   debugSessionId: string;
-  execucaoId: number;
-  status: StatusExecucao;
-  totalEtapas: number;
-  etapasRestantes: number;
-  proximaEtapaId?: number;
-  proximaEtapaNome?: string;
+  executionId: number;
+  status: ExecutionStatus;
+  totalSteps: number;
+  remainingSteps: number;
+  nextStepId?: number;
+  nextStepName?: string;
 }
 
 export interface ExecuteNextDebugStepRequest {
@@ -84,17 +84,17 @@ export interface ExecuteNextDebugStepRequest {
 
 export interface ExecuteNextDebugStepResult {
   debugSessionId: string;
-  execucaoId: number;
-  executouEtapa: boolean;
-  etapaExecutadaId?: number;
-  etapaExecutadaNome?: string;
-  sucesso?: boolean;
-  interrompidoPorErro?: boolean;
-  finalizouFluxo: boolean;
-  etapasRestantes: number;
-  proximaEtapaId?: number;
-  proximaEtapaNome?: string;
-  mensagem?: string;
+  executionId: number;
+  executedStep: boolean;
+  executedStepId?: number;
+  executedStepName?: string;
+  success?: boolean;
+  interruptedByError?: boolean;
+  finishedFlow: boolean;
+  remainingSteps: number;
+  nextStepId?: number;
+  nextStepName?: string;
+  message?: string;
 }
 
 export interface FinalizeDebugPipelineRequest {

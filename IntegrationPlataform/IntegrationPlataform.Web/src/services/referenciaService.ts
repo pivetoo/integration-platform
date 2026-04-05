@@ -1,13 +1,13 @@
 import { buildPaginationQuery, httpClient } from 'archon-ui';
 import type { PaginatedResult, PaginationParams } from '../types/pagination';
-import type { Referencia, CreateReferenciaRequest, UpdateReferenciaRequest } from '../types/referencia';
+import type { Reference, CreateReferenceRequest, UpdateReferenceRequest } from '../types/referencia';
 
-const BASE_URL = '/referencia';
+const BASE_URL = '/References';
 
 export const referenciaService = {
-  getAll: async (params?: PaginationParams): Promise<PaginatedResult<Referencia>> => {
+  getAll: async (params?: PaginationParams): Promise<PaginatedResult<Reference>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<Referencia[]>(`${BASE_URL}/Get${query}`);
+    const response = await httpClient.get<Reference[]>(`${BASE_URL}/Get${query}`);
     return {
       data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,
@@ -16,17 +16,18 @@ export const referenciaService = {
     };
   },
 
-  getById: (id: number) => httpClient.get<Referencia>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<Reference>(`${BASE_URL}/${id}`),
 
-  getByConector: (conectorId: number) =>
-    httpClient.get<Referencia[]>(`${BASE_URL}/conector/${conectorId}`),
+  getByConnector: async (connectorId: number) => {
+    return httpClient.get<Reference[]>(`${BASE_URL}/connector/${connectorId}`);
+  },
 
-  create: (data: CreateReferenciaRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: (data: CreateReferenceRequest) =>
+    httpClient.post<Reference>(`${BASE_URL}/Create`, data),
 
-  update: (id: number, data: UpdateReferenciaRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+  update: (id: number, data: UpdateReferenceRequest) =>
+    httpClient.put<Reference>(`${BASE_URL}/${id}`, data),
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<Reference>(`${BASE_URL}/${id}`),
 };

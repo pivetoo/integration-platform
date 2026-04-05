@@ -3,8 +3,8 @@ import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } fr
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { chamadaApiService } from '../../services/chamadaApiService';
-import { MetodoHttpLabels } from '../../types/chamadaApi';
-import type { ChamadaApi, MetodoHttp } from '../../types/chamadaApi';
+import { HttpMethodLabels } from '../../types/chamadaApi';
+import type { ApiCall, HttpMethod } from '../../types/chamadaApi';
 import ChamadaApiFormModal from '../../components/modals/ChamadaApiFormModal';
 
 const metodoVariantMap: Record<number, string> = {
@@ -17,13 +17,13 @@ const metodoVariantMap: Record<number, string> = {
 
 export default function ChamadasApi() {
   const { t } = useI18n();
-  const [chamadas, setChamadas] = useState<ChamadaApi[]>([]);
-  const [selectedChamadas, setSelectedChamadas] = useState<ChamadaApi[]>([]);
+  const [chamadas, setChamadas] = useState<ApiCall[]>([]);
+  const [selectedChamadas, setSelectedChamadas] = useState<ApiCall[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingChamada, setEditingChamada] = useState<ChamadaApi | null>(null);
+  const [editingChamada, setEditingChamada] = useState<ApiCall | null>(null);
 
-  const { execute: fetchChamadas, loading } = useApi<PaginatedResult<ChamadaApi>>({
+  const { execute: fetchChamadas, loading } = useApi<PaginatedResult<ApiCall>>({
     showErrorMessage: true,
   });
 
@@ -83,15 +83,15 @@ export default function ChamadasApi() {
     loadChamadas();
   };
 
-  const columns: DataTableColumn<ChamadaApi>[] = [
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+  const columns: DataTableColumn<ApiCall>[] = [
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {
-      key: 'metodo',
+      key: 'method',
       title: t('common.column.method'),
-      dataIndex: 'metodo',
-      render: (value: MetodoHttp) => (
+      dataIndex: 'method',
+      render: (value: HttpMethod) => (
         <Badge variant={(metodoVariantMap[value] || 'outline') as 'success' | 'default' | 'warning' | 'secondary' | 'destructive'}>
-          {MetodoHttpLabels[value] || '-'}
+          {HttpMethodLabels[value] || '-'}
         </Badge>
       ),
     },

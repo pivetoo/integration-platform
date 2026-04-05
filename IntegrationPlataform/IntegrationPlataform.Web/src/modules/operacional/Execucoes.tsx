@@ -3,8 +3,8 @@ import { PageLayout, DataTable, Badge, useApi, useI18n } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { execucaoService } from '../../services/execucaoService';
-import { TipoExecucaoLabels, StatusExecucaoLabels } from '../../types/execucao';
-import type { Execucao, TipoExecucao, StatusExecucao as StatusExecucaoType } from '../../types/execucao';
+import { ExecutionTypeLabels, ExecutionStatusLabels } from '../../types/execucao';
+import type { Execution, ExecutionType, ExecutionStatus } from '../../types/execucao';
 import type { Conector } from '../../types/conector';
 import type { Pipeline } from '../../types/pipeline';
 import ExecucaoDetalheModal from '../../components/modals/ExecucaoDetalheModal';
@@ -41,88 +41,88 @@ function formatDateTime(dateStr?: string): string {
 
 export default function Execucoes() {
   const { t } = useI18n();
-  const [execucoes, setExecucoes] = useState<Execucao[]>([]);
-  const [selectedExecucao, setSelectedExecucao] = useState<Execucao | null>(null);
+  const [executions, setExecutions] = useState<Execution[]>([]);
+  const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const { execute: fetchExecucoes, loading } = useApi<PaginatedResult<Execucao>>({
+  const { execute: fetchExecutions, loading } = useApi<PaginatedResult<Execution>>({
     showErrorMessage: true,
   });
 
-  const loadExecucoes = async () => {
-    const result = await fetchExecucoes(() => execucaoService.getAll());
+  const loadExecutions = async () => {
+    const result = await fetchExecutions(() => execucaoService.getAll());
     if (result) {
-      setExecucoes(result.data);
+      setExecutions(result.data);
     }
   };
 
   useEffect(() => {
-    loadExecucoes();
+    loadExecutions();
   }, []);
 
-  const columns: DataTableColumn<Execucao>[] = [
+  const columns: DataTableColumn<Execution>[] = [
     {
-      key: 'tipo',
+      key: 'type',
       title: t('common.column.type'),
-      dataIndex: 'tipo',
-      render: (value: TipoExecucao) => TipoExecucaoLabels[value] || '-',
+      dataIndex: 'type',
+      render: (value: ExecutionType) => ExecutionTypeLabels[value] || '-',
     },
     {
-      key: 'conector',
+      key: 'connector',
       title: t('common.column.connector'),
-      dataIndex: 'conector',
-      render: (value: Conector) => value?.nome || '-',
+      dataIndex: 'connector',
+      render: (value: Conector) => value?.name || '-',
     },
     {
       key: 'pipeline',
       title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
-      render: (value: Pipeline) => value?.nome || '-',
+      render: (value: Pipeline) => value?.name || '-',
     },
     {
       key: 'status',
       title: t('common.column.status'),
       dataIndex: 'status',
-      render: (value: StatusExecucaoType) => (
+      render: (value: ExecutionStatus) => (
         <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'success' | 'destructive' | 'secondary'}>
-          {StatusExecucaoLabels[value] || '-'}
+          {ExecutionStatusLabels[value] || '-'}
         </Badge>
       ),
     },
     {
-      key: 'iniciadoEm',
+      key: 'startedAt',
       title: t('common.column.startedAt'),
-      dataIndex: 'iniciadoEm',
+      dataIndex: 'startedAt',
       render: (value: string) => formatDateTime(value),
     },
     {
-      key: 'duracao',
+      key: 'duration',
       title: t('common.column.duration'),
-      dataIndex: 'duracao',
+      dataIndex: 'duration',
       render: (value: number) => formatDuracao(value),
     },
   ];
 
-  const handleRowClick = (execucao: Execucao) => {
-    setSelectedExecucao(execucao);
+  const handleRowClick = (execution: Execution) => {
+    setSelectedExecution(execution);
     setModalOpen(true);
   };
 
   const handleModalOpenChange = (open: boolean) => {
     setModalOpen(open);
     if (!open) {
-      setSelectedExecucao(null);
+      setSelectedExecution(null);
     }
   };
 
   return (
     <PageLayout
       title={t('execution.list.title')}
-      onRefresh={loadExecucoes}
+      onRefresh={loadExecutions}
     >
       <DataTable
         columns={columns}
-        data={execucoes}
+        data={executions}
         rowKey="id"
         emptyText={t('execution.list.empty')}
         loading={loading}
@@ -132,7 +132,7 @@ export default function Execucoes() {
       <ExecucaoDetalheModal
         open={modalOpen}
         onOpenChange={handleModalOpenChange}
-        execucao={selectedExecucao}
+        execution={selectedExecution}
       />
     </PageLayout>
   );

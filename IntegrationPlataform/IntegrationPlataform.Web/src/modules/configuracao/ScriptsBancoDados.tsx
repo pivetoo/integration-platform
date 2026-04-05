@@ -3,19 +3,19 @@ import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'arc
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { scriptBancoDadosService } from '../../services/scriptBancoDadosService';
-import type { ScriptBancoDados } from '../../types/scriptBancoDados';
-import type { ConexaoBancoDados } from '../../types/conexaoBancoDados';
+import type { DatabaseScript } from '../../types/scriptBancoDados';
+import type { DatabaseConnection } from '../../types/conexaoBancoDados';
 import ScriptBancoDadosFormModal from '../../components/modals/ScriptBancoDadosFormModal';
 
 export default function ScriptsBancoDados() {
   const { t } = useI18n();
-  const [scripts, setScripts] = useState<ScriptBancoDados[]>([]);
-  const [selectedScripts, setSelectedScripts] = useState<ScriptBancoDados[]>([]);
+  const [scripts, setScripts] = useState<DatabaseScript[]>([]);
+  const [selectedScripts, setSelectedScripts] = useState<DatabaseScript[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingScript, setEditingScript] = useState<ScriptBancoDados | null>(null);
+  const [editingScript, setEditingScript] = useState<DatabaseScript | null>(null);
 
-  const { execute: fetchScripts, loading } = useApi<PaginatedResult<ScriptBancoDados>>({
+  const { execute: fetchScripts, loading } = useApi<PaginatedResult<DatabaseScript>>({
     showErrorMessage: true,
   });
 
@@ -70,15 +70,15 @@ export default function ScriptsBancoDados() {
     loadScripts();
   };
 
-  const columns: DataTableColumn<ScriptBancoDados>[] = [
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+  const columns: DataTableColumn<DatabaseScript>[] = [
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {
-      key: 'conexaoBancoDados',
+      key: 'databaseConnection',
       title: t('common.column.connection'),
-      dataIndex: 'conexaoBancoDados',
-      render: (value: ConexaoBancoDados) => value?.nome || '-',
+      dataIndex: 'databaseConnection',
+      render: (value: DatabaseConnection) => value?.name || '-',
     },
-    { key: 'descricao', title: t('common.column.description'), dataIndex: 'descricao' },
+    { key: 'description', title: t('common.column.description'), dataIndex: 'description' },
   ];
 
   return (

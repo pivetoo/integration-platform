@@ -1,26 +1,26 @@
-import type { ConexaoBancoDados } from './conexaoBancoDados';
+import type { DatabaseConnection } from './conexaoBancoDados';
 
-export interface ScriptBancoDados {
+export interface DatabaseScript {
   id: number;
-  conexaoBancoDadosId: number;
-  conexaoBancoDados?: ConexaoBancoDados;
-  nome: string;
-  descricao: string | null;
+  databaseConnectionId: number;
+  databaseConnection?: DatabaseConnection;
+  name: string;
+  description: string | null;
   script: string;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateScriptBancoDadosRequest {
-  conexaoBancoDadosId: number;
-  nome: string;
-  descricao: string;
+export interface CreateDatabaseScriptRequest {
+  databaseConnectionId: number;
+  name: string;
+  description: string;
   script: string;
 }
 
-export interface UpdateScriptBancoDadosRequest {
-  conexaoBancoDadosId: number;
-  nome: string;
-  descricao: string;
+export interface UpdateDatabaseScriptRequest {
+  databaseConnectionId: number;
+  name: string;
+  description: string;
   script: string;
 }

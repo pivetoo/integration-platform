@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Clock, AlertCircle, Info as InfoIcon, Copy, Check } from 'lucide-react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi, useI18n } from 'archon-ui';
-import type { Execucao } from '../../types/execucao';
-import type { ExecucaoLog } from '../../types/execucaoLog';
-import { NivelLogLabels } from '../../types/execucaoLog';
+import type { Execution } from '../../types/execucao';
+import type { ExecutionLog } from '../../types/execucaoLog';
+import { LogLevelLabels } from '../../types/execucaoLog';
 import { execucaoLogService } from '../../services/execucaoLogService';
-import { StatusExecucaoLabels } from '../../types/execucao';
+import { ExecutionStatusLabels } from '../../types/execucao';
 
 interface ExecucaoDetalheModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  execucao: Execucao | null;
+  execution: Execution | null;
 }
 
 const statusVariantMap: Record<number, string> = {
@@ -44,31 +44,31 @@ function formatDuracao(ms?: number): string {
   return `${minutes}m ${remainingSeconds}s`;
 }
 
-export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: ExecucaoDetalheModalProps) {
+export default function ExecucaoDetalheModal({ open, onOpenChange, execution }: ExecucaoDetalheModalProps) {
   const { t } = useI18n();
-  const [logs, setLogs] = useState<ExecucaoLog[]>([]);
-  const [selectedLog, setSelectedLog] = useState<ExecucaoLog | null>(null);
-  const [copiedRequisicao, setCopiedRequisicao] = useState(false);
-  const [copiedResposta, setCopiedResposta] = useState(false);
+  const [logs, setLogs] = useState<ExecutionLog[]>([]);
+  const [selectedLog, setSelectedLog] = useState<ExecutionLog | null>(null);
+  const [copiedRequest, setCopiedRequest] = useState(false);
+  const [copiedResponse, setCopiedResponse] = useState(false);
 
-  const { execute: fetchLogs, loading } = useApi<ExecucaoLog[]>({
+  const { execute: fetchLogs, loading } = useApi<ExecutionLog[]>({
     showErrorMessage: true,
   });
 
   useEffect(() => {
-    if (open && execucao) {
+    if (open && execution) {
       loadLogs();
     } else {
       setLogs([]);
       setSelectedLog(null);
     }
-  }, [open, execucao]);
+  }, [open, execution]);
 
   const loadLogs = async () => {
-    if (!execucao) return;
-    const result = await fetchLogs(() => execucaoLogService.getByExecucao(execucao.id));
+    if (!execution) return;
+    const result = await fetchLogs(() => execucaoLogService.getByExecution(execution.id));
     if (result) {
-      const grouped = groupLogsByEtapa(result);
+      const grouped = groupLogsByStep(result);
       setLogs(grouped);
       if (grouped.length > 0) {
         setSelectedLog(grouped[0]);
@@ -76,39 +76,39 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
     }
   };
 
-  const groupLogsByEtapa = (logs: ExecucaoLog[]): ExecucaoLog[] => {
-    const etapaMap = new Map<number, ExecucaoLog>();
-    const logsGerais: ExecucaoLog[] = [];
+  const groupLogsByStep = (executionLogs: ExecutionLog[]): ExecutionLog[] => {
+    const stepMap = new Map<number, ExecutionLog>();
+    const generalLogs: ExecutionLog[] = [];
 
-    logs.forEach((log) => {
-      const etapaId = log.pipelineEtapa?.id;
+    executionLogs.forEach((log) => {
+      const stepId = log.pipelineStep?.id;
 
-      if (!etapaId) {
-        logsGerais.push(log);
+      if (!stepId) {
+        generalLogs.push(log);
       } else {
-        const existing = etapaMap.get(etapaId);
+        const existing = stepMap.get(stepId);
         if (!existing || log.id > existing.id) {
-          etapaMap.set(etapaId, log);
+          stepMap.set(stepId, log);
         }
       }
     });
 
-    return [...logsGerais, ...Array.from(etapaMap.values())].sort((a, b) => a.id - b.id);
+    return [...generalLogs, ...Array.from(stepMap.values())].sort((a, b) => a.id - b.id);
   };
 
-  const handleCopyRequisicao = async () => {
-    if (selectedLog?.requisicao) {
-      await navigator.clipboard.writeText(selectedLog.requisicao);
-      setCopiedRequisicao(true);
-      setTimeout(() => setCopiedRequisicao(false), 2000);
+  const handleCopyRequest = async () => {
+    if (selectedLog?.request) {
+      await navigator.clipboard.writeText(selectedLog.request);
+      setCopiedRequest(true);
+      setTimeout(() => setCopiedRequest(false), 2000);
     }
   };
 
-  const handleCopyResposta = async () => {
-    if (selectedLog?.resposta) {
-      await navigator.clipboard.writeText(selectedLog.resposta);
-      setCopiedResposta(true);
-      setTimeout(() => setCopiedResposta(false), 2000);
+  const handleCopyResponse = async () => {
+    if (selectedLog?.response) {
+      await navigator.clipboard.writeText(selectedLog.response);
+      setCopiedResponse(true);
+      setTimeout(() => setCopiedResponse(false), 2000);
     }
   };
 
@@ -126,41 +126,41 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
     4: t('execution.log.level.error'),
   };
 
-  if (!execucao) return null;
+  if (!execution) return null;
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="5xl" className="max-h-[90vh] flex flex-col">
         <ModalHeader>
           <ModalTitle className="flex items-center justify-between">
-            <span>{t('execution.detail.title')} #{execucao.id}</span>
+            <span>{t('execution.detail.title')} #{execution.id}</span>
           </ModalTitle>
         </ModalHeader>
 
         <div className="flex flex-col gap-4 mt-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-semibold">{t('common.column.connector')}:</span> {execucao.conector?.nome || '-'}
+              <span className="font-semibold">{t('common.column.connector')}:</span> {execution.connector?.name || '-'}
             </div>
             <div>
-              <span className="font-semibold">{t('common.column.pipeline')}:</span> {execucao.pipeline?.nome || '-'}
+              <span className="font-semibold">{t('common.column.pipeline')}:</span> {execution.pipeline?.name || '-'}
             </div>
             <div>
               <span className="font-semibold">{t('common.column.status')}:</span>{' '}
               <Badge
                 variant={
-                  (statusVariantMap[execucao.status] || 'outline') as
+                  (statusVariantMap[execution.status] || 'outline') as
                     | 'warning'
                     | 'success'
                     | 'destructive'
                     | 'secondary'
                 }
               >
-                {statusLabels[execucao.status] || StatusExecucaoLabels[execucao.status] || '-'}
+                {statusLabels[execution.status] || ExecutionStatusLabels[execution.status] || '-'}
               </Badge>
             </div>
             <div>
-              <span className="font-semibold">{t('common.column.duration')}:</span> {formatDuracao(execucao.duracao)}
+              <span className="font-semibold">{t('common.column.duration')}:</span> {formatDuracao(execution.duration)}
             </div>
           </div>
 
@@ -185,11 +185,11 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-sm truncate">
-                          {log.pipelineEtapa?.nome || t('execution.detail.generalLog')}
+                          {log.pipelineStep?.name || t('execution.detail.generalLog')}
                         </span>
                         <Badge
                           variant={
-                            (nivelLogVariantMap[log.nivel] || 'outline') as
+                            (nivelLogVariantMap[log.level] || 'outline') as
                               | 'default'
                               | 'warning'
                               | 'destructive'
@@ -197,14 +197,14 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                           }
                           className="ml-2 flex items-center gap-1"
                         >
-                          {nivelLogIconMap[log.nivel]}
-                          {nivelLogLabels[log.nivel] || NivelLogLabels[log.nivel]}
+                          {nivelLogIconMap[log.level]}
+                          {nivelLogLabels[log.level] || LogLevelLabels[log.level]}
                         </Badge>
                       </div>
-                      {log.duracao != null && (
+                      {log.duration != null && (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Clock size={12} />
-                          {formatDuracao(log.duracao)}
+                          {formatDuracao(log.duration)}
                         </div>
                       )}
                     </button>
@@ -218,25 +218,25 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                 <div className="p-4 space-y-4">
                   <div>
                     <h3 className="font-semibold mb-2">{t('execution.detail.message')}</h3>
-                    <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded">{selectedLog.mensagem}</p>
+                    <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded">{selectedLog.message}</p>
                   </div>
 
-                  {selectedLog.contexto && (
+                  {selectedLog.context && (
                     <div>
                       <h3 className="font-semibold mb-2">{t('execution.detail.context')}</h3>
-                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.contexto}</pre>
+                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.context}</pre>
                     </div>
                   )}
 
-                  {selectedLog.requisicao && (
+                  {selectedLog.request && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold">{t('execution.detail.request')}</h3>
                         <button
-                          onClick={handleCopyRequisicao}
+                          onClick={handleCopyRequest}
                           className="flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-accent transition-colors"
                         >
-                          {copiedRequisicao ? (
+                          {copiedRequest ? (
                             <>
                               <Check size={14} className="text-green-600" />
                               <span>{t('common.action.copied')}</span>
@@ -249,26 +249,26 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                           )}
                         </button>
                       </div>
-                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.requisicao}</pre>
+                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.request}</pre>
                     </div>
                   )}
 
-                  {selectedLog.resposta && (
+                  {selectedLog.response && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold">
                           {t('execution.detail.response')}
-                          {selectedLog.statusHttpCode && (
+                          {selectedLog.httpStatusCode && (
                             <Badge variant="outline" className="ml-2">
-                              HTTP {selectedLog.statusHttpCode}
+                              HTTP {selectedLog.httpStatusCode}
                             </Badge>
                           )}
                         </h3>
                         <button
-                          onClick={handleCopyResposta}
+                          onClick={handleCopyResponse}
                           className="flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-accent transition-colors"
                         >
-                          {copiedResposta ? (
+                          {copiedResponse ? (
                             <>
                               <Check size={14} className="text-green-600" />
                               <span>{t('common.action.copied')}</span>
@@ -281,14 +281,14 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                           )}
                         </button>
                       </div>
-                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.resposta}</pre>
+                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.response}</pre>
                     </div>
                   )}
 
-                  {selectedLog.duracao != null && (
+                  {selectedLog.duration != null && (
                     <div>
                       <h3 className="font-semibold mb-2">{t('common.column.duration')}</h3>
-                      <p className="text-sm">{formatDuracao(selectedLog.duracao)}</p>
+                      <p className="text-sm">{formatDuracao(selectedLog.duration)}</p>
                     </div>
                   )}
                 </div>

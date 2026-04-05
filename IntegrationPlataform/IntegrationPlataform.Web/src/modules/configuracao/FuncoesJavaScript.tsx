@@ -3,18 +3,18 @@ import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'arc
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';
-import type { FuncaoJavaScript } from '../../types/funcaoJavaScript';
+import type { JavaScriptFunction } from '../../types/funcaoJavaScript';
 import FuncaoJavaScriptFormModal from '../../components/modals/FuncaoJavaScriptFormModal';
 
 export default function FuncoesJavaScript() {
   const { t } = useI18n();
-  const [funcoes, setFuncoes] = useState<FuncaoJavaScript[]>([]);
-  const [selectedFuncoes, setSelectedFuncoes] = useState<FuncaoJavaScript[]>([]);
+  const [funcoes, setFuncoes] = useState<JavaScriptFunction[]>([]);
+  const [selectedFuncoes, setSelectedFuncoes] = useState<JavaScriptFunction[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingFuncao, setEditingFuncao] = useState<FuncaoJavaScript | null>(null);
+  const [editingFuncao, setEditingFuncao] = useState<JavaScriptFunction | null>(null);
 
-  const { execute: fetchFuncoes, loading } = useApi<PaginatedResult<FuncaoJavaScript>>({
+  const { execute: fetchFuncoes, loading } = useApi<PaginatedResult<JavaScriptFunction>>({
     showErrorMessage: true,
   });
 
@@ -69,9 +69,9 @@ export default function FuncoesJavaScript() {
     loadFuncoes();
   };
 
-  const columns: DataTableColumn<FuncaoJavaScript>[] = [
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
-    { key: 'descricao', title: t('common.column.description'), dataIndex: 'descricao' },
+  const columns: DataTableColumn<JavaScriptFunction>[] = [
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'description', title: t('common.column.description'), dataIndex: 'description' },
   ];
 
   return (

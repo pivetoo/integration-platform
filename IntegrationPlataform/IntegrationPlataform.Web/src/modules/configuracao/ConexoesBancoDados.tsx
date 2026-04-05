@@ -3,8 +3,8 @@ import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } fr
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
-import { TipoBancoDadosLabels } from '../../types/conexaoBancoDados';
-import type { ConexaoBancoDados, TipoBancoDados } from '../../types/conexaoBancoDados';
+import { DatabaseTypeLabels } from '../../types/conexaoBancoDados';
+import type { DatabaseConnection, DatabaseType } from '../../types/conexaoBancoDados';
 import ConexaoBancoDadosFormModal from '../../components/modals/ConexaoBancoDadosFormModal';
 
 const tipoBancoVariantMap: Record<number, string> = {
@@ -16,13 +16,13 @@ const tipoBancoVariantMap: Record<number, string> = {
 
 export default function ConexoesBancoDados() {
   const { t } = useI18n();
-  const [conexoes, setConexoes] = useState<ConexaoBancoDados[]>([]);
-  const [selectedConexoes, setSelectedConexoes] = useState<ConexaoBancoDados[]>([]);
+  const [conexoes, setConexoes] = useState<DatabaseConnection[]>([]);
+  const [selectedConexoes, setSelectedConexoes] = useState<DatabaseConnection[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingConexao, setEditingConexao] = useState<ConexaoBancoDados | null>(null);
+  const [editingConexao, setEditingConexao] = useState<DatabaseConnection | null>(null);
 
-  const { execute: fetchConexoes, loading } = useApi<PaginatedResult<ConexaoBancoDados>>({
+  const { execute: fetchConexoes, loading } = useApi<PaginatedResult<DatabaseConnection>>({
     showErrorMessage: true,
   });
 
@@ -77,15 +77,15 @@ export default function ConexoesBancoDados() {
     loadConexoes();
   };
 
-  const columns: DataTableColumn<ConexaoBancoDados>[] = [
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+  const columns: DataTableColumn<DatabaseConnection>[] = [
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {
-      key: 'tipo',
+      key: 'type',
       title: t('common.column.type'),
-      dataIndex: 'tipo',
-      render: (value: TipoBancoDados) => (
+      dataIndex: 'type',
+      render: (value: DatabaseType) => (
         <Badge variant={(tipoBancoVariantMap[value] || 'outline') as 'default' | 'secondary' | 'warning' | 'success'}>
-          {TipoBancoDadosLabels[value] || '-'}
+          {DatabaseTypeLabels[value] || '-'}
         </Badge>
       ),
     },

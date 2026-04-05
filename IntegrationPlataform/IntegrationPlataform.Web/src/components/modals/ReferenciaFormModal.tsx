@@ -2,26 +2,26 @@ import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { referenciaService } from '../../services/referenciaService';
 import { conectorService } from '../../services/conectorService';
-import type { Referencia, CreateReferenciaRequest } from '../../types/referencia';
+import type { Reference, CreateReferenceRequest } from '../../types/referencia';
 import type { Conector } from '../../types/conector';
 
 interface ReferenciaFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  referencia: Referencia | null;
+  referencia: Reference | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreateReferenciaRequest = {
-  conectorId: 0,
-  entidade: '',
-  idInterno: '',
-  idExterno: '',
+const initialFormData: CreateReferenceRequest = {
+  connectorId: 0,
+  entity: '',
+  internalId: '',
+  externalId: '',
 };
 
 export default function ReferenciaFormModal({ open, onOpenChange, referencia, onSuccess }: ReferenciaFormModalProps) {
   const isEditing = !!referencia;
-  const [formData, setFormData] = useState<CreateReferenciaRequest>(initialFormData);
+  const [formData, setFormData] = useState<CreateReferenceRequest>(initialFormData);
   const [conectores, setConectores] = useState<Conector[]>([]);
   const { t } = useI18n();
 
@@ -43,10 +43,10 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
   useEffect(() => {
     if (referencia) {
       setFormData({
-        conectorId: referencia.conector?.id || 0,
-        entidade: referencia.entidade,
-        idInterno: referencia.idInterno,
-        idExterno: referencia.idExterno,
+        connectorId: referencia.connector?.id || 0,
+        entity: referencia.entity,
+        internalId: referencia.internalId,
+        externalId: referencia.externalId,
       });
     } else {
       setFormData(initialFormData);
@@ -54,13 +54,13 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
   }, [referencia]);
 
   const loadConectores = async () => {
-    const result = await fetchConectores(() => conectorService.getAtivos());
+    const result = await fetchConectores(() => conectorService.getActive());
     if (result) {
       setConectores(result);
     }
   };
 
-  const handleChange = (field: keyof CreateReferenciaRequest, value: string | number) => {
+  const handleChange = (field: keyof CreateReferenceRequest, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -68,7 +68,7 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
     e.preventDefault();
     try {
       if (isEditing) {
-        const { conectorId: _, ...updateData } = formData;
+        const { connectorId: _, ...updateData } = formData;
         await execute(() => referenciaService.update(referencia.id, updateData));
       } else {
         await execute(() => referenciaService.create(formData));
@@ -89,10 +89,10 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.connector')}</label>
+                <label className="text-sm font-medium">{t('common.column.connector')}</label>
               <Select
-                value={formData.conectorId ? formData.conectorId.toString() : ''}
-                onValueChange={(value) => handleChange('conectorId', parseInt(value))}
+                value={formData.connectorId ? formData.connectorId.toString() : ''}
+                onValueChange={(value) => handleChange('connectorId', parseInt(value))}
                 disabled={isEditing}
               >
                 <SelectTrigger>
@@ -101,7 +101,7 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
                 <SelectContent>
                   {conectores.map((conector) => (
                     <SelectItem key={conector.id} value={conector.id.toString()}>
-                      {conector.nome}
+                      {conector.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -109,32 +109,32 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="entidade" className="text-sm font-medium">{t('reference.form.entityLabel')}</label>
+              <label htmlFor="entity" className="text-sm font-medium">{t('reference.form.entityLabel')}</label>
               <Input
-                id="entidade"
-                value={formData.entidade}
-                onChange={(e) => handleChange('entidade', e.target.value)}
+                id="entity"
+                value={formData.entity}
+                onChange={(e) => handleChange('entity', e.target.value)}
                 placeholder={t('reference.form.entityPlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="idInterno" className="text-sm font-medium">{t('reference.form.internalId')}</label>
+              <label htmlFor="internalId" className="text-sm font-medium">{t('reference.form.internalId')}</label>
               <Input
-                id="idInterno"
-                value={formData.idInterno}
-                onChange={(e) => handleChange('idInterno', e.target.value)}
+                id="internalId"
+                value={formData.internalId}
+                onChange={(e) => handleChange('internalId', e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="idExterno" className="text-sm font-medium">{t('reference.form.externalId')}</label>
+              <label htmlFor="externalId" className="text-sm font-medium">{t('reference.form.externalId')}</label>
               <Input
-                id="idExterno"
-                value={formData.idExterno}
-                onChange={(e) => handleChange('idExterno', e.target.value)}
+                id="externalId"
+                value={formData.externalId}
+                onChange={(e) => handleChange('externalId', e.target.value)}
                 required
               />
             </div>

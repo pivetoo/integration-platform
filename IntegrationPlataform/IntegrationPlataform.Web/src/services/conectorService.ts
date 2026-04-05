@@ -4,86 +4,50 @@ import type { Conector, CreateConectorRequest, UpdateConectorRequest } from '../
 
 const BASE_URL = '/Connectors';
 
-function mapConector(item: any): Conector {
-  return {
-    id: item.id,
-    sistemaId: item.systemApplicationId,
-    integracaoId: item.integrationId,
-    integracao: item.integration ? {
-      id: item.integration.id,
-      identificador: item.integration.identifier,
-      nome: item.integration.name,
-      descricao: item.integration.description,
-      categoriaId: item.integration.integrationCategoryId,
-      categoria: undefined,
-      ativo: item.integration.isActive,
-      criadoEm: item.integration.createdAt,
-      ultimaAlteracao: item.integration.updatedAt,
-    } : item.integration,
-    nome: item.name,
-    ativo: item.isActive,
-    criadoEm: item.createdAt,
-    ultimaAlteracao: item.updatedAt,
-  };
-}
-
 export const conectorService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Conector>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
+    const response = await httpClient.get<Conector[]>(`${BASE_URL}/Get${query}`);
 
     return {
-      data: (response.data ?? []).map(mapConector),
+      data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,
       page: response.pagination?.page ?? params?.page,
       pageSize: response.pagination?.pageSize ?? params?.pageSize,
     };
   },
 
-  getByIntegracao: async (integracaoId: number) => {
-    const response = await httpClient.get<any[]>(`${BASE_URL}/integration/${integracaoId}`);
-    return response.data?.map(mapConector) ?? [];
+  getByIntegration: async (integrationId: number) => {
+    const response = await httpClient.get<Conector[]>(`${BASE_URL}/integration/${integrationId}`);
+    return response.data ?? [];
   },
 
-  getAtivos: async () => {
-    const response = await httpClient.get<any[]>(`${BASE_URL}/active`);
-    return response.data?.map(mapConector) ?? [];
+  getActive: async () => {
+    const response = await httpClient.get<Conector[]>(`${BASE_URL}/active`);
+    return response.data ?? [];
   },
 
   getById: async (id: number) => {
-    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
-    return {
-      ...response,
-      data: response.data ? mapConector(response.data) : response.data,
-    };
+    return httpClient.get<Conector>(`${BASE_URL}/${id}`);
   },
 
   create: async (data: CreateConectorRequest) => {
-    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
-      integrationId: data.integracaoId,
-      name: data.nome,
-      systemApplicationId: data.sistemaId || undefined,
+    return httpClient.post<Conector>(`${BASE_URL}/Create`, {
+      integrationId: data.integrationId,
+      name: data.name,
+      systemApplicationId: data.systemApplicationId || undefined,
+      isActive: data.isActive,
     });
-
-    return {
-      ...response,
-      data: response.data ? mapConector(response.data) : response.data,
-    };
   },
 
   update: async (id: number, data: UpdateConectorRequest) => {
-    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+    return httpClient.put<Conector>(`${BASE_URL}/${id}`, {
       id,
-      integrationId: data.integracaoId,
-      name: data.nome,
-      systemApplicationId: data.sistemaId || undefined,
-      isActive: data.ativo,
+      integrationId: data.integrationId,
+      name: data.name,
+      systemApplicationId: data.systemApplicationId || undefined,
+      isActive: data.isActive,
     });
-
-    return {
-      ...response,
-      data: response.data ? mapConector(response.data) : response.data,
-    };
   },
 
   delete: (id: number) =>

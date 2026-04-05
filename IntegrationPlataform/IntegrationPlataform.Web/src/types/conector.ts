@@ -1,26 +1,26 @@
-import type { Integracao } from './integracao';
+import type { Integration } from './integracao';
 
 export interface Conector {
   id: number;
-  sistemaId?: string;
-  integracaoId: number;
-  integracao?: Integracao;
-  nome: string;
-  ativo: boolean;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  systemApplicationId?: string;
+  integrationId: number;
+  integration?: Integration;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateConectorRequest {
-  sistemaId?: string;
-  integracaoId: number;
-  nome: string;
-  ativo: boolean;
+  systemApplicationId?: string;
+  integrationId: number;
+  name: string;
+  isActive: boolean;
 }
 
 export interface UpdateConectorRequest {
-  sistemaId?: string;
-  integracaoId: number;
-  nome: string;
-  ativo: boolean;
+  systemApplicationId?: string;
+  integrationId: number;
+  name: string;
+  isActive: boolean;
 }

@@ -5,7 +5,7 @@ import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { conectorService } from '../../services/conectorService';
 import type { Conector } from '../../types/conector';
-import type { Integracao } from '../../types/integracao';
+import type { Integration } from '../../types/integracao';
 import ConectorFormModal from '../../components/modals/ConectorFormModal';
 
 export default function Conectores() {
@@ -77,17 +77,17 @@ export default function Conectores() {
   };
 
   const columns: DataTableColumn<Conector>[] = [
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {
-      key: 'integracao',
+      key: 'integration',
       title: t('common.column.integration'),
-      dataIndex: 'integracao',
-      render: (value: Integracao) => value?.nome || '-',
+      dataIndex: 'integration',
+      render: (value: Integration) => value?.name || '-',
     },
     {
-      key: 'ativo',
+      key: 'isActive',
       title: t('common.column.active'),
-      dataIndex: 'ativo',
+      dataIndex: 'isActive',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
           {value ? t('common.boolean.yes') : t('common.boolean.no')}
@@ -130,7 +130,7 @@ export default function Conectores() {
       <ConectorFormModal
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        conector={editingConector}
+        connector={editingConector}
         onSuccess={handleFormSuccess}
       />
     </PageLayout>

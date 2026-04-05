@@ -1,4 +1,4 @@
-export const MetodoHttp = {
+export const HttpMethod = {
   GET: 1,
   POST: 2,
   PUT: 3,
@@ -6,39 +6,39 @@ export const MetodoHttp = {
   DELETE: 5,
 } as const;
 
-export type MetodoHttp = typeof MetodoHttp[keyof typeof MetodoHttp];
+export type HttpMethod = typeof HttpMethod[keyof typeof HttpMethod];
 
-export const MetodoHttpLabels: Record<MetodoHttp, string> = {
-  [MetodoHttp.GET]: 'GET',
-  [MetodoHttp.POST]: 'POST',
-  [MetodoHttp.PUT]: 'PUT',
-  [MetodoHttp.PATCH]: 'PATCH',
-  [MetodoHttp.DELETE]: 'DELETE',
+export const HttpMethodLabels: Record<HttpMethod, string> = {
+  [HttpMethod.GET]: 'GET',
+  [HttpMethod.POST]: 'POST',
+  [HttpMethod.PUT]: 'PUT',
+  [HttpMethod.PATCH]: 'PATCH',
+  [HttpMethod.DELETE]: 'DELETE',
 };
 
-export interface ChamadaApi {
+export interface ApiCall {
   id: number;
-  nome: string;
-  descricao?: string;
-  metodo: MetodoHttp;
+  name: string;
+  description?: string;
+  method: HttpMethod;
   url: string;
   headersTemplate?: string;
   bodyTemplate?: string;
 }
 
-export interface CreateChamadaApiRequest {
-  nome: string;
-  descricao?: string;
-  metodo: MetodoHttp;
+export interface CreateApiCallRequest {
+  name: string;
+  description?: string;
+  method: HttpMethod;
   url: string;
   headersTemplate?: string;
   bodyTemplate?: string;
 }
 
-export interface UpdateChamadaApiRequest {
-  nome: string;
-  descricao?: string;
-  metodo: MetodoHttp;
+export interface UpdateApiCallRequest {
+  name: string;
+  description?: string;
+  method: HttpMethod;
   url: string;
   headersTemplate?: string;
   bodyTemplate?: string;

@@ -10,7 +10,7 @@ namespace IntegrationPlataform.Application.Services
 
         Task<DebugSessionState> StartDebugPipeline(long connectorId, long pipelineId, string? inputData, long? initialStepId = null, CancellationToken cancellationToken = default);
 
-        Task<object?> ExecuteNextDebugStep(string debugSessionId, CancellationToken cancellationToken = default);
+        Task<ExecuteNextDebugStepResult> ExecuteNextDebugStep(string debugSessionId, CancellationToken cancellationToken = default);
 
         Task<Execution> FinishDebugPipeline(string debugSessionId, CancellationToken cancellationToken = default);
 

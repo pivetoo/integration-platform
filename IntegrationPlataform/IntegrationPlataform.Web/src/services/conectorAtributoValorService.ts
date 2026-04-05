@@ -1,52 +1,24 @@
 import { httpClient } from 'archon-ui';
-import type { ConectorAtributoValor, CreateConectorAtributoValorRequest, UpdateConectorAtributoValorRequest } from '../types/conectorAtributoValor';
+import type { ConnectorAttributeValue, CreateConnectorAttributeValueRequest, UpdateConnectorAttributeValueRequest } from '../types/conectorAtributoValor';
 
 const BASE_URL = '/ConnectorAttributeValues';
 
-function mapConectorAtributoValor(item: any): ConectorAtributoValor {
-  return {
-    id: item.id,
-    conectorId: item.connectorId,
-    conector: item.connector ?? null,
-    integracaoAtributoId: item.integrationAttributeId,
-    integracaoAtributo: item.integrationAttribute
-      ? {
-          id: item.integrationAttribute.id,
-          campo: item.integrationAttribute.field,
-          label: item.integrationAttribute.label,
-          descricao: item.integrationAttribute.description,
-          placeholder: item.integrationAttribute.placeholder,
-          tipo: item.integrationAttribute.type,
-          valorPadrao: item.integrationAttribute.defaultValue,
-          obrigatorio: item.integrationAttribute.isRequired,
-          ordem: item.integrationAttribute.order,
-          grupo: item.integrationAttribute.group,
-          sensivel: item.integrationAttribute.isSensitive,
-        }
-      : null,
-    valor: item.value,
-  };
-}
-
 export const conectorAtributoValorService = {
-  getByConector: (conectorId: number) =>
-    httpClient.get<any[]>(`${BASE_URL}/connector/${conectorId}`).then((response) => ({
-      ...response,
-      data: response.data?.map(mapConectorAtributoValor) ?? [],
-    })),
+  getByConnector: (connectorId: number) =>
+    httpClient.get<ConnectorAttributeValue[]>(`${BASE_URL}/connector/${connectorId}`),
 
-  create: (data: CreateConectorAtributoValorRequest) =>
+  create: (data: CreateConnectorAttributeValueRequest) =>
     httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, {
-      connectorId: data.conectorId,
-      integrationAttributeId: data.integracaoAtributoId,
-      value: data.valor,
+      connectorId: data.connectorId,
+      integrationAttributeId: data.integrationAttributeId,
+      value: data.value,
     }),
 
-  update: (id: number, data: UpdateConectorAtributoValorRequest) =>
+  update: (id: number, data: UpdateConnectorAttributeValueRequest) =>
     httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, {
       id,
-      integrationAttributeId: data.integracaoAtributoId,
-      value: data.valor,
+      integrationAttributeId: data.integrationAttributeId,
+      value: data.value,
     }),
 
   delete: (id: number) =>

@@ -1,12 +1,12 @@
 export const TipoCampo = {
-  Texto: 0,
-  TextoLongo: 1,
-  Numero: 2,
-  Decimal: 3,
-  Booleano: 4,
-  Data: 5,
-  DataHora: 6,
-  Lista: 7,
+  Texto: 1,
+  TextoLongo: 2,
+  Numero: 3,
+  Decimal: 4,
+  Booleano: 5,
+  Data: 6,
+  DataHora: 7,
+  Lista: 8,
 } as const;
 
 export type TipoCampo = typeof TipoCampo[keyof typeof TipoCampo];
@@ -24,41 +24,44 @@ export const TipoCampoLabels: Record<TipoCampo, string> = {
 
 export interface IntegracaoAtributo {
   id: number;
-  campo: string;
+  integrationId?: number;
+  field: string;
   label: string;
-  descricao?: string;
+  description?: string;
   placeholder?: string;
-  tipo: TipoCampo;
-  valorPadrao?: string;
-  obrigatorio: boolean;
-  ordem: number;
-  grupo?: string;
-  sensivel: boolean;
+  type: TipoCampo;
+  defaultValue?: string;
+  isRequired: boolean;
+  order: number;
+  group?: string;
+  isSensitive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateIntegracaoAtributoRequest {
-  integracaoId: number;
-  campo: string;
+  integrationId: number;
+  field: string;
   label: string;
-  descricao?: string;
+  description?: string;
   placeholder?: string;
-  tipo: TipoCampo;
-  valorPadrao?: string;
-  obrigatorio: boolean;
-  ordem: number;
-  grupo?: string;
-  sensivel: boolean;
+  type: TipoCampo;
+  defaultValue?: string;
+  isRequired: boolean;
+  order: number;
+  group?: string;
+  isSensitive: boolean;
 }
 
 export interface UpdateIntegracaoAtributoRequest {
-  campo: string;
+  field: string;
   label: string;
-  descricao?: string;
+  description?: string;
   placeholder?: string;
-  tipo: TipoCampo;
-  valorPadrao?: string;
-  obrigatorio: boolean;
-  ordem: number;
-  grupo?: string;
-  sensivel: boolean;
+  type: TipoCampo;
+  defaultValue?: string;
+  isRequired: boolean;
+  order: number;
+  group?: string;
+  isSensitive: boolean;
 }

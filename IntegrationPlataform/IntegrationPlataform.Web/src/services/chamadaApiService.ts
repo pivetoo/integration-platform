@@ -1,28 +1,16 @@
 import { buildPaginationQuery, httpClient } from 'archon-ui';
 import type { PaginatedResult, PaginationParams } from '../types/pagination';
-import type { ChamadaApi, CreateChamadaApiRequest, UpdateChamadaApiRequest } from '../types/chamadaApi';
+import type { ApiCall, CreateApiCallRequest, UpdateApiCallRequest } from '../types/chamadaApi';
 
 const BASE_URL = '/ApiCalls';
 
-function mapChamadaApi(item: any): ChamadaApi {
-  return {
-    id: item.id,
-    nome: item.name,
-    descricao: item.description,
-    metodo: item.method,
-    url: item.url,
-    headersTemplate: item.headersTemplate,
-    bodyTemplate: item.bodyTemplate,
-  };
-}
-
 export const chamadaApiService = {
-  getAll: async (params?: PaginationParams): Promise<PaginatedResult<ChamadaApi>> => {
+  getAll: async (params?: PaginationParams): Promise<PaginatedResult<ApiCall>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<any[]>(`${BASE_URL}/Get${query}`);
+    const response = await httpClient.get<ApiCall[]>(`${BASE_URL}/Get${query}`);
 
     return {
-      data: (response.data ?? []).map(mapChamadaApi),
+      data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,
       page: response.pagination?.page ?? params?.page,
       pageSize: response.pagination?.pageSize ?? params?.pageSize,
@@ -30,44 +18,30 @@ export const chamadaApiService = {
   },
 
   getById: async (id: number) => {
-    const response = await httpClient.get<any>(`${BASE_URL}/${id}`);
-    return {
-      ...response,
-      data: response.data ? mapChamadaApi(response.data) : response.data,
-    };
+    return httpClient.get<ApiCall>(`${BASE_URL}/${id}`);
   },
 
-  create: async (data: CreateChamadaApiRequest) => {
-    const response = await httpClient.post<any>(`${BASE_URL}/Create`, {
-      name: data.nome,
-      description: data.descricao || undefined,
-      method: data.metodo,
+  create: async (data: CreateApiCallRequest) => {
+    return httpClient.post<ApiCall>(`${BASE_URL}/Create`, {
+      name: data.name,
+      description: data.description || undefined,
+      method: data.method,
       url: data.url,
       headersTemplate: data.headersTemplate || undefined,
       bodyTemplate: data.bodyTemplate || undefined,
     });
-
-    return {
-      ...response,
-      data: response.data ? mapChamadaApi(response.data) : response.data,
-    };
   },
 
-  update: async (id: number, data: UpdateChamadaApiRequest) => {
-    const response = await httpClient.put<any>(`${BASE_URL}/${id}`, {
+  update: async (id: number, data: UpdateApiCallRequest) => {
+    return httpClient.put<ApiCall>(`${BASE_URL}/${id}`, {
       id,
-      name: data.nome,
-      description: data.descricao || undefined,
-      method: data.metodo,
+      name: data.name,
+      description: data.description || undefined,
+      method: data.method,
       url: data.url,
       headersTemplate: data.headersTemplate || undefined,
       bodyTemplate: data.bodyTemplate || undefined,
     });
-
-    return {
-      ...response,
-      data: response.data ? mapChamadaApi(response.data) : response.data,
-    };
   },
 
   delete: (id: number) =>

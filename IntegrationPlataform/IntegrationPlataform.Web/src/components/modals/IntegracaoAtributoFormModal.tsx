@@ -7,27 +7,27 @@ import type { IntegracaoAtributo, CreateIntegracaoAtributoRequest } from '../../
 interface IntegracaoAtributoFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  integracaoId: number;
-  atributo: IntegracaoAtributo | null;
-  nextOrdem: number;
+  integrationId: number;
+  attribute: IntegracaoAtributo | null;
+  nextOrder: number;
   onSuccess: () => void;
 }
 
-const initialFormData: Omit<CreateIntegracaoAtributoRequest, 'integracaoId'> = {
-  campo: '',
+const initialFormData: Omit<CreateIntegracaoAtributoRequest, 'integrationId'> = {
+  field: '',
   label: '',
-  descricao: '',
+  description: '',
   placeholder: '',
-  tipo: TipoCampo.Texto,
-  valorPadrao: '',
-  obrigatorio: false,
-  ordem: 1,
-  grupo: '',
-  sensivel: false,
+  type: TipoCampo.Texto,
+  defaultValue: '',
+  isRequired: false,
+  order: 1,
+  group: '',
+  isSensitive: false,
 };
 
-export default function IntegracaoAtributoFormModal({ open, onOpenChange, integracaoId, atributo, nextOrdem, onSuccess }: IntegracaoAtributoFormModalProps) {
-  const isEditing = !!atributo;
+export default function IntegracaoAtributoFormModal({ open, onOpenChange, integrationId, attribute, nextOrder, onSuccess }: IntegracaoAtributoFormModalProps) {
+  const isEditing = !!attribute;
   const [formData, setFormData] = useState(initialFormData);
   const { t } = useI18n();
 
@@ -37,23 +37,23 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
   });
 
   useEffect(() => {
-    if (atributo) {
+    if (attribute) {
       setFormData({
-        campo: atributo.campo,
-        label: atributo.label,
-        descricao: atributo.descricao || '',
-        placeholder: atributo.placeholder || '',
-        tipo: atributo.tipo,
-        valorPadrao: atributo.valorPadrao || '',
-        obrigatorio: atributo.obrigatorio,
-        ordem: atributo.ordem,
-        grupo: atributo.grupo || '',
-        sensivel: atributo.sensivel,
+        field: attribute.field,
+        label: attribute.label,
+        description: attribute.description || '',
+        placeholder: attribute.placeholder || '',
+        type: attribute.type,
+        defaultValue: attribute.defaultValue || '',
+        isRequired: attribute.isRequired,
+        order: attribute.order,
+        group: attribute.group || '',
+        isSensitive: attribute.isSensitive,
       });
     } else {
-      setFormData({ ...initialFormData, ordem: nextOrdem });
+      setFormData({ ...initialFormData, order: nextOrder });
     }
-  }, [atributo, nextOrdem]);
+  }, [attribute, nextOrder]);
 
   const handleChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -63,31 +63,31 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
     e.preventDefault();
     try {
       if (isEditing) {
-        await execute(() => integracaoAtributoService.update(atributo.id, {
-          campo: formData.campo,
+        await execute(() => integracaoAtributoService.update(attribute.id, {
+          field: formData.field,
           label: formData.label,
-          descricao: formData.descricao || undefined,
+          description: formData.description || undefined,
           placeholder: formData.placeholder || undefined,
-          tipo: formData.tipo,
-          valorPadrao: formData.valorPadrao || undefined,
-          obrigatorio: formData.obrigatorio,
-          ordem: formData.ordem,
-          grupo: formData.grupo || undefined,
-          sensivel: formData.sensivel,
+          type: formData.type,
+          defaultValue: formData.defaultValue || undefined,
+          isRequired: formData.isRequired,
+          order: formData.order,
+          group: formData.group || undefined,
+          isSensitive: formData.isSensitive,
         }));
       } else {
         await execute(() => integracaoAtributoService.create({
-          integracaoId,
-          campo: formData.campo,
+          integrationId,
+          field: formData.field,
           label: formData.label,
-          descricao: formData.descricao || undefined,
+          description: formData.description || undefined,
           placeholder: formData.placeholder || undefined,
-          tipo: formData.tipo,
-          valorPadrao: formData.valorPadrao || undefined,
-          obrigatorio: formData.obrigatorio,
-          ordem: formData.ordem,
-          grupo: formData.grupo || undefined,
-          sensivel: formData.sensivel,
+          type: formData.type,
+          defaultValue: formData.defaultValue || undefined,
+          isRequired: formData.isRequired,
+          order: formData.order,
+          group: formData.group || undefined,
+          isSensitive: formData.isSensitive,
         }));
       }
       onSuccess();
@@ -120,8 +120,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
               <label htmlFor="campo" className="text-sm font-medium">{t('integration.attribute.form.fieldLabel')}</label>
               <Input
                 id="campo"
-                value={formData.campo}
-                onChange={(e) => handleChange('campo', e.target.value)}
+                value={formData.field}
+                onChange={(e) => handleChange('field', e.target.value)}
                 placeholder={t('integration.attribute.form.fieldPlaceholder')}
                 required
               />
@@ -142,8 +142,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
               <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
-                value={formData.descricao || ''}
-                onChange={(e) => handleChange('descricao', e.target.value)}
+                value={formData.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
                 placeholder={t('integration.attribute.form.descriptionPlaceholder')}
               />
             </div>
@@ -151,8 +151,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.type')}</label>
               <Select
-                value={formData.tipo.toString()}
-                onValueChange={(value) => handleChange('tipo', parseInt(value))}
+                value={formData.type.toString()}
+                onValueChange={(value) => handleChange('type', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -180,8 +180,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
               <label htmlFor="valorPadrao" className="text-sm font-medium">{t('integration.attribute.form.defaultValueLabel')}</label>
               <Input
                 id="valorPadrao"
-                value={formData.valorPadrao || ''}
-                onChange={(e) => handleChange('valorPadrao', e.target.value)}
+                value={formData.defaultValue || ''}
+                onChange={(e) => handleChange('defaultValue', e.target.value)}
               />
             </div>
 
@@ -189,8 +189,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
               <label htmlFor="grupo" className="text-sm font-medium">{t('integration.attribute.form.groupLabel')}</label>
               <Input
                 id="grupo"
-                value={formData.grupo || ''}
-                onChange={(e) => handleChange('grupo', e.target.value)}
+                value={formData.group || ''}
+                onChange={(e) => handleChange('group', e.target.value)}
                 placeholder={t('integration.attribute.form.groupPlaceholder')}
               />
             </div>
@@ -200,8 +200,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
               <Input
                 id="ordem"
                 type="number"
-                value={formData.ordem}
-                onChange={(e) => handleChange('ordem', parseInt(e.target.value) || 0)}
+                value={formData.order}
+                onChange={(e) => handleChange('order', parseInt(e.target.value) || 0)}
                 min={1}
               />
             </div>
@@ -211,8 +211,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="obrigatorio"
-                checked={formData.obrigatorio}
-                onCheckedChange={(checked) => handleChange('obrigatorio', !!checked)}
+                checked={formData.isRequired}
+                onCheckedChange={(checked) => handleChange('isRequired', !!checked)}
               />
               <label htmlFor="obrigatorio" className="text-sm font-medium">{t('integration.detail.required')}</label>
             </div>
@@ -220,8 +220,8 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="sensivel"
-                checked={formData.sensivel}
-                onCheckedChange={(checked) => handleChange('sensivel', !!checked)}
+                checked={formData.isSensitive}
+                onCheckedChange={(checked) => handleChange('isSensitive', !!checked)}
               />
               <label htmlFor="sensivel" className="text-sm font-medium">{t('integration.detail.sensitive')}</label>
             </div>

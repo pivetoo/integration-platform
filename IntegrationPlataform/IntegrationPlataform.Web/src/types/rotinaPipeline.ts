@@ -1,31 +1,31 @@
 import type { Conector } from './conector';
 import type { Pipeline } from './pipeline';
 
-export interface RotinaPipeline {
+export interface PipelineRoutine {
   id: number;
-  conector: Conector;
+  connector: Conector;
   pipeline: Pipeline;
-  ativo: boolean;
-  intervaloMinutos: number;
-  payloadPadrao?: string;
-  ultimaExecucao?: string;
-  proximaExecucao?: string;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  isActive: boolean;
+  intervalMinutes: number;
+  defaultPayload?: string;
+  lastExecution?: string;
+  nextExecution?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateRotinaPipelineRequest {
-  conectorId: number;
+export interface CreatePipelineRoutineRequest {
+  connectorId: number;
   pipelineId: number;
-  ativo: boolean;
-  intervaloMinutos: number;
-  payloadPadrao?: string;
-  proximaExecucao?: string;
+  isActive: boolean;
+  intervalMinutes: number;
+  defaultPayload?: string;
+  nextExecution?: string;
 }
 
-export interface UpdateRotinaPipelineRequest {
-  ativo: boolean;
-  intervaloMinutos: number;
-  payloadPadrao?: string;
-  proximaExecucao?: string;
+export interface UpdatePipelineRoutineRequest {
+  isActive: boolean;
+  intervalMinutes: number;
+  defaultPayload?: string;
+  nextExecution?: string;
 }

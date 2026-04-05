@@ -71,7 +71,14 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Integration integration = await integrationService.CreateIntegration(request, cancellationToken);
-            return Http201(integration, Localizer["integration.created"]);
+
+            IntegrationContract? contract = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.Id == integration.Id)
+                .Select(IntegrationContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return Http201(contract ?? IntegrationContract.Projection.Compile()(integration), Localizer["integration.created"]);
         }
 
         [RequireAccess]
@@ -85,20 +92,33 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Integration integration = await integrationService.UpdateIntegration(id, request, cancellationToken);
-            return Http200(integration, Localizer["integration.updated"]);
+
+            IntegrationContract? contract = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.Id == integration.Id)
+                .Select(IntegrationContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return Http200(contract ?? IntegrationContract.Projection.Compile()(integration), Localizer["integration.updated"]);
         }
 
         [RequireAccess]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
+            IntegrationContract? contract = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.Id == id)
+                .Select(IntegrationContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
             Integration? integration = await integrationService.Delete(id, cancellationToken);
             if (integration is null)
             {
                 return Http404(integrationService.GetErrorMessages());
             }
 
-            return Http200(integration, Localizer["integration.deleted"]);
+            return Http200(contract ?? IntegrationContract.Projection.Compile()(integration), Localizer["integration.deleted"]);
         }
     }
 }

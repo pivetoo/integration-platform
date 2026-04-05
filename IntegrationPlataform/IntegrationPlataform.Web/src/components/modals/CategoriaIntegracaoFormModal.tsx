@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, useApi, useI18n } from 'archon-ui';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
-import type { CategoriaIntegracao, CreateCategoriaIntegracaoRequest } from '../../types/categoriaIntegracao';
+import type { IntegrationCategory, CreateIntegrationCategoryRequest } from '../../types/categoriaIntegracao';
 
 interface CategoriaIntegracaoFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  categoria: CategoriaIntegracao | null;
+  categoria: IntegrationCategory | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreateCategoriaIntegracaoRequest = {
-  nome: '',
-  descricao: '',
+const initialFormData: CreateIntegrationCategoryRequest = {
+  name: '',
+  description: '',
 };
 
 export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categoria, onSuccess }: CategoriaIntegracaoFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!categoria;
-  const [formData, setFormData] = useState<CreateCategoriaIntegracaoRequest>(initialFormData);
-  const [ativo, setAtivo] = useState(true);
+  const [formData, setFormData] = useState<CreateIntegrationCategoryRequest>(initialFormData);
+  const [isActive, setIsActive] = useState(true);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
@@ -29,17 +29,17 @@ export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categ
   useEffect(() => {
     if (categoria) {
       setFormData({
-        nome: categoria.nome,
-        descricao: categoria.descricao || '',
+        name: categoria.name,
+        description: categoria.description || '',
       });
-      setAtivo(categoria.ativo);
+      setIsActive(categoria.isActive);
     } else {
       setFormData(initialFormData);
-      setAtivo(true);
+      setIsActive(true);
     }
   }, [categoria]);
 
-  const handleChange = (field: keyof CreateCategoriaIntegracaoRequest, value: string | number) => {
+  const handleChange = (field: keyof CreateIntegrationCategoryRequest, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -47,7 +47,7 @@ export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categ
     e.preventDefault();
     try {
       if (isEditing) {
-        await execute(() => categoriaIntegracaoService.update(categoria.id, { ...formData, ativo }));
+        await execute(() => categoriaIntegracaoService.update(categoria.id, { ...formData, isActive }));
       } else {
         await execute(() => categoriaIntegracaoService.create(formData));
       }
@@ -66,22 +66,22 @@ export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categ
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+            <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
             <Input
-              id="nome"
-              value={formData.nome}
-              onChange={(e) => handleChange('nome', e.target.value)}
+              id="name"
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
               required
               placeholder={t('integration.category.form.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
+            <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
             <Input
-              id="descricao"
-              value={formData.descricao || ''}
-              onChange={(e) => handleChange('descricao', e.target.value)}
+              id="description"
+              value={formData.description || ''}
+              onChange={(e) => handleChange('description', e.target.value)}
               placeholder={t('integration.category.form.descriptionPlaceholder')}
             />
           </div>
@@ -89,11 +89,11 @@ export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categ
           {isEditing && (
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="ativo"
-                checked={ativo}
-                onCheckedChange={(checked) => setAtivo(checked as boolean)}
+                id="isActive"
+                checked={isActive}
+                onCheckedChange={(checked) => setIsActive(checked as boolean)}
               />
-              <label htmlFor="ativo" className="text-sm font-medium cursor-pointer">
+              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
                 {t('common.column.active')}
               </label>
             </div>

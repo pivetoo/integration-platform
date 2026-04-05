@@ -1,24 +1,24 @@
 import type { Conector } from './conector';
 
-export interface Referencia {
+export interface Reference {
   id: number;
-  conector: Conector;
-  entidade: string;
-  idInterno: string;
-  idExterno: string;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  connector: Conector;
+  entity: string;
+  internalId: string;
+  externalId: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateReferenciaRequest {
-  conectorId: number;
-  entidade: string;
-  idInterno: string;
-  idExterno: string;
+export interface CreateReferenceRequest {
+  connectorId: number;
+  entity: string;
+  internalId: string;
+  externalId: string;
 }
 
-export interface UpdateReferenciaRequest {
-  entidade: string;
-  idInterno: string;
-  idExterno: string;
+export interface UpdateReferenceRequest {
+  entity: string;
+  internalId: string;
+  externalId: string;
 }

@@ -183,7 +183,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             return state;
         }
 
-        public async Task<object?> ExecuteNextDebugStep(string debugSessionId, CancellationToken cancellationToken = default)
+        public async Task<ExecuteNextDebugStepResult> ExecuteNextDebugStep(string debugSessionId, CancellationToken cancellationToken = default)
         {
             if (!DebugSessions.TryGetValue(debugSessionId, out DebugSessionState? state))
             {
@@ -192,14 +192,14 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
             if (state.Stopped || state.CurrentIndex >= state.ActiveSteps.Count)
             {
-                return new
+                return new ExecuteNextDebugStepResult
                 {
-                    debugSessionId = state.SessionId,
-                    executionId = state.Execution.Id,
-                    executedStep = false,
-                    finishedFlow = true,
-                    remainingSteps = 0,
-                    message = Localizer["execution.debug.noMoreSteps"].Value
+                    DebugSessionId = state.SessionId,
+                    ExecutionId = state.Execution.Id,
+                    ExecutedStep = false,
+                    FinishedFlow = true,
+                    RemainingSteps = 0,
+                    Message = Localizer["execution.debug.noMoreSteps"].Value
                 };
             }
 
@@ -243,19 +243,19 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             bool finishedFlow = state.Stopped || state.CurrentIndex >= state.ActiveSteps.Count;
             PipelineStep? nextStep = !finishedFlow ? state.ActiveSteps[state.CurrentIndex] : null;
 
-            return new
+            return new ExecuteNextDebugStepResult
             {
-                debugSessionId = state.SessionId,
-                executionId = state.Execution.Id,
-                executedStep = true,
-                executedStepId = step.Id,
-                executedStepName = step.Name,
-                success = result.Success,
-                interruptedByError = state.Stopped,
-                finishedFlow,
-                remainingSteps = finishedFlow ? 0 : state.ActiveSteps.Count - state.CurrentIndex,
-                nextStepId = nextStep?.Id,
-                nextStepName = nextStep?.Name
+                DebugSessionId = state.SessionId,
+                ExecutionId = state.Execution.Id,
+                ExecutedStep = true,
+                ExecutedStepId = step.Id,
+                ExecutedStepName = step.Name,
+                Success = result.Success,
+                InterruptedByError = state.Stopped,
+                FinishedFlow = finishedFlow,
+                RemainingSteps = finishedFlow ? 0 : state.ActiveSteps.Count - state.CurrentIndex,
+                NextStepId = nextStep?.Id,
+                NextStepName = nextStep?.Name
             };
         }
 

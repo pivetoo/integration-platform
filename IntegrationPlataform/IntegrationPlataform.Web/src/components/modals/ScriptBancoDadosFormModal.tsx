@@ -2,35 +2,35 @@ import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { scriptBancoDadosService } from '../../services/scriptBancoDadosService';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
-import type { ScriptBancoDados, CreateScriptBancoDadosRequest } from '../../types/scriptBancoDados';
-import type { ConexaoBancoDados } from '../../types/conexaoBancoDados';
+import type { DatabaseScript, CreateDatabaseScriptRequest } from '../../types/scriptBancoDados';
+import type { DatabaseConnection } from '../../types/conexaoBancoDados';
 
 interface ScriptBancoDadosFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  scriptBancoDados: ScriptBancoDados | null;
+  scriptBancoDados: DatabaseScript | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreateScriptBancoDadosRequest = {
-  conexaoBancoDadosId: 0,
-  nome: '',
-  descricao: '',
+const initialFormData: CreateDatabaseScriptRequest = {
+  databaseConnectionId: 0,
+  name: '',
+  description: '',
   script: '',
 };
 
 export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBancoDados, onSuccess }: ScriptBancoDadosFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!scriptBancoDados;
-  const [formData, setFormData] = useState<CreateScriptBancoDadosRequest>(initialFormData);
-  const [conexoes, setConexoes] = useState<ConexaoBancoDados[]>([]);
+  const [formData, setFormData] = useState<CreateDatabaseScriptRequest>(initialFormData);
+  const [conexoes, setConexoes] = useState<DatabaseConnection[]>([]);
 
   const { execute, loading } = useApi({
     showSuccessMessage: false,
     showErrorMessage: true,
   });
 
-  const { execute: fetchConexoes } = useApi<ConexaoBancoDados[]>({
+  const { execute: fetchConexoes } = useApi<DatabaseConnection[]>({
     showErrorMessage: true,
   });
 
@@ -43,9 +43,9 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
   useEffect(() => {
     if (scriptBancoDados) {
       setFormData({
-        conexaoBancoDadosId: scriptBancoDados.conexaoBancoDadosId || scriptBancoDados.conexaoBancoDados?.id || 0,
-        nome: scriptBancoDados.nome,
-        descricao: scriptBancoDados.descricao || '',
+        databaseConnectionId: scriptBancoDados.databaseConnectionId || scriptBancoDados.databaseConnection?.id || 0,
+        name: scriptBancoDados.name,
+        description: scriptBancoDados.description || '',
         script: scriptBancoDados.script,
       });
     } else {
@@ -63,7 +63,7 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
     }
   };
 
-  const handleChange = (field: keyof CreateScriptBancoDadosRequest, value: string | number) => {
+  const handleChange = (field: keyof CreateDatabaseScriptRequest, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -102,11 +102,11 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 required
               />
             </div>
@@ -114,8 +114,8 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.connection')}</label>
               <Select
-                value={formData.conexaoBancoDadosId ? formData.conexaoBancoDadosId.toString() : ''}
-                onValueChange={(value) => handleChange('conexaoBancoDadosId', parseInt(value))}
+                value={formData.databaseConnectionId ? formData.databaseConnectionId.toString() : ''}
+                onValueChange={(value) => handleChange('databaseConnectionId', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('database.script.form.connectionPlaceholder')} />
@@ -123,7 +123,7 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
                 <SelectContent>
                   {conexoes.map((conexao) => (
                     <SelectItem key={conexao.id} value={conexao.id.toString()}>
-                      {conexao.nome}
+                      {conexao.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -131,11 +131,11 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
+              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
-                id="descricao"
-                value={formData.descricao || ''}
-                onChange={(e) => handleChange('descricao', e.target.value)}
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
               />
             </div>
 

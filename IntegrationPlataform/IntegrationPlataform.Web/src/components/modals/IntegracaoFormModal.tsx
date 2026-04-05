@@ -2,36 +2,36 @@ import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { integracaoService } from '../../services/integracaoService';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
-import type { Integracao, CreateIntegracaoRequest } from '../../types/integracao';
-import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
+import type { Integration, CreateIntegrationRequest } from '../../types/integracao';
+import type { IntegrationCategory } from '../../types/categoriaIntegracao';
 
 interface IntegracaoFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  integracao: Integracao | null;
+  integracao: Integration | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreateIntegracaoRequest = {
-  identificador: '',
-  nome: '',
-  descricao: '',
-  categoriaId: undefined,
-  ativo: true,
+const initialFormData: CreateIntegrationRequest = {
+  identifier: '',
+  name: '',
+  description: '',
+  integrationCategoryId: undefined,
+  isActive: true,
 };
 
 export default function IntegracaoFormModal({ open, onOpenChange, integracao, onSuccess }: IntegracaoFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!integracao;
-  const [formData, setFormData] = useState<CreateIntegracaoRequest>(initialFormData);
-  const [categorias, setCategorias] = useState<CategoriaIntegracao[]>([]);
+  const [formData, setFormData] = useState<CreateIntegrationRequest>(initialFormData);
+  const [categorias, setCategorias] = useState<IntegrationCategory[]>([]);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
     showErrorMessage: true,
   });
 
-  const { execute: fetchCategorias } = useApi<CategoriaIntegracao[]>({
+  const { execute: fetchCategorias } = useApi<IntegrationCategory[]>({
     showErrorMessage: true,
   });
 
@@ -44,11 +44,11 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
   useEffect(() => {
     if (integracao) {
       setFormData({
-        identificador: integracao.identificador,
-        nome: integracao.nome,
-        descricao: integracao.descricao || '',
-        categoriaId: integracao.categoriaId ?? integracao.categoria?.id,
-        ativo: integracao.ativo,
+        identifier: integracao.identifier,
+        name: integracao.name,
+        description: integracao.description || '',
+        integrationCategoryId: integracao.integrationCategoryId ?? integracao.integrationCategory?.id,
+        isActive: integracao.isActive,
       });
     } else {
       setFormData(initialFormData);
@@ -56,13 +56,13 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
   }, [integracao]);
 
   const loadCategorias = async () => {
-    const result = await fetchCategorias(() => categoriaIntegracaoService.getAtivas());
+    const result = await fetchCategorias(() => categoriaIntegracaoService.getActive());
     if (result) {
       setCategorias(result);
     }
   };
 
-  const handleChange = (field: keyof CreateIntegracaoRequest, value: string | number | boolean | undefined) => {
+  const handleChange = (field: keyof CreateIntegrationRequest, value: string | number | boolean | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -90,39 +90,39 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="identificador" className="text-sm font-medium">{t('common.column.identifier')}</label>
+              <label htmlFor="identifier" className="text-sm font-medium">{t('common.column.identifier')}</label>
               <Input
-                id="identificador"
-                value={formData.identificador}
-                onChange={(e) => handleChange('identificador', e.target.value)}
+                id="identifier"
+                value={formData.identifier}
+                onChange={(e) => handleChange('identifier', e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
+              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
-                id="descricao"
-                value={formData.descricao || ''}
-                onChange={(e) => handleChange('descricao', e.target.value)}
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.category')}</label>
               <Select
-                value={formData.categoriaId ? formData.categoriaId.toString() : '_none'}
-                onValueChange={(value) => handleChange('categoriaId', value === '_none' ? undefined : parseInt(value))}
+                value={formData.integrationCategoryId ? formData.integrationCategoryId.toString() : '_none'}
+                onValueChange={(value) => handleChange('integrationCategoryId', value === '_none' ? undefined : parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('integration.form.categoryPlaceholder')} />
@@ -131,7 +131,7 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
                   <SelectItem value="_none">{t('integration.form.noCategory')}</SelectItem>
                   {categorias.map((categoria) => (
                     <SelectItem key={categoria.id} value={categoria.id.toString()}>
-                      {categoria.nome}
+                      {categoria.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -141,11 +141,11 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="ativo"
-              checked={formData.ativo}
-              onCheckedChange={(checked) => handleChange('ativo', !!checked)}
+              id="isActive"
+              checked={formData.isActive}
+              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
+            <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>

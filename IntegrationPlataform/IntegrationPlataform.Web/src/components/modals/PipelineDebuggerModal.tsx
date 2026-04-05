@@ -4,25 +4,24 @@ import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi, us
 import { conectorService } from '../../services/conectorService';
 import { execucaoService } from '../../services/execucaoService';
 import { execucaoLogService } from '../../services/execucaoLogService';
-import { AcaoErroLabels, TipoEtapaLabels } from '../../types/pipeline';
 import type { Conector } from '../../types/conector';
 import type { DebugPipelineResult, ExecuteNextDebugStepResult, StartDebugPipelineResult } from '../../types/execucao';
-import type { ExecucaoLog } from '../../types/execucaoLog';
-import { NivelLog, NivelLogLabels } from '../../types/execucaoLog';
-import type { PipelineEtapa } from '../../types/pipeline';
+import type { ExecutionLog } from '../../types/execucaoLog';
+import { LogLevel, LogLevelLabels } from '../../types/execucaoLog';
+import type { PipelineStep } from '../../types/pipeline';
 
 interface PipelineDebuggerModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pipelineId: number;
-  integracaoId: number;
-  etapas: PipelineEtapa[];
-  initialEtapaId?: number | null;
+  integrationId: number;
+  steps: PipelineStep[];
+  initialStepId?: number | null;
 }
 
 interface DebugRun {
-  execucaoId: number;
-  logs: ExecucaoLog[];
+  executionId: number;
+  logs: ExecutionLog[];
   output?: unknown;
 }
 
@@ -67,18 +66,18 @@ function parseJsonSafe(value: unknown): unknown {
   }
 }
 
-function getStepOutput(logs: ExecucaoLog[]): unknown {
-  const withResponse = [...logs].reverse().find((log) => !!log.resposta);
-  if (!withResponse?.resposta) {
+function getStepOutput(logs: ExecutionLog[]): unknown {
+  const withResponse = [...logs].reverse().find((log) => !!log.response);
+  if (!withResponse?.response) {
     return null;
   }
 
-  return parseJsonSafe(withResponse.resposta);
+  return parseJsonSafe(withResponse.response);
 }
 
-function getStepInput(logs: ExecucaoLog[]): string {
-  const withRequest = [...logs].reverse().find((log) => !!log.requisicao);
-  return withRequest?.requisicao ?? '';
+function getStepInput(logs: ExecutionLog[]): string {
+  const withRequest = [...logs].reverse().find((log) => !!log.request);
+  return withRequest?.request ?? '';
 }
 
 function isBinaryStepOutput(value: unknown): value is BinaryStepOutput {
@@ -158,14 +157,14 @@ export default function PipelineDebuggerModal({
   open,
   onOpenChange,
   pipelineId,
-  integracaoId,
-  etapas,
-  initialEtapaId,
+  integrationId,
+  steps,
+  initialStepId,
 }: PipelineDebuggerModalProps) {
   const { t } = useI18n();
   const [conector, setConector] = useState<Conector | null>(null);
   const [payloadText, setPayloadText] = useState<string>('{}');
-  const [selectedEtapaId, setSelectedEtapaId] = useState<number | null>(initialEtapaId ?? null);
+  const [selectedStepId, setSelectedStepId] = useState<number | null>(initialStepId ?? null);
   const [activeTab, setActiveTab] = useState<'input' | 'output' | 'diff' | 'logs'>('output');
   const [logFilters, setLogFilters] = useState({
     info: true,
@@ -185,38 +184,38 @@ export default function PipelineDebuggerModal({
   const { execute: startDebugSession, loading: loadingStartDebug } = useApi<StartDebugPipelineResult>({ showErrorMessage: true });
   const { execute: executeNextDebugStep, loading: loadingNextDebugStep } = useApi<ExecuteNextDebugStepResult>({ showErrorMessage: true });
   const { execute: finalizeDebugSession, loading: loadingFinalizeDebug } = useApi<DebugPipelineResult>({ showErrorMessage: true });
-  const { execute: fetchLogs, loading: loadingLogs } = useApi<ExecucaoLog[]>({ showErrorMessage: true });
+  const { execute: fetchLogs, loading: loadingLogs } = useApi<ExecutionLog[]>({ showErrorMessage: true });
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    setSelectedEtapaId(initialEtapaId ?? etapas[0]?.id ?? null);
+    setSelectedStepId(initialStepId ?? steps[0]?.id ?? null);
     setDebugSessionId(null);
     setDebugFlowFinished(false);
     setNextStepName(null);
     setRemainingSteps(0);
 
     const loadConector = async () => {
-      const result = await fetchConectores(() => conectorService.getByIntegracao(integracaoId));
+      const result = await fetchConectores(() => conectorService.getByIntegration(integrationId));
       if (result && result.length > 0) {
         setConector(result[0]);
       }
     };
 
     loadConector();
-  }, [open, initialEtapaId, etapas, integracaoId]);
+  }, [open, initialStepId, steps, integrationId]);
 
   const logsByEtapa = useMemo(() => {
-    const map = new Map<number, ExecucaoLog[]>();
+    const map = new Map<number, ExecutionLog[]>();
 
     if (!currentRun) {
       return map;
     }
 
     currentRun.logs.forEach((log) => {
-      const etapaId = log.pipelineEtapa?.id;
+      const etapaId = log.pipelineStep?.id;
       if (!etapaId) {
         return;
       }
@@ -230,14 +229,14 @@ export default function PipelineDebuggerModal({
   }, [currentRun]);
 
   const previousLogsByEtapa = useMemo(() => {
-    const map = new Map<number, ExecucaoLog[]>();
+    const map = new Map<number, ExecutionLog[]>();
 
     if (!previousRun) {
       return map;
     }
 
     previousRun.logs.forEach((log) => {
-      const etapaId = log.pipelineEtapa?.id;
+      const etapaId = log.pipelineStep?.id;
       if (!etapaId) {
         return;
       }
@@ -250,15 +249,15 @@ export default function PipelineDebuggerModal({
     return map;
   }, [previousRun]);
 
-  const selectedEtapa = etapas.find((etapa) => etapa.id === selectedEtapaId) ?? null;
-  const selectedLogs = selectedEtapaId ? (logsByEtapa.get(selectedEtapaId) ?? []) : [];
+  const selectedStep = steps.find((step) => step.id === selectedStepId) ?? null;
+  const selectedLogs = selectedStepId ? (logsByEtapa.get(selectedStepId) ?? []) : [];
 
   const filteredLogs = selectedLogs.filter((log) => {
-    if (log.nivel === NivelLog.Warning) {
+    if (log.level === LogLevel.Warning) {
       return logFilters.warning;
     }
 
-    if (log.nivel === NivelLog.Error) {
+    if (log.level === LogLevel.Error) {
       return logFilters.error;
     }
 
@@ -267,7 +266,7 @@ export default function PipelineDebuggerModal({
 
   const outputAtual = getStepOutput(selectedLogs);
   const inputAtualText = getStepInput(selectedLogs);
-  const outputAnterior = selectedEtapaId ? getStepOutput(previousLogsByEtapa.get(selectedEtapaId) ?? []) : null;
+  const outputAnterior = selectedStepId ? getStepOutput(previousLogsByEtapa.get(selectedStepId) ?? []) : null;
   const outputDiff = buildObjectDiff(outputAtual, outputAnterior);
   const binaryOutputAtual = isBinaryStepOutput(outputAtual) ? outputAtual : null;
   const outputAtualText = outputAtual == null
@@ -307,30 +306,30 @@ export default function PipelineDebuggerModal({
     return normalizedPayload;
   };
 
-  const refreshRunLogs = async (execucaoId: number, output?: unknown) => {
-    const logs = await fetchLogs(() => execucaoLogService.getByExecucao(execucaoId));
+  const refreshRunLogs = async (executionId: number, output?: unknown) => {
+    const logs = await fetchLogs(() => execucaoLogService.getByExecution(executionId));
     if (!logs) {
       return;
     }
 
     setCurrentRun((previous) => ({
-      execucaoId,
+      executionId,
       logs,
       output: output ?? previous?.output,
     }));
   };
 
-  const runDebug = async (etapaInicialId?: number) => {
+  const runDebug = async (initialStepIdValue?: number) => {
     if (!conector) {
       return;
     }
 
     const normalizedPayload = normalizePayload();
-    const debugResult = await executeDebug(() => execucaoService.debug({
-      conectorId: conector.id,
+      const debugResult = await executeDebug(() => execucaoService.debug({
+      connectorId: conector.id,
       pipelineId,
-      dadosEntrada: normalizedPayload,
-      etapaInicialId,
+      inputData: normalizedPayload,
+      initialStepId: initialStepIdValue,
     }));
 
     if (!debugResult?.id) {
@@ -342,10 +341,10 @@ export default function PipelineDebuggerModal({
     setNextStepName(null);
     setRemainingSteps(0);
     setPreviousRun(currentRun);
-    await refreshRunLogs(debugResult.id, debugResult.dadosSaida);
+    await refreshRunLogs(debugResult.id, debugResult.outputData);
 
-    if (etapaInicialId) {
-      setSelectedEtapaId(etapaInicialId);
+    if (initialStepIdValue) {
+      setSelectedStepId(initialStepIdValue);
     }
   };
 
@@ -356,10 +355,10 @@ export default function PipelineDebuggerModal({
 
     const normalizedPayload = normalizePayload();
     const result = await startDebugSession(() => execucaoService.startDebug({
-      conectorId: conector.id,
+      connectorId: conector.id,
       pipelineId,
-      dadosEntrada: normalizedPayload,
-      etapaInicialId: selectedEtapaId ?? undefined,
+      inputData: normalizedPayload,
+      initialStepId: selectedStepId ?? undefined,
     }));
 
     if (!result) {
@@ -368,20 +367,20 @@ export default function PipelineDebuggerModal({
 
     setPreviousRun(currentRun);
     setCurrentRun({
-      execucaoId: result.execucaoId,
+      executionId: result.executionId,
       logs: [],
       output: null,
     });
     setDebugSessionId(result.debugSessionId);
-    setDebugFlowFinished(result.etapasRestantes === 0);
-    setRemainingSteps(result.etapasRestantes);
-    setNextStepName(result.proximaEtapaNome ?? null);
+    setDebugFlowFinished(result.remainingSteps === 0);
+    setRemainingSteps(result.remainingSteps);
+    setNextStepName(result.nextStepName ?? null);
 
-    if (result.proximaEtapaId) {
-      setSelectedEtapaId(result.proximaEtapaId);
+    if (result.nextStepId) {
+      setSelectedStepId(result.nextStepId);
     }
 
-    await refreshRunLogs(result.execucaoId);
+    await refreshRunLogs(result.executionId);
   };
 
   const executeNextStep = async () => {
@@ -397,15 +396,15 @@ export default function PipelineDebuggerModal({
       return;
     }
 
-    if (result.etapaExecutadaId) {
-      setSelectedEtapaId(result.etapaExecutadaId);
+    if (result.executedStepId) {
+      setSelectedStepId(result.executedStepId);
     }
 
-    setDebugFlowFinished(result.finalizouFluxo);
-    setRemainingSteps(result.etapasRestantes);
-    setNextStepName(result.proximaEtapaNome ?? null);
+    setDebugFlowFinished(result.finishedFlow);
+    setRemainingSteps(result.remainingSteps);
+    setNextStepName(result.nextStepName ?? null);
 
-    await refreshRunLogs(result.execucaoId);
+    await refreshRunLogs(result.executionId);
   };
 
   const finalizeStepByStepDebug = async () => {
@@ -422,24 +421,24 @@ export default function PipelineDebuggerModal({
       return;
     }
 
-    await refreshRunLogs(currentRun.execucaoId, result.dadosSaida);
+    await refreshRunLogs(currentRun.executionId, result.outputData);
     setDebugSessionId(null);
     setDebugFlowFinished(false);
     setRemainingSteps(0);
     setNextStepName(null);
   };
 
-  const stepStatus = (etapaId: number): 'ok' | 'warn' | 'error' | 'idle' => {
-    const logs = logsByEtapa.get(etapaId) ?? [];
+  const stepStatus = (stepId: number): 'ok' | 'warn' | 'error' | 'idle' => {
+    const logs = logsByEtapa.get(stepId) ?? [];
     if (logs.length === 0) {
       return 'idle';
     }
 
-    if (logs.some((log) => log.nivel === NivelLog.Error)) {
+    if (logs.some((log) => log.level === LogLevel.Error)) {
       return 'error';
     }
 
-    if (logs.some((log) => log.nivel === NivelLog.Warning)) {
+    if (logs.some((log) => log.level === LogLevel.Warning)) {
       return 'warn';
     }
 
@@ -490,8 +489,8 @@ export default function PipelineDebuggerModal({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => selectedEtapaId && runDebug(selectedEtapaId)}
-                disabled={!selectedEtapaId || !conector || loadingAnyAction || !!debugSessionId}
+                onClick={() => selectedStepId && runDebug(selectedStepId)}
+                disabled={!selectedStepId || !conector || loadingAnyAction || !!debugSessionId}
                 className="h-8 px-2 text-xs"
               >
                 <RefreshCcw size={13} className="mr-1" />
@@ -503,7 +502,7 @@ export default function PipelineDebuggerModal({
                 variant="outline-danger"
                 size="sm"
                 onClick={startStepByStepDebug}
-                disabled={!selectedEtapaId || !conector || loadingAnyAction || !!debugSessionId}
+                disabled={!selectedStepId || !conector || loadingAnyAction || !!debugSessionId}
                 className="h-8 px-2 text-xs"
               >
                 {t('pipeline.debugger.startDebug')}
@@ -534,7 +533,7 @@ export default function PipelineDebuggerModal({
                 </div>
               )}
               {currentRun && (
-                <p className="text-[11px] text-muted-foreground">{t('pipeline.debugger.currentExecution')} #{currentRun.execucaoId}</p>
+                <p className="text-[11px] text-muted-foreground">{t('pipeline.debugger.currentExecution')} #{currentRun.executionId}</p>
               )}
             </div>
           </div>
@@ -544,25 +543,25 @@ export default function PipelineDebuggerModal({
           <div className="md:col-span-4 border rounded-lg overflow-y-auto">
             <div className="sticky top-0 border-b bg-background px-3 py-2 text-sm font-semibold">{t('pipeline.detail.stepsTitle')}</div>
             <div className="p-2 space-y-2">
-              {etapas.map((etapa) => {
-                const status = stepStatus(etapa.id);
+              {steps.map((step) => {
+                const status = stepStatus(step.id);
                 const statusLabel = status === 'error' ? t('pipeline.debugger.stepStatus.error') : status === 'warn' ? t('pipeline.debugger.stepStatus.warning') : status === 'ok' ? t('pipeline.debugger.stepStatus.ok') : t('pipeline.debugger.stepStatus.waiting');
                 const variant = status === 'error' ? 'destructive' : status === 'warn' ? 'warning' : status === 'ok' ? 'success' : 'outline';
 
                 return (
                   <button
-                    key={etapa.id}
+                    key={step.id}
                     type="button"
-                    onClick={() => setSelectedEtapaId(etapa.id)}
-                    className={`w-full rounded-md border p-2 text-left transition-colors ${selectedEtapaId === etapa.id ? 'border-primary bg-primary/5' : 'hover:bg-accent'}`}
+                    onClick={() => setSelectedStepId(step.id)}
+                    className={`w-full rounded-md border p-2 text-left transition-colors ${selectedStepId === step.id ? 'border-primary bg-primary/5' : 'hover:bg-accent'}`}
                   >
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium truncate">{etapa.ordem}. {etapa.nome}</span>
+                      <span className="text-sm font-medium truncate">{step.order}. {step.name}</span>
                       <Badge variant={variant as 'outline' | 'success' | 'warning' | 'destructive'}>{statusLabel}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-1 text-xs">
-                      <Badge variant="outline">{tipoEtapaLabels[etapa.tipo] || TipoEtapaLabels[etapa.tipo]}</Badge>
-                      <Badge variant="outline">{t('pipeline.detail.onErrorLabel')}: {acaoErroLabels[etapa.aoErro] || AcaoErroLabels[etapa.aoErro]}</Badge>
+                      <Badge variant="outline">{tipoEtapaLabels[step.type] || '-'}</Badge>
+                      <Badge variant="outline">{t('pipeline.detail.onErrorLabel')}: {acaoErroLabels[step.errorAction] || '-'}</Badge>
                     </div>
                   </button>
                 );
@@ -590,7 +589,7 @@ export default function PipelineDebuggerModal({
             </div>
 
             <div className="flex-1 overflow-auto p-3">
-              {!selectedEtapa ? (
+              {!selectedStep ? (
                 <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{t('pipeline.debugger.selectStep')}</div>
               ) : activeTab === 'input' ? (
                 <div className="space-y-2">
@@ -659,12 +658,12 @@ export default function PipelineDebuggerModal({
                     filteredLogs.map((log) => (
                       <div key={log.id} className="rounded-md border p-2">
                         <div className="mb-1 flex items-center justify-between gap-2">
-                          <Badge variant={log.nivel === NivelLog.Error ? 'destructive' : log.nivel === NivelLog.Warning ? 'warning' : 'secondary'}>
-                            {nivelLogLabels[log.nivel] || NivelLogLabels[log.nivel]}
+                          <Badge variant={log.level === LogLevel.Error ? 'destructive' : log.level === LogLevel.Warning ? 'warning' : 'secondary'}>
+                            {nivelLogLabels[log.level] || LogLevelLabels[log.level]}
                           </Badge>
-                          {log.duracao != null && <span className="text-xs text-muted-foreground">{log.duracao}ms</span>}
+                          {log.duration != null && <span className="text-xs text-muted-foreground">{log.duration}ms</span>}
                         </div>
-                        <p className="text-xs text-foreground">{log.mensagem}</p>
+                        <p className="text-xs text-foreground">{log.message}</p>
                       </div>
                     ))
                   )}

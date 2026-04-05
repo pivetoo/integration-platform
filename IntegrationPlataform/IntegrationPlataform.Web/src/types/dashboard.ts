@@ -18,8 +18,8 @@ export interface ExecucaoRecente {
   pipeline: string;
   conector: string;
   status: number;
-  duracao?: number;
-  iniciadoEm: string;
+  duration?: number;
+  startedAt: string;
 }
 
 export interface DashboardData {

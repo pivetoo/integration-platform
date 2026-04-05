@@ -3,7 +3,7 @@ import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'arc
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { referenciaService } from '../../services/referenciaService';
-import type { Referencia } from '../../types/referencia';
+import type { Reference } from '../../types/referencia';
 import type { Conector } from '../../types/conector';
 import ReferenciaFormModal from '../../components/modals/ReferenciaFormModal';
 
@@ -16,13 +16,13 @@ function formatDateTime(dateStr?: string): string {
 
 export default function Referencias() {
   const { t } = useI18n();
-  const [referencias, setReferencias] = useState<Referencia[]>([]);
-  const [selectedReferencias, setSelectedReferencias] = useState<Referencia[]>([]);
+  const [referencias, setReferencias] = useState<Reference[]>([]);
+  const [selectedReferencias, setSelectedReferencias] = useState<Reference[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingReferencia, setEditingReferencia] = useState<Referencia | null>(null);
+  const [editingReferencia, setEditingReferencia] = useState<Reference | null>(null);
 
-  const { execute: fetchReferencias, loading } = useApi<PaginatedResult<Referencia>>({
+  const { execute: fetchReferencias, loading } = useApi<PaginatedResult<Reference>>({
     showErrorMessage: true,
   });
 
@@ -77,32 +77,32 @@ export default function Referencias() {
     loadReferencias();
   };
 
-  const columns: DataTableColumn<Referencia>[] = [
+  const columns: DataTableColumn<Reference>[] = [
     {
-      key: 'conector',
+      key: 'connector',
       title: t('common.column.connector'),
-      dataIndex: 'conector',
-      render: (value: Conector) => value?.nome || '-',
+      dataIndex: 'connector',
+      render: (value: Conector) => value?.name || '-',
     },
     {
-      key: 'entidade',
+      key: 'entity',
       title: t('common.column.entity'),
-      dataIndex: 'entidade',
+      dataIndex: 'entity',
     },
     {
-      key: 'idInterno',
+      key: 'internalId',
       title: t('common.column.internalId'),
-      dataIndex: 'idInterno',
+      dataIndex: 'internalId',
     },
     {
-      key: 'idExterno',
+      key: 'externalId',
       title: t('common.column.externalId'),
-      dataIndex: 'idExterno',
+      dataIndex: 'externalId',
     },
     {
-      key: 'criadoEm',
+      key: 'createdAt',
       title: t('common.column.createdAt'),
-      dataIndex: 'criadoEm',
+      dataIndex: 'createdAt',
       render: (value: string) => formatDateTime(value),
     },
   ];

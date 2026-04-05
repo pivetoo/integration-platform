@@ -4,55 +4,56 @@ import { pipelineEtapaService } from '../../services/pipelineEtapaService';
 import { chamadaApiService } from '../../services/chamadaApiService';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';
 import { scriptBancoDadosService } from '../../services/scriptBancoDadosService';
-import { TipoEtapa, AcaoErro } from '../../types/pipeline';
-import type { PipelineEtapa, CreatePipelineEtapaRequest } from '../../types/pipeline';
-import type { ChamadaApi } from '../../types/chamadaApi';
-import type { FuncaoJavaScript } from '../../types/funcaoJavaScript';
-import type { ScriptBancoDados } from '../../types/scriptBancoDados';
+import { PipelineStepType, ErrorAction } from '../../types/pipeline';
+import type { PipelineStep, CreatePipelineStepRequest } from '../../types/pipeline';
+import type { ApiCall } from '../../types/chamadaApi';
+import type { JavaScriptFunction } from '../../types/funcaoJavaScript';
+import type { DatabaseScript } from '../../types/scriptBancoDados';
 
 interface PipelineEtapaFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  etapa: PipelineEtapa | null;
+  step: PipelineStep | null;
   pipelineId: number;
-  integracaoId: number;
-  nextOrdem: number;
+  integrationId: number;
+  nextOrder: number;
   onSuccess: () => void;
 }
 
-export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipelineId, integracaoId, nextOrdem, onSuccess }: PipelineEtapaFormModalProps) {
-  const isEditing = !!etapa;
+export default function PipelineEtapaFormModal({ open, onOpenChange, step, pipelineId, integrationId, nextOrder, onSuccess }: PipelineEtapaFormModalProps) {
+  const isEditing = !!step;
   const { t } = useI18n();
-  const [formData, setFormData] = useState<CreatePipelineEtapaRequest>({
+  const createInitialFormData = (): CreatePipelineStepRequest => ({
     pipelineId,
-    ordem: nextOrdem,
-    nome: '',
-    tipo: TipoEtapa.RequisicaoHttp,
-    chamadaApiId: undefined,
-    funcaoJavaScriptId: undefined,
-    scriptBancoDadosId: undefined,
-    aoErro: AcaoErro.Parar,
-    ativo: true,
-    ignorarNoRetorno: false,
+    order: nextOrder,
+    name: '',
+    type: PipelineStepType.HttpRequest,
+    apiCallId: undefined,
+    javaScriptFunctionId: undefined,
+    databaseScriptId: undefined,
+    errorAction: ErrorAction.Stop,
+    isActive: true,
+    ignoreOnResponse: false,
   });
-  const [chamadas, setChamadas] = useState<ChamadaApi[]>([]);
-  const [funcoes, setFuncoes] = useState<FuncaoJavaScript[]>([]);
-  const [scripts, setScripts] = useState<ScriptBancoDados[]>([]);
+  const [formData, setFormData] = useState<CreatePipelineStepRequest>(createInitialFormData);
+  const [chamadas, setChamadas] = useState<ApiCall[]>([]);
+  const [funcoes, setFuncoes] = useState<JavaScriptFunction[]>([]);
+  const [scripts, setScripts] = useState<DatabaseScript[]>([]);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
     showErrorMessage: true,
   });
 
-  const { execute: fetchChamadas, loading: loadingChamadas } = useApi<ChamadaApi[]>({
+  const { execute: fetchChamadas, loading: loadingChamadas } = useApi<ApiCall[]>({
     showErrorMessage: true,
   });
 
-  const { execute: fetchFuncoes, loading: loadingFuncoes } = useApi<FuncaoJavaScript[]>({
+  const { execute: fetchFuncoes, loading: loadingFuncoes } = useApi<JavaScriptFunction[]>({
     showErrorMessage: true,
   });
 
-  const { execute: fetchScripts, loading: loadingScripts } = useApi<ScriptBancoDados[]>({
+  const { execute: fetchScripts, loading: loadingScripts } = useApi<DatabaseScript[]>({
     showErrorMessage: true,
   });
 
@@ -64,37 +65,26 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
       loadFuncoes();
       loadScripts();
     }
-  }, [open, integracaoId]);
+  }, [open, integrationId]);
 
   useEffect(() => {
-    if (etapa) {
+    if (step) {
       setFormData({
         pipelineId,
-        ordem: etapa.ordem,
-        nome: etapa.nome,
-        tipo: etapa.tipo,
-        chamadaApiId: etapa.chamadaApi?.id,
-        funcaoJavaScriptId: etapa.funcaoJavaScript?.id,
-        scriptBancoDadosId: etapa.scriptBancoDados?.id,
-        aoErro: etapa.aoErro,
-        ativo: etapa.ativo,
-        ignorarNoRetorno: !!etapa.ignorarNoRetorno,
+        order: step.order,
+        name: step.name,
+        type: step.type,
+        apiCallId: step.apiCall?.id,
+        javaScriptFunctionId: step.javaScriptFunction?.id,
+        databaseScriptId: step.databaseScript?.id,
+        errorAction: step.errorAction,
+        isActive: step.isActive,
+        ignoreOnResponse: !!step.ignoreOnResponse,
       });
     } else {
-      setFormData({
-        pipelineId,
-        ordem: nextOrdem,
-        nome: '',
-        tipo: TipoEtapa.RequisicaoHttp,
-        chamadaApiId: undefined,
-        funcaoJavaScriptId: undefined,
-        scriptBancoDadosId: undefined,
-        aoErro: AcaoErro.Parar,
-        ativo: true,
-        ignorarNoRetorno: false,
-      });
+      setFormData(createInitialFormData());
     }
-  }, [etapa, pipelineId, nextOrdem]);
+  }, [step, pipelineId, nextOrder]);
 
   const loadChamadas = async () => {
     const result = await fetchChamadas(async () => {
@@ -126,7 +116,7 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
     }
   };
 
-  const handleChange = (field: keyof CreatePipelineEtapaRequest, value: string | number | boolean | undefined) => {
+  const handleChange = (field: keyof CreatePipelineStepRequest, value: string | number | boolean | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -134,7 +124,7 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
     e.preventDefault();
     try {
       if (isEditing) {
-        await execute(() => pipelineEtapaService.update(etapa.id, formData));
+        await execute(() => pipelineEtapaService.update(step.id, formData));
       } else {
         await execute(() => pipelineEtapaService.create(formData));
       }
@@ -145,13 +135,13 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
   };
 
   const tipoOptions = [
-    { value: TipoEtapa.RequisicaoHttp.toString(), label: t('pipeline.step.type.httpRequest') },
-    { value: TipoEtapa.FuncaoJavaScript.toString(), label: t('pipeline.step.type.javaScriptFunction') },
-    { value: TipoEtapa.ExecutarScript.toString(), label: t('pipeline.step.type.executeSqlScript') },
+    { value: PipelineStepType.HttpRequest.toString(), label: t('pipeline.step.type.httpRequest') },
+    { value: PipelineStepType.JavaScriptFunction.toString(), label: t('pipeline.step.type.javaScriptFunction') },
+    { value: PipelineStepType.ExecuteScript.toString(), label: t('pipeline.step.type.executeSqlScript') },
   ];
   const acaoErroOptions = [
-    { value: AcaoErro.Parar.toString(), label: t('pipeline.step.errorAction.stop') },
-    { value: AcaoErro.Continuar.toString(), label: t('pipeline.step.errorAction.continue') },
+    { value: ErrorAction.Stop.toString(), label: t('pipeline.step.errorAction.stop') },
+    { value: ErrorAction.Continue.toString(), label: t('pipeline.step.errorAction.continue') },
   ];
 
   return (
@@ -164,11 +154,11 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 required
               />
             </div>
@@ -176,8 +166,8 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.type')}</label>
                 <Select
-                  value={formData.tipo.toString()}
-                  onValueChange={(value) => handleChange('tipo', parseInt(value))}
+                  value={formData.type.toString()}
+                  onValueChange={(value) => handleChange('type', parseInt(value))}
                   disabled={loadingReferencias}
                 >
                 <SelectTrigger>
@@ -196,8 +186,8 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('pipeline.detail.onErrorLabel')}</label>
                 <Select
-                  value={formData.aoErro.toString()}
-                  onValueChange={(value) => handleChange('aoErro', parseInt(value))}
+                  value={formData.errorAction.toString()}
+                  onValueChange={(value) => handleChange('errorAction', parseInt(value))}
                   disabled={loadingReferencias}
                 >
                 <SelectTrigger>
@@ -213,12 +203,12 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
               </Select>
             </div>
 
-            {formData.tipo === TipoEtapa.RequisicaoHttp && (
+            {formData.type === PipelineStepType.HttpRequest && (
               <div className="space-y-2 col-span-2">
                 <label className="text-sm font-medium">{t('pipeline.detail.apiCall')}</label>
                 <Select
-                  value={formData.chamadaApiId?.toString() || '_none'}
-                  onValueChange={(value) => handleChange('chamadaApiId', value === '_none' ? undefined : parseInt(value))}
+                  value={formData.apiCallId?.toString() || '_none'}
+                  onValueChange={(value) => handleChange('apiCallId', value === '_none' ? undefined : parseInt(value))}
                   disabled={loadingReferencias}
                 >
                   <SelectTrigger>
@@ -228,7 +218,7 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
                     <SelectItem value="_none">{t('common.option.none')}</SelectItem>
                     {chamadas.map((chamada) => (
                       <SelectItem key={chamada.id} value={chamada.id.toString()}>
-                        {chamada.nome}
+                        {chamada.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -236,12 +226,12 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
               </div>
             )}
 
-            {formData.tipo === TipoEtapa.FuncaoJavaScript && (
+            {formData.type === PipelineStepType.JavaScriptFunction && (
               <div className="space-y-2 col-span-2">
                 <label className="text-sm font-medium">{t('pipeline.detail.javaScriptFunction')}</label>
                 <Select
-                  value={formData.funcaoJavaScriptId?.toString() || '_none'}
-                  onValueChange={(value) => handleChange('funcaoJavaScriptId', value === '_none' ? undefined : parseInt(value))}
+                  value={formData.javaScriptFunctionId?.toString() || '_none'}
+                  onValueChange={(value) => handleChange('javaScriptFunctionId', value === '_none' ? undefined : parseInt(value))}
                   disabled={loadingReferencias}
                 >
                   <SelectTrigger>
@@ -251,7 +241,7 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
                     <SelectItem value="_none">{t('common.option.none')}</SelectItem>
                     {funcoes.map((funcao) => (
                       <SelectItem key={funcao.id} value={funcao.id.toString()}>
-                        {funcao.nome}
+                        {funcao.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -259,12 +249,12 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
               </div>
             )}
 
-            {formData.tipo === TipoEtapa.ExecutarScript && (
+            {formData.type === PipelineStepType.ExecuteScript && (
               <div className="space-y-2 col-span-2">
                 <label className="text-sm font-medium">{t('pipeline.step.form.databaseScriptLabel')}</label>
                 <Select
-                  value={formData.scriptBancoDadosId?.toString() || '_none'}
-                  onValueChange={(value) => handleChange('scriptBancoDadosId', value === '_none' ? undefined : parseInt(value))}
+                  value={formData.databaseScriptId?.toString() || '_none'}
+                  onValueChange={(value) => handleChange('databaseScriptId', value === '_none' ? undefined : parseInt(value))}
                   disabled={loadingReferencias}
                 >
                   <SelectTrigger>
@@ -274,7 +264,7 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
                     <SelectItem value="_none">{t('common.option.none')}</SelectItem>
                     {scripts.map((script) => (
                       <SelectItem key={script.id} value={script.id.toString()}>
-                        {script.nome}
+                        {script.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -286,20 +276,20 @@ export default function PipelineEtapaFormModal({ open, onOpenChange, etapa, pipe
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="ativo"
-                checked={formData.ativo}
-                onCheckedChange={(checked) => handleChange('ativo', !!checked)}
+                id="isActive"
+                checked={formData.isActive}
+                onCheckedChange={(checked) => handleChange('isActive', !!checked)}
               />
-              <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
+              <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
             </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="ignorarNoRetorno"
-                checked={!!formData.ignorarNoRetorno}
-                onCheckedChange={(checked) => handleChange('ignorarNoRetorno', !!checked)}
+                id="ignoreOnResponse"
+                checked={!!formData.ignoreOnResponse}
+                onCheckedChange={(checked) => handleChange('ignoreOnResponse', !!checked)}
               />
-              <label htmlFor="ignorarNoRetorno" className="text-sm font-medium">{t('pipeline.step.form.ignoreOnApiReturn')}</label>
+              <label htmlFor="ignoreOnResponse" className="text-sm font-medium">{t('pipeline.step.form.ignoreOnApiReturn')}</label>
             </div>
           </div>
 

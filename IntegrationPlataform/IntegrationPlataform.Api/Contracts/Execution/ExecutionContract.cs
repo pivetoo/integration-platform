@@ -1,7 +1,6 @@
 using IntegrationPlataform.Api.Contracts.Connectors;
 using IntegrationPlataform.Api.Contracts.Integrations;
 using IntegrationPlataform.Api.Contracts.Pipelines;
-using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using System.Linq.Expressions;
 using ExecutionEntity = IntegrationPlataform.Domain.Entities.Execution;

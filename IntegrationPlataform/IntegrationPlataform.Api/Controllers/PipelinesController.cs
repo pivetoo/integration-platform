@@ -116,13 +116,16 @@ namespace IntegrationPlataform.Api.Controllers
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
+            PipelineContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
             Pipeline? pipeline = await pipelineService.Delete(id, cancellationToken);
             if (pipeline is null)
             {
                 return Http404(pipelineService.GetErrorMessages());
             }
 
-            return Http200(pipeline, Localizer["pipeline.deleted"]);
+            return Http200(contract ?? PipelineContract.Projection.Compile()(pipeline), Localizer["pipeline.deleted"]);
         }
     }
 }

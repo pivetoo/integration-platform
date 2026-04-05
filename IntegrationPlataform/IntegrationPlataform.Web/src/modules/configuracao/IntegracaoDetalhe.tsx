@@ -4,7 +4,7 @@ import { Plus, Pencil, Trash2, Cable } from 'lucide-react';
 import { PageLayout, Badge, Button, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import { integracaoService } from '../../services/integracaoService';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
-import type { Integracao } from '../../types/integracao';
+import type { Integration } from '../../types/integracao';
 import { TipoCampoLabels } from '../../types/integracaoAtributo';
 import type { IntegracaoAtributo } from '../../types/integracaoAtributo';
 import IntegracaoFormModal from '../../components/modals/IntegracaoFormModal';
@@ -13,7 +13,7 @@ import IntegracaoAtributoFormModal from '../../components/modals/IntegracaoAtrib
 export default function IntegracaoDetalhe() {
   const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
-  const [integracao, setIntegracao] = useState<Integracao | null>(null);
+  const [integracao, setIntegracao] = useState<Integration | null>(null);
   const [atributos, setAtributos] = useState<IntegracaoAtributo[]>([]);
   const [isEditIntegracaoOpen, setIsEditIntegracaoOpen] = useState(false);
   const [isAtributoFormOpen, setIsAtributoFormOpen] = useState(false);
@@ -21,7 +21,7 @@ export default function IntegracaoDetalhe() {
   const [deletingAtributo, setDeletingAtributo] = useState<IntegracaoAtributo | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const { execute: fetchIntegracao } = useApi<Integracao>({
+  const { execute: fetchIntegracao } = useApi<Integration>({
     showErrorMessage: true,
   });
 
@@ -47,9 +47,9 @@ export default function IntegracaoDetalhe() {
   };
 
   const loadAtributos = async () => {
-    const result = await fetchAtributos(() => integracaoAtributoService.getByIntegracao(integracaoId));
+    const result = await fetchAtributos(() => integracaoAtributoService.getByIntegration(integracaoId));
     if (result) {
-      const sorted = [...result].sort((a, b) => a.ordem - b.ordem);
+      const sorted = [...result].sort((a, b) => a.order - b.order);
       setAtributos(sorted);
     }
   };
@@ -96,11 +96,11 @@ export default function IntegracaoDetalhe() {
     loadIntegracao();
   };
 
-  const nextOrdem = atributos.length > 0 ? Math.max(...atributos.map(a => a.ordem)) + 1 : 1;
+  const nextOrder = atributos.length > 0 ? Math.max(...atributos.map((item) => item.order)) + 1 : 1;
 
   return (
     <PageLayout
-      title={integracao?.nome || t('integration.detail.fallbackTitle')}
+      title={integracao?.name || t('integration.detail.fallbackTitle')}
       onRefresh={() => { loadIntegracao(); loadAtributos(); }}
       actions={[
         {
@@ -118,21 +118,21 @@ export default function IntegracaoDetalhe() {
           <div className="grid grid-cols-2 gap-4 rounded-lg border bg-card p-4 md:grid-cols-4">
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.identifier')}</span>
-              <p className="font-medium">{integracao.identificador}</p>
+              <p className="font-medium">{integracao.identifier}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.name')}</span>
-              <p className="font-medium">{integracao.nome}</p>
+              <p className="font-medium">{integracao.name}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.category')}</span>
-              <p className="font-medium">{integracao.categoria?.nome || '-'}</p>
+              <p className="font-medium">{integracao.integrationCategory?.name || '-'}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
-                <Badge variant={integracao.ativo ? 'success' : 'destructive'}>
-                  {integracao.ativo ? t('common.status.active') : t('common.status.inactive')}
+                <Badge variant={integracao.isActive ? 'success' : 'destructive'}>
+                  {integracao.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>
             </div>
@@ -162,32 +162,32 @@ export default function IntegracaoDetalhe() {
                   className="flex items-center gap-3 rounded-lg border bg-card p-4"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                    {atributo.ordem}
+                    {atributo.order}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{atributo.label}</span>
-                      <Badge variant="outline">{TipoCampoLabels[atributo.tipo]}</Badge>
-                      {atributo.obrigatorio && (
+                      <Badge variant="outline">{TipoCampoLabels[atributo.type]}</Badge>
+                      {atributo.isRequired && (
                         <Badge variant="destructive">{t('integration.detail.required')}</Badge>
                       )}
-                      {atributo.sensivel && (
+                      {atributo.isSensitive && (
                         <Badge variant="secondary">{t('integration.detail.sensitive')}</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <span>{t('integration.detail.fieldLabel')}: {atributo.campo}</span>
-                      {atributo.grupo && (
+                      <span>{t('integration.detail.fieldLabel')}: {atributo.field}</span>
+                      {atributo.group && (
                         <>
                           <span>|</span>
-                          <span>{t('integration.detail.groupLabel')}: {atributo.grupo}</span>
+                          <span>{t('integration.detail.groupLabel')}: {atributo.group}</span>
                         </>
                       )}
-                      {atributo.valorPadrao && (
+                      {atributo.defaultValue && (
                         <>
                           <span>|</span>
-                          <span>{t('integration.detail.defaultLabel')}: {atributo.valorPadrao}</span>
+                          <span>{t('integration.detail.defaultLabel')}: {atributo.defaultValue}</span>
                         </>
                       )}
                     </div>
@@ -230,9 +230,9 @@ export default function IntegracaoDetalhe() {
         <IntegracaoAtributoFormModal
           open={isAtributoFormOpen}
           onOpenChange={setIsAtributoFormOpen}
-          integracaoId={integracaoId}
-          atributo={editingAtributo}
-          nextOrdem={nextOrdem}
+          integrationId={integracaoId}
+          attribute={editingAtributo}
+          nextOrder={nextOrder}
           onSuccess={handleAtributoFormSuccess}
         />
       )}

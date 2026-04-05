@@ -1,19 +1,19 @@
-export interface CategoriaIntegracao {
+export interface IntegrationCategory {
   id: number;
-  nome: string;
-  descricao: string | null;
-  ativo: boolean;
-  criadoEm: string;
-  ultimaAlteracao: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CreateCategoriaIntegracaoRequest {
-  nome: string;
-  descricao: string;
+export interface CreateIntegrationCategoryRequest {
+  name: string;
+  description: string;
 }
 
-export interface UpdateCategoriaIntegracaoRequest {
-  nome: string;
-  descricao: string;
-  ativo: boolean;
+export interface UpdateIntegrationCategoryRequest {
+  name: string;
+  description: string;
+  isActive: boolean;
 }

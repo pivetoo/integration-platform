@@ -89,7 +89,14 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Connector connector = await connectorService.CreateConnector(request, cancellationToken);
-            return Http201(connector, Localizer["connector.created"]);
+
+            ConnectorContract? contract = await DbContext.Set<Connector>()
+                .AsNoTracking()
+                .Where(item => item.Id == connector.Id)
+                .Select(ConnectorContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return Http201(contract ?? ConnectorContract.Projection.Compile()(connector), Localizer["connector.created"]);
         }
 
         [RequireAccess]
@@ -103,7 +110,14 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Connector connector = await connectorService.UpdateConnector(id, request, cancellationToken);
-            return Http200(connector, Localizer["connector.updated"]);
+
+            ConnectorContract? contract = await DbContext.Set<Connector>()
+                .AsNoTracking()
+                .Where(item => item.Id == connector.Id)
+                .Select(ConnectorContract.Projection)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return Http200(contract ?? ConnectorContract.Projection.Compile()(connector), Localizer["connector.updated"]);
         }
 
         [RequireAccess]
@@ -116,7 +130,18 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(connectorService.GetErrorMessages());
             }
 
-            return Http200(connector, Localizer["connector.deleted"]);
+            ConnectorContract contract = new()
+            {
+                Id = connector.Id,
+                SystemApplicationId = connector.SystemApplicationId,
+                IntegrationId = connector.IntegrationId,
+                Name = connector.Name,
+                IsActive = connector.IsActive,
+                CreatedAt = connector.CreatedAt,
+                UpdatedAt = connector.UpdatedAt
+            };
+
+            return Http200(contract, Localizer["connector.deleted"]);
         }
     }
 }

@@ -1,22 +1,22 @@
 import type { Conector } from './conector';
 import type { IntegracaoAtributo } from './integracaoAtributo';
 
-export interface ConectorAtributoValor {
+export interface ConnectorAttributeValue {
   id: number;
-  conectorId: number;
-  conector: Conector | null;
-  integracaoAtributoId: number;
-  integracaoAtributo: IntegracaoAtributo | null;
-  valor: string;
+  connectorId: number;
+  connector: Conector | null;
+  integrationAttributeId: number;
+  integrationAttribute: IntegracaoAtributo | null;
+  value: string;
 }
 
-export interface CreateConectorAtributoValorRequest {
-  conectorId: number;
-  integracaoAtributoId: number;
-  valor: string;
+export interface CreateConnectorAttributeValueRequest {
+  connectorId: number;
+  integrationAttributeId: number;
+  value: string;
 }
 
-export interface UpdateConectorAtributoValorRequest {
-  integracaoAtributoId: number;
-  valor: string;
+export interface UpdateConnectorAttributeValueRequest {
+  integrationAttributeId: number;
+  value: string;
 }

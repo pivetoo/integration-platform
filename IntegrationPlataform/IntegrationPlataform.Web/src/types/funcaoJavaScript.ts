@@ -1,20 +1,20 @@
-export interface FuncaoJavaScript {
+export interface JavaScriptFunction {
   id: number;
-  nome: string;
-  descricao: string | null;
-  codigo: string;
-  criadoEm: string;
-  ultimaAlteracao: string;
+  name: string;
+  description: string | null;
+  code: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CreateFuncaoJavaScriptRequest {
-  nome: string;
-  descricao: string;
-  codigo: string;
+export interface CreateJavaScriptFunctionRequest {
+  name: string;
+  description: string;
+  code: string;
 }
 
-export interface UpdateFuncaoJavaScriptRequest {
-  nome: string;
-  descricao: string;
-  codigo: string;
+export interface UpdateJavaScriptFunctionRequest {
+  name: string;
+  description: string;
+  code: string;
 }

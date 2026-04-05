@@ -8,9 +8,9 @@ import {
   XCircle, Clock, TrendingUp, AlertTriangle, Zap
 } from 'lucide-react';
 import { dashboardService } from '../services/dashboardService';
-import { StatusExecucaoLabels } from '../types/execucao';
+import { ExecutionStatusLabels } from '../types/execucao';
 import type { DashboardData, ExecucaoRecente } from '../types/dashboard';
-import type { StatusExecucao } from '../types/execucao';
+import type { ExecutionStatus } from '../types/execucao';
 
 const statusVariantMap: Record<number, 'success' | 'destructive' | 'warning'> = {
   1: 'warning',
@@ -196,12 +196,12 @@ export default function Dashboard() {
                     <Badge variant={statusVariantMap[exec.status] || 'warning'}>
                       <span className="flex items-center gap-1">
                         {getStatusIcon(exec.status)}
-                        {StatusExecucaoLabels[exec.status as StatusExecucao] || '-'}
+                        {ExecutionStatusLabels[exec.status as ExecutionStatus] || '-'}
                       </span>
                     </Badge>
                     <div className="flex items-center gap-2 justify-end">
-                      <span className="text-xs text-muted-foreground">{formatDuracao(exec.duracao)}</span>
-                      <span className="text-xs text-muted-foreground">{formatHorario(exec.iniciadoEm)}</span>
+                      <span className="text-xs text-muted-foreground">{formatDuracao(exec.duration)}</span>
+                      <span className="text-xs text-muted-foreground">{formatHorario(exec.startedAt)}</span>
                     </div>
                   </div>
                 </div>

@@ -3,7 +3,7 @@ import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } fr
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { rotinaPipelineService } from '../../services/rotinaPipelineService';
-import type { RotinaPipeline } from '../../types/rotinaPipeline';
+import type { PipelineRoutine } from '../../types/rotinaPipeline';
 import type { Conector } from '../../types/conector';
 import type { Pipeline } from '../../types/pipeline';
 import RotinaPipelineFormModal from '../../components/modals/RotinaPipelineFormModal';
@@ -18,13 +18,13 @@ function formatDateTime(dateStr?: string): string {
 
 export default function Automacao() {
   const { t } = useI18n();
-  const [rotinas, setRotinas] = useState<RotinaPipeline[]>([]);
-  const [selectedRotinas, setSelectedRotinas] = useState<RotinaPipeline[]>([]);
+  const [rotinas, setRotinas] = useState<PipelineRoutine[]>([]);
+  const [selectedRotinas, setSelectedRotinas] = useState<PipelineRoutine[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingRotina, setEditingRotina] = useState<RotinaPipeline | null>(null);
+  const [editingRotina, setEditingRotina] = useState<PipelineRoutine | null>(null);
 
-  const { execute: fetchRotinas, loading } = useApi<PaginatedResult<RotinaPipeline>>({
+  const { execute: fetchRotinas, loading } = useApi<PaginatedResult<PipelineRoutine>>({
     showErrorMessage: true,
   });
 
@@ -80,28 +80,28 @@ export default function Automacao() {
     loadRotinas();
   };
 
-  const columns: DataTableColumn<RotinaPipeline>[] = [
+  const columns: DataTableColumn<PipelineRoutine>[] = [
     {
-      key: 'conector',
+      key: 'connector',
       title: t('common.column.connector'),
-      dataIndex: 'conector',
-      render: (value: Conector) => value?.nome || '-',
+      dataIndex: 'connector',
+      render: (value: Conector) => value?.name || '-',
     },
     {
       key: 'pipeline',
       title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
-      render: (value: Pipeline) => value?.nome || '-',
+      render: (value: Pipeline) => value?.name || '-',
     },
     {
-      key: 'intervaloMinutos',
+      key: 'intervalMinutes',
       title: t('automation.list.intervalMinutes'),
-      dataIndex: 'intervaloMinutos',
+      dataIndex: 'intervalMinutes',
     },
     {
-      key: 'ativo',
+      key: 'isActive',
       title: t('common.column.active'),
-      dataIndex: 'ativo',
+      dataIndex: 'isActive',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
           {value ? t('common.boolean.yes') : t('common.boolean.no')}
@@ -109,15 +109,15 @@ export default function Automacao() {
       ),
     },
     {
-      key: 'proximaExecucao',
+      key: 'nextExecution',
       title: t('automation.list.nextExecution'),
-      dataIndex: 'proximaExecucao',
+      dataIndex: 'nextExecution',
       render: (value: string) => formatDateTime(value),
     },
     {
-      key: 'ultimaExecucao',
+      key: 'lastExecution',
       title: t('automation.list.lastExecution'),
-      dataIndex: 'ultimaExecucao',
+      dataIndex: 'lastExecution',
       render: (value: string) => formatDateTime(value),
     },
   ];

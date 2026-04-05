@@ -3,34 +3,34 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Inpu
 import { conectorService } from '../../services/conectorService';
 import { integracaoService } from '../../services/integracaoService';
 import type { Conector, CreateConectorRequest } from '../../types/conector';
-import type { Integracao } from '../../types/integracao';
+import type { Integration } from '../../types/integracao';
 
 interface ConectorFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  conector: Conector | null;
+  connector: Conector | null;
   onSuccess: () => void;
 }
 
 const initialFormData: CreateConectorRequest = {
-  sistemaId: '',
-  integracaoId: 0,
-  nome: '',
-  ativo: true,
+  systemApplicationId: '',
+  integrationId: 0,
+  name: '',
+  isActive: true,
 };
 
-export default function ConectorFormModal({ open, onOpenChange, conector, onSuccess }: ConectorFormModalProps) {
+export default function ConectorFormModal({ open, onOpenChange, connector, onSuccess }: ConectorFormModalProps) {
   const { t } = useI18n();
-  const isEditing = !!conector;
+  const isEditing = !!connector;
   const [formData, setFormData] = useState<CreateConectorRequest>(initialFormData);
-  const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
     showErrorMessage: true,
   });
 
-  const { execute: fetchIntegracoes } = useApi<Integracao[]>({
+  const { execute: fetchIntegracoes } = useApi<Integration[]>({
     showErrorMessage: true,
   });
 
@@ -41,22 +41,22 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
   }, [open]);
 
   useEffect(() => {
-    if (conector) {
+    if (connector) {
       setFormData({
-        sistemaId: conector.sistemaId || '',
-        integracaoId: conector.integracaoId || conector.integracao?.id || 0,
-        nome: conector.nome,
-        ativo: conector.ativo,
+        systemApplicationId: connector.systemApplicationId || '',
+        integrationId: connector.integrationId || connector.integration?.id || 0,
+        name: connector.name,
+        isActive: connector.isActive,
       });
     } else {
       setFormData(initialFormData);
     }
-  }, [conector]);
+  }, [connector]);
 
   const loadIntegracoes = async () => {
-    const result = await fetchIntegracoes(() => integracaoService.getAtivas());
+    const result = await fetchIntegracoes(() => integracaoService.getActive());
     if (result) {
-      setIntegracoes(result);
+      setIntegrations(result);
     }
   };
 
@@ -68,7 +68,7 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
     e.preventDefault();
     try {
       if (isEditing) {
-        await execute(() => conectorService.update(conector.id, formData));
+        await execute(() => conectorService.update(connector.id, formData));
       } else {
         await execute(() => conectorService.create(formData));
       }
@@ -91,8 +91,8 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
               <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 required
               />
             </div>
@@ -100,16 +100,16 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.integration')}</label>
               <Select
-                value={formData.integracaoId ? formData.integracaoId.toString() : ''}
-                onValueChange={(value) => handleChange('integracaoId', parseInt(value))}
+                value={formData.integrationId ? formData.integrationId.toString() : ''}
+                onValueChange={(value) => handleChange('integrationId', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('connector.form.integrationPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {integracoes.map((integracao) => (
+                  {integrations.map((integracao) => (
                     <SelectItem key={integracao.id} value={integracao.id.toString()}>
-                      {integracao.nome}
+                      {integracao.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -120,8 +120,8 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
               <label htmlFor="sistemaId" className="text-sm font-medium">{t('connector.form.systemId')}</label>
               <Input
                 id="sistemaId"
-                value={formData.sistemaId || ''}
-                onChange={(e) => handleChange('sistemaId', e.target.value)}
+                value={formData.systemApplicationId || ''}
+                onChange={(e) => handleChange('systemApplicationId', e.target.value)}
               />
             </div>
           </div>
@@ -129,8 +129,8 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
           <div className="flex items-center space-x-2">
             <Checkbox
               id="ativo"
-              checked={formData.ativo}
-              onCheckedChange={(checked) => handleChange('ativo', !!checked)}
+              checked={formData.isActive}
+              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
             />
             <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
           </div>

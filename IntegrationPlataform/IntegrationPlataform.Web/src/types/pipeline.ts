@@ -1,95 +1,95 @@
-import type { Integracao } from './integracao';
+import type { Integration } from './integracao';
 
-export const TipoEtapa = {
-  RequisicaoHttp: 1,
-  FuncaoJavaScript: 2,
-  ExecutarScript: 3,
+export const PipelineStepType = {
+  HttpRequest: 1,
+  JavaScriptFunction: 2,
+  ExecuteScript: 3,
 } as const;
 
-export type TipoEtapa = typeof TipoEtapa[keyof typeof TipoEtapa];
+export type PipelineStepType = typeof PipelineStepType[keyof typeof PipelineStepType];
 
-export const TipoEtapaLabels: Record<TipoEtapa, string> = {
-  [TipoEtapa.RequisicaoHttp]: 'Requisição HTTP',
-  [TipoEtapa.FuncaoJavaScript]: 'Função JavaScript',
-  [TipoEtapa.ExecutarScript]: 'Executar Script SQL',
+export const PipelineStepTypeLabels: Record<PipelineStepType, string> = {
+  [PipelineStepType.HttpRequest]: 'Requisição HTTP',
+  [PipelineStepType.JavaScriptFunction]: 'Função JavaScript',
+  [PipelineStepType.ExecuteScript]: 'Executar Script SQL',
 };
 
-export const AcaoErro = {
-  Parar: 1,
-  Continuar: 2,
+export const ErrorAction = {
+  Stop: 1,
+  Continue: 2,
 } as const;
 
-export type AcaoErro = typeof AcaoErro[keyof typeof AcaoErro];
+export type ErrorAction = typeof ErrorAction[keyof typeof ErrorAction];
 
-export const AcaoErroLabels: Record<AcaoErro, string> = {
-  [AcaoErro.Parar]: 'Parar',
-  [AcaoErro.Continuar]: 'Continuar',
+export const ErrorActionLabels: Record<ErrorAction, string> = {
+  [ErrorAction.Stop]: 'Parar',
+  [ErrorAction.Continue]: 'Continuar',
 };
 
 export interface Pipeline {
   id: number;
-  integracaoId: number;
-  integracao?: Integracao;
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  ativo: boolean;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  integrationId: number;
+  integration?: Integration;
+  identifier: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface PipelineEtapa {
+export interface PipelineStep {
   id: number;
   pipeline: Pipeline;
-  ordem: number;
-  nome: string;
-  tipo: TipoEtapa;
-  chamadaApi?: { id: number; nome: string };
-  funcaoJavaScript?: { id: number; nome: string };
-  scriptBancoDados?: { id: number; nome: string };
-  aoErro: AcaoErro;
-  ativo: boolean;
-  ignorarNoRetorno?: boolean;
+  order: number;
+  name: string;
+  type: PipelineStepType;
+  apiCall?: { id: number; name: string };
+  javaScriptFunction?: { id: number; name: string };
+  databaseScript?: { id: number; name: string };
+  errorAction: ErrorAction;
+  isActive: boolean;
+  ignoreOnResponse?: boolean;
 }
 
 export interface CreatePipelineRequest {
-  integracaoId: number;
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  ativo: boolean;
+  integrationId: number;
+  identifier: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
 }
 
 export interface UpdatePipelineRequest {
-  integracaoId: number;
-  identificador: string;
-  nome: string;
-  descricao?: string;
-  ativo: boolean;
+  integrationId: number;
+  identifier: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
 }
 
-export interface CreatePipelineEtapaRequest {
+export interface CreatePipelineStepRequest {
   pipelineId: number;
-  ordem: number;
-  nome: string;
-  tipo: TipoEtapa;
-  chamadaApiId?: number;
-  funcaoJavaScriptId?: number;
-  scriptBancoDadosId?: number;
-  aoErro: AcaoErro;
-  ativo: boolean;
-  ignorarNoRetorno?: boolean;
+  order: number;
+  name: string;
+  type: PipelineStepType;
+  apiCallId?: number;
+  javaScriptFunctionId?: number;
+  databaseScriptId?: number;
+  errorAction: ErrorAction;
+  isActive: boolean;
+  ignoreOnResponse?: boolean;
 }
 
-export interface UpdatePipelineEtapaRequest {
+export interface UpdatePipelineStepRequest {
   pipelineId: number;
-  ordem: number;
-  nome: string;
-  tipo: TipoEtapa;
-  chamadaApiId?: number;
-  funcaoJavaScriptId?: number;
-  scriptBancoDadosId?: number;
-  aoErro: AcaoErro;
-  ativo: boolean;
-  ignorarNoRetorno?: boolean;
+  order: number;
+  name: string;
+  type: PipelineStepType;
+  apiCallId?: number;
+  javaScriptFunctionId?: number;
+  databaseScriptId?: number;
+  errorAction: ErrorAction;
+  isActive: boolean;
+  ignoreOnResponse?: boolean;
 }

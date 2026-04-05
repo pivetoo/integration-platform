@@ -85,13 +85,16 @@ namespace IntegrationPlataform.Api.Controllers
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
+            DatabaseScriptContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
             DatabaseScript? script = await databaseScriptService.Delete(id, cancellationToken);
             if (script is null)
             {
                 return Http404(databaseScriptService.GetErrorMessages());
             }
 
-            return Http200(script, Localizer["database.script.deleted"]);
+            return Http200(contract ?? DatabaseScriptContract.Projection.Compile()(script), Localizer["database.script.deleted"]);
         }
     }
 }

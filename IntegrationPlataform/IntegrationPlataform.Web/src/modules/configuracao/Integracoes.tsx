@@ -5,20 +5,20 @@ import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } fr
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { integracaoService } from '../../services/integracaoService';
-import type { Integracao, IntegracaoExportModel } from '../../types/integracao';
-import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
+import type { Integration, IntegrationExportModel } from '../../types/integracao';
+import type { IntegrationCategory } from '../../types/categoriaIntegracao';
 import IntegracaoFormModal from '../../components/modals/IntegracaoFormModal';
 
 export default function Integracoes() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
-  const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integracao[]>([]);
+  const [integracoes, setIntegracoes] = useState<Integration[]>([]);
+  const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integration[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingIntegracao, setEditingIntegracao] = useState<Integracao | null>(null);
+  const [editingIntegracao, setEditingIntegracao] = useState<Integration | null>(null);
 
-  const { execute: fetchIntegracoes, loading } = useApi<PaginatedResult<Integracao>>({
+  const { execute: fetchIntegracoes, loading } = useApi<PaginatedResult<Integration>>({
     showErrorMessage: true,
   });
 
@@ -30,7 +30,7 @@ export default function Integracoes() {
     },
   });
 
-  const { execute: exportarIntegracao } = useApi<IntegracaoExportModel>({
+  const { execute: exportarIntegracao } = useApi<IntegrationExportModel>({
     showErrorMessage: true,
   });
 
@@ -64,7 +64,7 @@ export default function Integracoes() {
     }
   };
 
-  const handleRowDoubleClick = (integracao: Integracao) => {
+  const handleRowDoubleClick = (integracao: Integration) => {
     navigate(`/integracoes/${integracao.id}`);
   };
 
@@ -93,14 +93,14 @@ export default function Integracoes() {
       return;
     }
 
-    const result = await exportarIntegracao(() => integracaoService.exportar(selectedIntegracoes[0].id));
+    const result = await exportarIntegracao(() => integracaoService.export(selectedIntegracoes[0].id));
     if (result) {
       const json = JSON.stringify(result, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${result.identificador}.json`;
+      link.download = `${result.identifier}.json`;
       link.click();
       URL.revokeObjectURL(url);
       toast({ title: 'Sucesso', description: 'Integração exportada com sucesso', variant: 'success' });
@@ -119,8 +119,8 @@ export default function Integracoes() {
 
     try {
       const text = await file.text();
-      const data: IntegracaoExportModel = JSON.parse(text);
-      await importarIntegracao(() => integracaoService.importar(data));
+      const data: IntegrationExportModel = JSON.parse(text);
+      await importarIntegracao(() => integracaoService.import(data));
       loadIntegracoes();
     } catch {
       toast({ title: 'Erro', description: 'Arquivo JSON inválido', variant: 'destructive' });
@@ -131,19 +131,19 @@ export default function Integracoes() {
     }
   };
 
-  const columns: DataTableColumn<Integracao>[] = [
-    { key: 'identificador', title: t('common.column.identifier'), dataIndex: 'identificador' },
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+  const columns: DataTableColumn<Integration>[] = [
+    { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {
-      key: 'categoria',
+      key: 'integrationCategory',
       title: t('common.column.category'),
-      dataIndex: 'categoria',
-      render: (value: CategoriaIntegracao) => value?.nome || '-',
+      dataIndex: 'integrationCategory',
+      render: (value: IntegrationCategory) => value?.name || '-',
     },
     {
-      key: 'ativo',
+      key: 'isActive',
       title: t('common.column.active'),
-      dataIndex: 'ativo',
+      dataIndex: 'isActive',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
           {value ? t('common.boolean.yes') : t('common.boolean.no')}

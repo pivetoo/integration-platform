@@ -1,41 +1,41 @@
-import type { AcaoErro, TipoEtapa } from './pipeline';
+import type { ErrorAction, PipelineStepType } from './pipeline';
 
-export const NivelLog = {
+export const LogLevel = {
   Debug: 1,
   Info: 2,
   Warning: 3,
   Error: 4,
 } as const;
 
-export type NivelLog = typeof NivelLog[keyof typeof NivelLog];
+export type LogLevel = typeof LogLevel[keyof typeof LogLevel];
 
-export const NivelLogLabels: Record<NivelLog, string> = {
-  [NivelLog.Debug]: 'Debug',
-  [NivelLog.Info]: 'Info',
-  [NivelLog.Warning]: 'Warning',
-  [NivelLog.Error]: 'Error',
+export const LogLevelLabels: Record<LogLevel, string> = {
+  [LogLevel.Debug]: 'Debug',
+  [LogLevel.Info]: 'Info',
+  [LogLevel.Warning]: 'Warning',
+  [LogLevel.Error]: 'Error',
 };
 
-export interface ExecucaoLogEtapa {
+export interface ExecutionLogStep {
   id: number;
-  ordem: number;
-  nome: string;
-  tipo: TipoEtapa;
-  aoErro: AcaoErro;
-  ativo: boolean;
-  ignorarNoRetorno: boolean;
+  order: number;
+  name: string;
+  type: PipelineStepType;
+  errorAction: ErrorAction;
+  isActive: boolean;
+  ignoreOnResponse: boolean;
 }
 
-export interface ExecucaoLog {
+export interface ExecutionLog {
   id: number;
-  execucaoId: number;
-  pipelineEtapa?: ExecucaoLogEtapa;
-  nivel: NivelLog;
-  mensagem: string;
-  contexto?: string;
-  requisicao?: string;
-  resposta?: string;
-  statusHttpCode?: number;
-  duracao?: number;
-  criadoEm: string;
+  executionId: number;
+  pipelineStep?: ExecutionLogStep;
+  level: LogLevel;
+  message: string;
+  context?: string;
+  request?: string;
+  response?: string;
+  httpStatusCode?: number;
+  duration?: number;
+  createdAt: string;
 }

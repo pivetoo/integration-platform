@@ -66,8 +66,8 @@ export const dashboardService = {
         pipeline: item.pipeline,
         conector: item.connector,
         status: item.status,
-        duracao: item.duration,
-        iniciadoEm: item.startedAt,
+        duration: item.duration,
+        startedAt: item.startedAt,
       })),
     };
   },

@@ -3,8 +3,8 @@ import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } fr
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { filaProcessamentoService } from '../../services/filaProcessamentoService';
-import { StatusProcessamentoLabels } from '../../types/filaProcessamento';
-import type { FilaProcessamento as FilaProcessamentoType, StatusProcessamento } from '../../types/filaProcessamento';
+import { ProcessingStatusLabels } from '../../types/filaProcessamento';
+import type { ProcessingQueueItem, ProcessingStatus } from '../../types/filaProcessamento';
 import type { Conector } from '../../types/conector';
 import type { Pipeline } from '../../types/pipeline';
 import FilaFormModal from '../../components/modals/FilaFormModal';
@@ -26,12 +26,12 @@ function formatDateTime(dateStr?: string): string {
 
 export default function FilaProcessamento() {
   const { t } = useI18n();
-  const [itens, setItens] = useState<FilaProcessamentoType[]>([]);
-  const [selectedItens, setSelectedItens] = useState<FilaProcessamentoType[]>([]);
+  const [itens, setItens] = useState<ProcessingQueueItem[]>([]);
+  const [selectedItens, setSelectedItens] = useState<ProcessingQueueItem[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  const { execute: fetchItens, loading } = useApi<PaginatedResult<FilaProcessamentoType>>({
+  const { execute: fetchItens, loading } = useApi<PaginatedResult<ProcessingQueueItem>>({
     showErrorMessage: true,
   });
 
@@ -77,44 +77,44 @@ export default function FilaProcessamento() {
     loadItens();
   };
 
-  const columns: DataTableColumn<FilaProcessamentoType>[] = [
+  const columns: DataTableColumn<ProcessingQueueItem>[] = [
     {
-      key: 'conector',
+      key: 'connector',
       title: t('common.column.connector'),
-      dataIndex: 'conector',
-      render: (value: Conector) => value?.nome || '-',
+      dataIndex: 'connector',
+      render: (value: Conector) => value?.name || '-',
     },
     {
       key: 'pipeline',
       title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
-      render: (value: Pipeline) => value?.nome || '-',
+      render: (value: Pipeline) => value?.name || '-',
     },
     {
-      key: 'prioridade',
+      key: 'priority',
       title: t('common.column.priority'),
-      dataIndex: 'prioridade',
+      dataIndex: 'priority',
     },
     {
       key: 'status',
       title: t('common.column.status'),
       dataIndex: 'status',
-      render: (value: StatusProcessamento) => (
+      render: (value: ProcessingStatus) => (
         <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'info' | 'success' | 'destructive' | 'secondary'}>
-          {StatusProcessamentoLabels[value] || '-'}
+          {ProcessingStatusLabels[value] || '-'}
         </Badge>
       ),
     },
     {
-      key: 'agendamento',
+      key: 'scheduledAt',
       title: t('common.column.scheduledAt'),
-      dataIndex: 'agendamento',
+      dataIndex: 'scheduledAt',
       render: (value: string) => formatDateTime(value),
     },
     {
-      key: 'criadoEm',
+      key: 'createdAt',
       title: t('common.column.createdAt'),
-      dataIndex: 'criadoEm',
+      dataIndex: 'createdAt',
       render: (value: string) => formatDateTime(value),
     },
   ];

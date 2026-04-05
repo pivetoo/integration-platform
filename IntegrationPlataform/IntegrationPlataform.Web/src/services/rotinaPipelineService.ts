@@ -1,13 +1,13 @@
 import { buildPaginationQuery, httpClient } from 'archon-ui';
 import type { PaginatedResult, PaginationParams } from '../types/pagination';
-import type { RotinaPipeline, CreateRotinaPipelineRequest, UpdateRotinaPipelineRequest } from '../types/rotinaPipeline';
+import type { PipelineRoutine, CreatePipelineRoutineRequest, UpdatePipelineRoutineRequest } from '../types/rotinaPipeline';
 
-const BASE_URL = '/rotinapipeline';
+const BASE_URL = '/PipelineRoutines';
 
 export const rotinaPipelineService = {
-  getAll: async (params?: PaginationParams): Promise<PaginatedResult<RotinaPipeline>> => {
+  getAll: async (params?: PaginationParams): Promise<PaginatedResult<PipelineRoutine>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<RotinaPipeline[]>(`${BASE_URL}/Get${query}`);
+    const response = await httpClient.get<PipelineRoutine[]>(`${BASE_URL}/Get${query}`);
     return {
       data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,
@@ -16,12 +16,12 @@ export const rotinaPipelineService = {
     };
   },
 
-  create: (data: CreateRotinaPipelineRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
+  create: (data: CreatePipelineRoutineRequest) =>
+    httpClient.post<PipelineRoutine>(`${BASE_URL}/Create`, data),
 
-  update: (id: number, data: UpdateRotinaPipelineRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+  update: (id: number, data: UpdatePipelineRoutineRequest) =>
+    httpClient.put<PipelineRoutine>(`${BASE_URL}/${id}`, data),
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<PipelineRoutine>(`${BASE_URL}/${id}`),
 };

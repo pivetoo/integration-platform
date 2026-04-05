@@ -1,35 +1,45 @@
-export const TipoBancoDados = {
+export const DatabaseType = {
   PostgreSQL: 1,
   SqlServer: 2,
   Oracle: 3,
   MySQL: 4,
 } as const;
 
-export type TipoBancoDados = typeof TipoBancoDados[keyof typeof TipoBancoDados];
+export type DatabaseType = typeof DatabaseType[keyof typeof DatabaseType];
 
-export const TipoBancoDadosLabels: Record<TipoBancoDados, string> = {
-  [TipoBancoDados.PostgreSQL]: 'PostgreSQL',
-  [TipoBancoDados.SqlServer]: 'SQL Server',
-  [TipoBancoDados.Oracle]: 'Oracle',
-  [TipoBancoDados.MySQL]: 'MySQL',
+export const DatabaseTypeLabels: Record<DatabaseType, string> = {
+  [DatabaseType.PostgreSQL]: 'PostgreSQL',
+  [DatabaseType.SqlServer]: 'SQL Server',
+  [DatabaseType.Oracle]: 'Oracle',
+  [DatabaseType.MySQL]: 'MySQL',
 };
 
-export interface ConexaoBancoDados {
+export interface DatabaseConnection {
   id: number;
-  nome: string;
-  tipo: TipoBancoDados;
+  name: string;
+  type: DatabaseType;
   host: string;
   port: number;
   database: string;
   username: string;
   password: string;
-  criadoEm: string;
-  ultimaAlteracao?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateConexaoBancoDadosRequest {
-  nome: string;
-  tipo: TipoBancoDados;
+export interface CreateDatabaseConnectionRequest {
+  name: string;
+  type: DatabaseType;
+  host: string;
+  port: number;
+  database: string;
+  username: string;
+  password: string;
+}
+
+export interface UpdateDatabaseConnectionRequest {
+  name: string;
+  type: DatabaseType;
   host: string;
   port: number;
   database: string;

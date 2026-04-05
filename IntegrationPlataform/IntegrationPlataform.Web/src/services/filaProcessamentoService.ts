@@ -1,13 +1,13 @@
 import { buildPaginationQuery, httpClient } from 'archon-ui';
 import type { PaginatedResult, PaginationParams } from '../types/pagination';
-import type { FilaProcessamento, CreateFilaProcessamentoRequest, UpdateFilaProcessamentoRequest } from '../types/filaProcessamento';
+import type { ProcessingQueueItem, CreateProcessingQueueItemRequest } from '../types/filaProcessamento';
 
-const BASE_URL = '/filaprocessamento';
+const BASE_URL = '/ProcessingQueues';
 
 export const filaProcessamentoService = {
-  getAll: async (params?: PaginationParams): Promise<PaginatedResult<FilaProcessamento>> => {
+  getAll: async (params?: PaginationParams): Promise<PaginatedResult<ProcessingQueueItem>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<FilaProcessamento[]>(`${BASE_URL}/Get${query}`);
+    const response = await httpClient.get<ProcessingQueueItem[]>(`${BASE_URL}/Get${query}`);
     return {
       data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,
@@ -16,16 +16,18 @@ export const filaProcessamentoService = {
     };
   },
 
-  getById: (id: number) => httpClient.get<FilaProcessamento>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<ProcessingQueueItem>(`${BASE_URL}/${id}`),
 
-  getPendentes: () => httpClient.get<FilaProcessamento[]>(`${BASE_URL}/pendentes`),
+  getPending: async () => httpClient.get<ProcessingQueueItem[]>(`${BASE_URL}/pending`),
 
-  create: (data: CreateFilaProcessamentoRequest) =>
-    httpClient.post<{ id: number; message: string }>(`${BASE_URL}/Create`, data),
-
-  update: (id: number, data: UpdateFilaProcessamentoRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, data),
+  create: (data: CreateProcessingQueueItemRequest) =>
+    httpClient.post<ProcessingQueueItem>(`${BASE_URL}/enqueue`, {
+      connectorId: data.connectorId,
+      pipelineId: data.pipelineId,
+      payload: data.payload,
+      priority: data.priority,
+    }),
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<ProcessingQueueItem>(`${BASE_URL}/${id}`),
 };

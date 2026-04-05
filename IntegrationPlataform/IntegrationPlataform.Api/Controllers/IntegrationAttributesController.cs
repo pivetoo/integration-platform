@@ -1,5 +1,7 @@
 using Archon.Api.Attributes;
 using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
+using IntegrationPlataform.Api.Contracts.IntegrationAttributes;
 using IntegrationPlataform.Application.Requests.IntegrationAttributes;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -17,18 +19,32 @@ namespace IntegrationPlataform.Api.Controllers
             this.integrationAttributeService = integrationAttributeService;
         }
 
+        private IQueryable<IntegrationAttributeContract> QueryContracts()
+        {
+            return DbContext.Set<IntegrationAttribute>()
+                .AsNoTracking()
+                .Select(IntegrationAttributeContract.Projection);
+        }
+
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            var result = await QueryContracts()
+                .OrderBy(item => item.Order)
+                .ToPagedResultAsync(request, cancellationToken);
+
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            IntegrationAttributeContract? attribute = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            return attribute is null ? Http404(Localizer["integration.attribute.notFound"]) : Http200(attribute);
         }
 
         [RequireAccess]
@@ -40,8 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.integration.id.required"]);
             }
 
-            List<IntegrationAttribute> attributes = await DbContext.Set<IntegrationAttribute>()
-                .AsNoTracking()
+            List<IntegrationAttributeContract> attributes = await QueryContracts()
                 .Where(item => item.IntegrationId == integrationId)
                 .OrderBy(item => item.Order)
                 .ToListAsync(cancellationToken);
@@ -78,7 +93,10 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http201(attribute, Localizer["integration.attribute.created"]);
+            IntegrationAttributeContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == attribute.Id, cancellationToken);
+
+            return Http201(contract ?? IntegrationAttributeContract.Projection.Compile()(attribute), Localizer["integration.attribute.created"]);
         }
 
         [RequireAccess]
@@ -122,20 +140,26 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http200(updatedAttribute, Localizer["integration.attribute.updated"]);
+            IntegrationAttributeContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == updatedAttribute.Id, cancellationToken);
+
+            return Http200(contract ?? IntegrationAttributeContract.Projection.Compile()(updatedAttribute), Localizer["integration.attribute.updated"]);
         }
 
         [RequireAccess]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
+            IntegrationAttributeContract? contract = await QueryContracts()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
             IntegrationAttribute? attribute = await integrationAttributeService.Delete(id, cancellationToken);
             if (attribute is null)
             {
                 return Http404(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http200(attribute, Localizer["integration.attribute.deleted"]);
+            return Http200(contract ?? IntegrationAttributeContract.Projection.Compile()(attribute), Localizer["integration.attribute.deleted"]);
         }
     }
 }

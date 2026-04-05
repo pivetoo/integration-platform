@@ -3,18 +3,18 @@ import { PageLayout, DataTable, ConfirmModal, Badge, useApi, useI18n, toast } fr
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
-import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
+import type { IntegrationCategory } from '../../types/categoriaIntegracao';
 import CategoriaIntegracaoFormModal from '../../components/modals/CategoriaIntegracaoFormModal';
 
 export default function CategoriasIntegracao() {
   const { t } = useI18n();
-  const [categorias, setCategorias] = useState<CategoriaIntegracao[]>([]);
-  const [selectedCategorias, setSelectedCategorias] = useState<CategoriaIntegracao[]>([]);
+  const [categorias, setCategorias] = useState<IntegrationCategory[]>([]);
+  const [selectedCategorias, setSelectedCategorias] = useState<IntegrationCategory[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCategoria, setEditingCategoria] = useState<CategoriaIntegracao | null>(null);
+  const [editingCategoria, setEditingCategoria] = useState<IntegrationCategory | null>(null);
 
-  const { execute: fetchCategorias, loading } = useApi<PaginatedResult<CategoriaIntegracao>>({
+  const { execute: fetchCategorias, loading } = useApi<PaginatedResult<IntegrationCategory>>({
     showErrorMessage: true,
   });
 
@@ -69,13 +69,13 @@ export default function CategoriasIntegracao() {
     loadCategorias();
   };
 
-  const columns: DataTableColumn<CategoriaIntegracao>[] = [
-    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
-    { key: 'descricao', title: t('common.column.description'), dataIndex: 'descricao' },
+  const columns: DataTableColumn<IntegrationCategory>[] = [
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'description', title: t('common.column.description'), dataIndex: 'description' },
     {
-      key: 'ativo',
+      key: 'isActive',
       title: t('common.column.status'),
-      dataIndex: 'ativo',
+      dataIndex: 'isActive',
       width: 120,
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'secondary'}>

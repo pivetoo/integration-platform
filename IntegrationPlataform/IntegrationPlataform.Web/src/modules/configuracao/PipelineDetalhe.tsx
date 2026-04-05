@@ -8,20 +8,20 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { CSS } from '@dnd-kit/utilities';
 import { pipelineService } from '../../services/pipelineService';
 import { pipelineEtapaService } from '../../services/pipelineEtapaService';
-import { TipoEtapaLabels, AcaoErroLabels } from '../../types/pipeline';
-import type { Pipeline, PipelineEtapa } from '../../types/pipeline';
+import { PipelineStepTypeLabels, ErrorActionLabels } from '../../types/pipeline';
+import type { Pipeline, PipelineStep } from '../../types/pipeline';
 import PipelineEtapaFormModal from '../../components/modals/PipelineEtapaFormModal';
 import PipelineDebuggerModal from '../../components/modals/PipelineDebuggerModal';
 
 interface SortableEtapaProps {
-  etapa: PipelineEtapa;
+  step: PipelineStep;
   selected: boolean;
-  onSelect: (etapaId: number) => void;
-  onEdit: (etapa: PipelineEtapa) => void;
-  onDelete: (etapa: PipelineEtapa) => void;
+  onSelect: (stepId: number) => void;
+  onEdit: (step: PipelineStep) => void;
+  onDelete: (step: PipelineStep) => void;
 }
 
-function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: SortableEtapaProps) {
+function SortableEtapa({ step, selected, onSelect, onEdit, onDelete }: SortableEtapaProps) {
   const {
     attributes,
     listeners,
@@ -29,7 +29,7 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: etapa.id });
+  } = useSortable({ id: step.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -43,11 +43,11 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
       tabIndex={0}
       ref={setNodeRef}
       style={style}
-      onClick={() => onSelect(etapa.id)}
+      onClick={() => onSelect(step.id)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          onSelect(etapa.id);
+          onSelect(step.id);
         }
       }}
       className={[
@@ -68,19 +68,19 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
         </span>
 
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-          {etapa.ordem}
+          {step.order}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-semibold text-foreground">{etapa.nome}</span>
-            <Badge variant={etapa.ativo ? 'success' : 'destructive'}>{etapa.ativo ? 'Ativo' : 'Inativo'}</Badge>
+            <span className="truncate text-sm font-semibold text-foreground">{step.name}</span>
+            <Badge variant={step.isActive ? 'success' : 'destructive'}>{step.isActive ? 'Ativo' : 'Inativo'}</Badge>
           </div>
 
           <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
-            <Badge variant="outline">{TipoEtapaLabels[etapa.tipo]}</Badge>
-            <Badge variant="outline">Ao erro: {AcaoErroLabels[etapa.aoErro]}</Badge>
-            {etapa.ignorarNoRetorno && <Badge variant="outline">Ignorar retorno</Badge>}
+            <Badge variant="outline">{PipelineStepTypeLabels[step.type]}</Badge>
+            <Badge variant="outline">Ao erro: {ErrorActionLabels[step.errorAction]}</Badge>
+            {step.ignoreOnResponse && <Badge variant="outline">Ignorar retorno</Badge>}
           </div>
         </div>
 
@@ -90,7 +90,7 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
             size="sm"
             onClick={(event) => {
               event.stopPropagation();
-              onEdit(etapa);
+              onEdit(step);
             }}
           >
             <Pencil size={14} />
@@ -100,7 +100,7 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
             size="sm"
             onClick={(event) => {
               event.stopPropagation();
-              onDelete(etapa);
+              onDelete(step);
             }}
           >
             <Trash2 size={14} className="text-destructive" />
@@ -115,18 +115,18 @@ export default function PipelineDetalhe() {
   const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
-  const [etapas, setEtapas] = useState<PipelineEtapa[]>([]);
-  const [selectedEtapaId, setSelectedEtapaId] = useState<number | null>(null);
-  const [isEtapaFormOpen, setIsEtapaFormOpen] = useState(false);
-  const [editingEtapa, setEditingEtapa] = useState<PipelineEtapa | null>(null);
-  const [deletingEtapa, setDeletingEtapa] = useState<PipelineEtapa | null>(null);
+  const [steps, setSteps] = useState<PipelineStep[]>([]);
+  const [selectedStepId, setSelectedStepId] = useState<number | null>(null);
+  const [isStepFormOpen, setIsStepFormOpen] = useState(false);
+  const [editingStep, setEditingStep] = useState<PipelineStep | null>(null);
+  const [deletingStep, setDeletingStep] = useState<PipelineStep | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDebuggerOpen, setIsDebuggerOpen] = useState(false);
 
   const { execute: fetchPipeline } = useApi<Pipeline>({ showErrorMessage: true });
-  const { execute: fetchEtapas } = useApi<PipelineEtapa[]>({ showErrorMessage: true });
-  const { execute: reorderEtapas } = useApi({ showSuccessMessage: true, showErrorMessage: true });
-  const { execute: deleteEtapa } = useApi({
+  const { execute: fetchSteps } = useApi<PipelineStep[]>({ showErrorMessage: true });
+  const { execute: reorderSteps } = useApi({ showSuccessMessage: true, showErrorMessage: true });
+  const { execute: deleteStep } = useApi({
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
@@ -141,9 +141,9 @@ export default function PipelineDetalhe() {
 
   const pipelineId = parseInt(id || '0');
 
-  const selectedEtapa = useMemo(
-    () => etapas.find((etapa) => etapa.id === selectedEtapaId) ?? null,
-    [etapas, selectedEtapaId]
+  const selectedStep = useMemo(
+    () => steps.find((step) => step.id === selectedStepId) ?? null,
+    [steps, selectedStepId]
   );
 
   const loadPipeline = async () => {
@@ -153,19 +153,19 @@ export default function PipelineDetalhe() {
     }
   };
 
-  const loadEtapas = async () => {
-    const result = await fetchEtapas(() => pipelineEtapaService.getByPipeline(pipelineId));
+  const loadSteps = async () => {
+    const result = await fetchSteps(() => pipelineEtapaService.getByPipeline(pipelineId));
     if (result) {
-      const sorted = [...result].sort((a, b) => a.ordem - b.ordem);
-      setEtapas(sorted);
+      const sorted = [...result].sort((a, b) => a.order - b.order);
+      setSteps(sorted);
 
       if (sorted.length === 0) {
-        setSelectedEtapaId(null);
+        setSelectedStepId(null);
         return;
       }
 
-      setSelectedEtapaId((prev) => {
-        if (prev && sorted.some((etapa) => etapa.id === prev)) {
+      setSelectedStepId((prev) => {
+        if (prev && sorted.some((step) => step.id === prev)) {
           return prev;
         }
         return sorted[0].id;
@@ -176,7 +176,7 @@ export default function PipelineDetalhe() {
   useEffect(() => {
     if (pipelineId) {
       loadPipeline();
-      loadEtapas();
+      loadSteps();
     }
   }, [pipelineId]);
 
@@ -187,71 +187,71 @@ export default function PipelineDetalhe() {
       return;
     }
 
-    const oldIndex = etapas.findIndex((etapa) => etapa.id === active.id);
-    const newIndex = etapas.findIndex((etapa) => etapa.id === over.id);
+    const oldIndex = steps.findIndex((step) => step.id === active.id);
+    const newIndex = steps.findIndex((step) => step.id === over.id);
 
     if (oldIndex < 0 || newIndex < 0) {
       return;
     }
 
-    const previousEtapas = [...etapas];
-    const reorderedEtapas = [...etapas];
-    const [removed] = reorderedEtapas.splice(oldIndex, 1);
-    reorderedEtapas.splice(newIndex, 0, removed);
+    const previousSteps = [...steps];
+    const reorderedSteps = [...steps];
+    const [removed] = reorderedSteps.splice(oldIndex, 1);
+    reorderedSteps.splice(newIndex, 0, removed);
 
-    const normalized = reorderedEtapas.map((etapa, index) => ({ ...etapa, ordem: index + 1 }));
-    setEtapas(normalized);
+    const normalized = reorderedSteps.map((step, index) => ({ ...step, order: index + 1 }));
+    setSteps(normalized);
 
     try {
-      await reorderEtapas(() =>
-        pipelineEtapaService.reorder(normalized.map((etapa) => ({ id: etapa.id, ordem: etapa.ordem })))
+      await reorderSteps(() =>
+        pipelineEtapaService.reorder(normalized.map((step) => ({ id: step.id, order: step.order })))
       );
     } catch {
-      setEtapas(previousEtapas);
-      loadEtapas();
+      setSteps(previousSteps);
+      loadSteps();
     }
   };
 
-  const handleAddEtapa = () => {
-    setEditingEtapa(null);
-    setIsEtapaFormOpen(true);
+  const handleAddStep = () => {
+    setEditingStep(null);
+    setIsStepFormOpen(true);
   };
 
-  const handleEditEtapa = (etapa: PipelineEtapa) => {
-    setEditingEtapa(etapa);
-    setIsEtapaFormOpen(true);
+  const handleEditStep = (step: PipelineStep) => {
+    setEditingStep(step);
+    setIsStepFormOpen(true);
   };
 
-  const handleDeleteEtapa = (etapa: PipelineEtapa) => {
-    setDeletingEtapa(etapa);
+  const handleDeleteStep = (step: PipelineStep) => {
+    setDeletingStep(step);
     setIsConfirmOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!deletingEtapa) {
+    if (!deletingStep) {
       return;
     }
 
-    await deleteEtapa(() => pipelineEtapaService.delete(deletingEtapa.id));
+    await deleteStep(() => pipelineEtapaService.delete(deletingStep.id));
 
     setIsConfirmOpen(false);
-    setDeletingEtapa(null);
-    loadEtapas();
+    setDeletingStep(null);
+    loadSteps();
   };
 
-  const handleEtapaFormSuccess = () => {
-    setIsEtapaFormOpen(false);
-    setEditingEtapa(null);
-    loadEtapas();
+  const handleStepFormSuccess = () => {
+    setIsStepFormOpen(false);
+    setEditingStep(null);
+    loadSteps();
   };
 
   return (
     <PageLayout
-      title={pipeline?.nome || t('pipeline.detail.fallbackTitle')}
+      title={pipeline?.name || t('pipeline.detail.fallbackTitle')}
       subtitle={t('pipeline.detail.subtitle')}
       onRefresh={() => {
         loadPipeline();
-        loadEtapas();
+        loadSteps();
       }}
       showDefaultActions={false}
       actions={[
@@ -267,7 +267,7 @@ export default function PipelineDetalhe() {
           label: t('pipeline.detail.newStepAction'),
           icon: <Plus size={16} />,
           variant: 'secondary',
-          onClick: handleAddEtapa,
+          onClick: handleAddStep,
         },
       ]}
     >
@@ -276,17 +276,17 @@ export default function PipelineDetalhe() {
           <div className="grid grid-cols-2 gap-4 rounded-lg border bg-card p-4 md:grid-cols-3">
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.identifier')}</span>
-              <p className="font-medium">{pipeline.identificador}</p>
+              <p className="font-medium">{pipeline.identifier}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.integration')}</span>
-              <p className="font-medium">{pipeline.integracao?.nome || '-'}</p>
+              <p className="font-medium">{pipeline.integration?.name || '-'}</p>
             </div>
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
-                <Badge variant={pipeline.ativo ? 'success' : 'destructive'}>
-                  {pipeline.ativo ? t('common.status.active') : t('common.status.inactive')}
+                <Badge variant={pipeline.isActive ? 'success' : 'destructive'}>
+                  {pipeline.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>
             </div>
@@ -300,23 +300,23 @@ export default function PipelineDetalhe() {
               <p className="text-sm text-muted-foreground">{t('pipeline.detail.stepsDescription')}</p>
             </CardHeader>
             <CardContent>
-              {etapas.length === 0 ? (
+              {steps.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10 text-muted-foreground">
                   <Workflow size={42} className="mb-3 opacity-50" />
                   <p>{t('pipeline.detail.emptyTitle')}</p>
                 </div>
               ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={etapas.map((etapa) => etapa.id)} strategy={verticalListSortingStrategy}>
+                  <SortableContext items={steps.map((step) => step.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2">
-                      {etapas.map((etapa) => (
+                      {steps.map((step) => (
                         <SortableEtapa
-                          key={etapa.id}
-                          etapa={etapa}
-                          selected={selectedEtapaId === etapa.id}
-                          onSelect={setSelectedEtapaId}
-                          onEdit={handleEditEtapa}
-                          onDelete={handleDeleteEtapa}
+                          key={step.id}
+                          step={step}
+                          selected={selectedStepId === step.id}
+                          onSelect={setSelectedStepId}
+                          onEdit={handleEditStep}
+                          onDelete={handleDeleteStep}
                         />
                       ))}
                     </div>
@@ -331,7 +331,7 @@ export default function PipelineDetalhe() {
               <CardTitle className="text-base">{t('pipeline.detail.stepDetailsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
-              {!selectedEtapa ? (
+              {!selectedStep ? (
                 <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
                   {t('pipeline.detail.selectStep')}
                 </div>
@@ -339,15 +339,15 @@ export default function PipelineDetalhe() {
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-lg font-semibold">{selectedEtapa.nome}</p>
-                      <p className="text-sm text-muted-foreground">{t('pipeline.detail.orderLabel')} {selectedEtapa.ordem}</p>
+                      <p className="text-lg font-semibold">{selectedStep.name}</p>
+                      <p className="text-sm text-muted-foreground">{t('pipeline.detail.orderLabel')} {selectedStep.order}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEditEtapa(selectedEtapa)}>
+                      <Button size="sm" variant="outline" onClick={() => handleEditStep(selectedStep)}>
                         <Pencil size={14} className="mr-1.5" />
                         {t('common.action.edit')}
                       </Button>
-                      <Button size="sm" variant="outline-danger" onClick={() => handleDeleteEtapa(selectedEtapa)}>
+                      <Button size="sm" variant="outline-danger" onClick={() => handleDeleteStep(selectedStep)}>
                         <Trash2 size={14} className="mr-1.5" />
                         {t('common.action.delete')}
                       </Button>
@@ -355,26 +355,26 @@ export default function PipelineDetalhe() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={selectedEtapa.ativo ? 'success' : 'destructive'}>
-                      {selectedEtapa.ativo ? t('common.status.active') : t('common.status.inactive')}
+                    <Badge variant={selectedStep.isActive ? 'success' : 'destructive'}>
+                      {selectedStep.isActive ? t('common.status.active') : t('common.status.inactive')}
                     </Badge>
-                    <Badge variant="outline">{TipoEtapaLabels[selectedEtapa.tipo]}</Badge>
-                    <Badge variant="outline">{t('pipeline.detail.onErrorLabel')}: {AcaoErroLabels[selectedEtapa.aoErro]}</Badge>
-                    {selectedEtapa.ignorarNoRetorno && <Badge variant="outline">{t('pipeline.detail.ignoreReturn')}</Badge>}
+                    <Badge variant="outline">{PipelineStepTypeLabels[selectedStep.type]}</Badge>
+                    <Badge variant="outline">{t('pipeline.detail.onErrorLabel')}: {ErrorActionLabels[selectedStep.errorAction]}</Badge>
+                    {selectedStep.ignoreOnResponse && <Badge variant="outline">{t('pipeline.detail.ignoreReturn')}</Badge>}
                   </div>
 
                   <div className="grid gap-3 rounded-lg border p-3 md:grid-cols-2">
                     <div>
                       <p className="text-xs text-muted-foreground">{t('pipeline.detail.apiCall')}</p>
-                      <p className="text-sm font-medium">{selectedEtapa.chamadaApi?.nome || '-'}</p>
+                      <p className="text-sm font-medium">{selectedStep.apiCall?.name || '-'}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">{t('pipeline.detail.javaScriptFunction')}</p>
-                      <p className="text-sm font-medium">{selectedEtapa.funcaoJavaScript?.nome || '-'}</p>
+                      <p className="text-sm font-medium">{selectedStep.javaScriptFunction?.name || '-'}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">{t('pipeline.detail.sqlScript')}</p>
-                      <p className="text-sm font-medium">{selectedEtapa.scriptBancoDados?.nome || '-'}</p>
+                      <p className="text-sm font-medium">{selectedStep.databaseScript?.name || '-'}</p>
                     </div>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export default function PipelineDetalhe() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('pipeline.detail.deleteStepTitle')}
-        description={t('pipeline.detail.deleteStepDescription').replace('{0}', deletingEtapa?.nome || '')}
+        description={t('pipeline.detail.deleteStepDescription').replace('{0}', deletingStep?.name || '')}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
@@ -397,13 +397,13 @@ export default function PipelineDetalhe() {
 
       {pipeline && (
         <PipelineEtapaFormModal
-          open={isEtapaFormOpen}
-          onOpenChange={setIsEtapaFormOpen}
-          etapa={editingEtapa}
+          open={isStepFormOpen}
+          onOpenChange={setIsStepFormOpen}
+          step={editingStep}
           pipelineId={pipelineId}
-          integracaoId={pipeline.integracao?.id || 0}
-          nextOrdem={etapas.length + 1}
-          onSuccess={handleEtapaFormSuccess}
+          integrationId={pipeline.integration?.id || 0}
+          nextOrder={steps.length + 1}
+          onSuccess={handleStepFormSuccess}
         />
       )}
 
@@ -412,9 +412,9 @@ export default function PipelineDetalhe() {
           open={isDebuggerOpen}
           onOpenChange={setIsDebuggerOpen}
           pipelineId={pipelineId}
-          integracaoId={pipeline.integracao?.id || 0}
-          etapas={etapas}
-          initialEtapaId={selectedEtapaId}
+          integrationId={pipeline.integration?.id || 0}
+          steps={steps}
+          initialStepId={selectedStepId}
         />
       )}
     </PageLayout>

@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Inpu
 import { pipelineService } from '../../services/pipelineService';
 import { integracaoService } from '../../services/integracaoService';
 import type { Pipeline, CreatePipelineRequest } from '../../types/pipeline';
-import type { Integracao } from '../../types/integracao';
+import type { Integration } from '../../types/integracao';
 
 interface PipelineFormModalProps {
   open: boolean;
@@ -13,52 +13,52 @@ interface PipelineFormModalProps {
 }
 
 const initialFormData: CreatePipelineRequest = {
-  integracaoId: 0,
-  identificador: '',
-  nome: '',
-  descricao: '',
-  ativo: true,
+  integrationId: 0,
+  identifier: '',
+  name: '',
+  description: '',
+  isActive: true,
 };
 
 export default function PipelineFormModal({ open, onOpenChange, pipeline, onSuccess }: PipelineFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!pipeline;
   const [formData, setFormData] = useState<CreatePipelineRequest>(initialFormData);
-  const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
     showErrorMessage: true,
   });
 
-  const { execute: fetchIntegracoes } = useApi<Integracao[]>({
+  const { execute: fetchIntegracoes } = useApi<Integration[]>({
     showErrorMessage: true,
   });
 
   useEffect(() => {
     if (open) {
-      loadIntegracoes();
+      loadIntegrations();
     }
   }, [open]);
 
   useEffect(() => {
     if (pipeline) {
       setFormData({
-        integracaoId: pipeline.integracaoId || pipeline.integracao?.id || 0,
-        identificador: pipeline.identificador,
-        nome: pipeline.nome,
-        descricao: pipeline.descricao || '',
-        ativo: pipeline.ativo,
+        integrationId: pipeline.integrationId || pipeline.integration?.id || 0,
+        identifier: pipeline.identifier,
+        name: pipeline.name,
+        description: pipeline.description || '',
+        isActive: pipeline.isActive,
       });
     } else {
       setFormData(initialFormData);
     }
   }, [pipeline]);
 
-  const loadIntegracoes = async () => {
-    const result = await fetchIntegracoes(() => integracaoService.getAtivas());
+  const loadIntegrations = async () => {
+    const result = await fetchIntegracoes(() => integracaoService.getActive());
     if (result) {
-      setIntegracoes(result);
+      setIntegrations(result);
     }
   };
 
@@ -90,47 +90,47 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="identificador" className="text-sm font-medium">{t('common.column.identifier')}</label>
+              <label htmlFor="identifier" className="text-sm font-medium">{t('common.column.identifier')}</label>
               <Input
-                id="identificador"
-                value={formData.identificador}
-                onChange={(e) => handleChange('identificador', e.target.value)}
+                id="identifier"
+                value={formData.identifier}
+                onChange={(e) => handleChange('identifier', e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
+              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
-                id="descricao"
-                value={formData.descricao || ''}
-                onChange={(e) => handleChange('descricao', e.target.value)}
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.integration')}</label>
               <Select
-                value={formData.integracaoId ? formData.integracaoId.toString() : ''}
-                onValueChange={(value) => handleChange('integracaoId', parseInt(value))}
+                value={formData.integrationId ? formData.integrationId.toString() : ''}
+                onValueChange={(value) => handleChange('integrationId', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('pipeline.form.integrationPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {integracoes.map((integracao) => (
-                    <SelectItem key={integracao.id} value={integracao.id.toString()}>
-                      {integracao.nome}
+                  {integrations.map((integration) => (
+                    <SelectItem key={integration.id} value={integration.id.toString()}>
+                      {integration.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -140,11 +140,11 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="ativo"
-              checked={formData.ativo}
-              onCheckedChange={(checked) => handleChange('ativo', !!checked)}
+              id="isActive"
+              checked={formData.isActive}
+              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
+            <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>

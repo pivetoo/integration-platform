@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Inpu
 import { filaProcessamentoService } from '../../services/filaProcessamentoService';
 import { conectorService } from '../../services/conectorService';
 import { pipelineService } from '../../services/pipelineService';
-import type { CreateFilaProcessamentoRequest } from '../../types/filaProcessamento';
+import type { CreateProcessingQueueItemRequest } from '../../types/filaProcessamento';
 import type { Conector } from '../../types/conector';
 import type { Pipeline } from '../../types/pipeline';
 
@@ -13,16 +13,16 @@ interface FilaFormModalProps {
   onSuccess: () => void;
 }
 
-const initialFormData: CreateFilaProcessamentoRequest = {
-  conectorId: 0,
+const initialFormData: CreateProcessingQueueItemRequest = {
+  connectorId: 0,
   pipelineId: 0,
-  prioridade: 0,
+  priority: 0,
   payload: '',
-  agendamento: '',
+  scheduledAt: '',
 };
 
 export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFormModalProps) {
-  const [formData, setFormData] = useState<CreateFilaProcessamentoRequest>(initialFormData);
+  const [formData, setFormData] = useState<CreateProcessingQueueItemRequest>(initialFormData);
   const [conectores, setConectores] = useState<Conector[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const { t } = useI18n();
@@ -49,29 +49,29 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
   }, [open]);
 
   const loadConectores = async () => {
-    const result = await fetchConectores(() => conectorService.getAtivos());
+    const result = await fetchConectores(() => conectorService.getActive());
     if (result) {
       setConectores(result);
     }
   };
 
   const loadPipelines = async () => {
-    const result = await fetchPipelines(() => pipelineService.getAtivos());
+    const result = await fetchPipelines(() => pipelineService.getActive());
     if (result) {
       setPipelines(result);
     }
   };
 
-  const handleChange = (field: keyof CreateFilaProcessamentoRequest, value: string | number) => {
+  const handleChange = (field: keyof CreateProcessingQueueItemRequest, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = {
-        ...formData,
-        agendamento: formData.agendamento || undefined,
+        const data = {
+          ...formData,
+        scheduledAt: formData.scheduledAt || undefined,
         payload: formData.payload || undefined,
       };
       await execute(() => filaProcessamentoService.create(data));
@@ -93,8 +93,8 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.column.connector')}</label>
               <Select
-                value={formData.conectorId ? formData.conectorId.toString() : ''}
-                onValueChange={(value) => handleChange('conectorId', parseInt(value))}
+                value={formData.connectorId ? formData.connectorId.toString() : ''}
+                onValueChange={(value) => handleChange('connectorId', parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('queue.form.connectorPlaceholder')} />
@@ -102,7 +102,7 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
                 <SelectContent>
                   {conectores.map((conector) => (
                     <SelectItem key={conector.id} value={conector.id.toString()}>
-                      {conector.nome}
+                      {conector.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -121,7 +121,7 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
                 <SelectContent>
                   {pipelines.map((pipeline) => (
                     <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
-                      {pipeline.nome}
+                      {pipeline.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -129,23 +129,23 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="prioridade" className="text-sm font-medium">{t('common.column.priority')}</label>
+              <label htmlFor="priority" className="text-sm font-medium">{t('common.column.priority')}</label>
               <Input
-                id="prioridade"
+                id="priority"
                 type="number"
-                value={formData.prioridade}
-                onChange={(e) => handleChange('prioridade', parseInt(e.target.value) || 0)}
+                value={formData.priority}
+                onChange={(e) => handleChange('priority', parseInt(e.target.value) || 0)}
                 min={0}
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="agendamento" className="text-sm font-medium">{t('queue.form.scheduledAt')}</label>
+              <label htmlFor="scheduledAt" className="text-sm font-medium">{t('queue.form.scheduledAt')}</label>
               <Input
-                id="agendamento"
+                id="scheduledAt"
                 type="datetime-local"
-                value={formData.agendamento || ''}
-                onChange={(e) => handleChange('agendamento', e.target.value)}
+                value={formData.scheduledAt || ''}
+                onChange={(e) => handleChange('scheduledAt', e.target.value)}
               />
             </div>
 
