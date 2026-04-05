@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { AuthProvider, ThemeProvider, GlobalLoaderProvider, useGlobalLoader, setGlobalLoaderContext, Toaster, setApiBaseURL, setIdentityManagementURL } from 'archon-ui';
+import { AuthProvider, ThemeProvider, GlobalLoaderProvider, I18nProvider, useGlobalLoader, setGlobalLoaderContext, Toaster, setApiBaseURL, setIdentityManagementURL } from 'archon-ui';
 import AppRoutes from './routes';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -32,7 +32,9 @@ function App() {
   return (
     <ThemeProvider>
       <GlobalLoaderProvider>
-        <AppContent />
+        <I18nProvider>
+          <AppContent />
+        </I18nProvider>
       </GlobalLoaderProvider>
     </ThemeProvider>
   );

@@ -1,6 +1,7 @@
 using Archon.Api.DependencyInjection;
 using Archon.Api.MultiTenancy;
 using Archon.Infrastructure.DependencyInjection;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Infrastructure.DependencyInjection;
 using Scalar.AspNetCore;
 
@@ -18,7 +19,7 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddAuthorization();
-builder.Services.AddArchonApi(builder.Configuration);
+builder.Services.AddArchonApi(builder.Configuration, typeof(IntegrationPlataformResource));
 builder.Services.AddIntegrationPlataformInfrastructure(builder.Configuration);
 builder.Services.AddServicesFromAssembly(typeof(Program).Assembly);
 

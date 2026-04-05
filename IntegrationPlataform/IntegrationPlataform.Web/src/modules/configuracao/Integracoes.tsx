@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Upload } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { integracaoService } from '../../services/integracaoService';
@@ -10,6 +10,7 @@ import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
 import IntegracaoFormModal from '../../components/modals/IntegracaoFormModal';
 
 export default function Integracoes() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
   const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integracao[]>([]);
@@ -153,7 +154,7 @@ export default function Integracoes() {
 
   return (
     <PageLayout
-      title="Integrações"
+      title={t("integration.integrations.title")}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -191,7 +192,7 @@ export default function Integracoes() {
         selectedRows={selectedIntegracoes}
         onSelectionChange={setSelectedIntegracoes}
         onRowDoubleClick={handleRowDoubleClick}
-        emptyText="Nenhuma integração encontrada"
+        emptyText={t("integration.integrations.empty")}
         loading={loading}
       />
 
