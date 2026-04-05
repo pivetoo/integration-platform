@@ -1,4 +1,4 @@
-# Integration Platform
+# Integration Plataform
 
 Plataforma de orquestração de integrações construída sobre o `Archon`.
 
@@ -6,7 +6,7 @@ O sistema foi desenhado para permitir a modelagem, configuração, execução e 
 
 ## Visão Geral
 
-Na prática, o `integration-platform` resolve estes problemas:
+Na prática, o `integration-plataform` resolve estes problemas:
 
 - cadastro de tipos de integração;
 - configuração de conectores concretos;
