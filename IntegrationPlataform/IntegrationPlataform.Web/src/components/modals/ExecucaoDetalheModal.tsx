@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Clock, AlertCircle, Info as InfoIcon, Copy, Check } from 'lucide-react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi, useI18n } from 'archon-ui';
 import type { Execucao } from '../../types/execucao';
 import type { ExecucaoLog } from '../../types/execucaoLog';
 import { NivelLogLabels } from '../../types/execucaoLog';
@@ -45,6 +45,7 @@ function formatDuracao(ms?: number): string {
 }
 
 export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: ExecucaoDetalheModalProps) {
+  const { t } = useI18n();
   const [logs, setLogs] = useState<ExecucaoLog[]>([]);
   const [selectedLog, setSelectedLog] = useState<ExecucaoLog | null>(null);
   const [copiedRequisicao, setCopiedRequisicao] = useState(false);
@@ -111,6 +112,20 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
     }
   };
 
+  const statusLabels: Record<number, string> = {
+    1: t('execution.status.running'),
+    2: t('execution.status.success'),
+    3: t('execution.status.error'),
+    4: t('execution.status.partial'),
+  };
+
+  const nivelLogLabels: Record<number, string> = {
+    1: t('execution.log.level.debug'),
+    2: t('execution.log.level.info'),
+    3: t('execution.log.level.warning'),
+    4: t('execution.log.level.error'),
+  };
+
   if (!execucao) return null;
 
   return (
@@ -118,20 +133,20 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
       <ModalContent size="5xl" className="max-h-[90vh] flex flex-col">
         <ModalHeader>
           <ModalTitle className="flex items-center justify-between">
-            <span>Detalhes da Execução #{execucao.id}</span>
+            <span>{t('execution.detail.title')} #{execucao.id}</span>
           </ModalTitle>
         </ModalHeader>
 
         <div className="flex flex-col gap-4 mt-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-semibold">Conector:</span> {execucao.conector?.nome || '-'}
+              <span className="font-semibold">{t('common.column.connector')}:</span> {execucao.conector?.nome || '-'}
             </div>
             <div>
-              <span className="font-semibold">Pipeline:</span> {execucao.pipeline?.nome || '-'}
+              <span className="font-semibold">{t('common.column.pipeline')}:</span> {execucao.pipeline?.nome || '-'}
             </div>
             <div>
-              <span className="font-semibold">Status:</span>{' '}
+              <span className="font-semibold">{t('common.column.status')}:</span>{' '}
               <Badge
                 variant={
                   (statusVariantMap[execucao.status] || 'outline') as
@@ -141,23 +156,23 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                     | 'secondary'
                 }
               >
-                {StatusExecucaoLabels[execucao.status] || '-'}
+                {statusLabels[execucao.status] || StatusExecucaoLabels[execucao.status] || '-'}
               </Badge>
             </div>
             <div>
-              <span className="font-semibold">Duração:</span> {formatDuracao(execucao.duracao)}
+              <span className="font-semibold">{t('common.column.duration')}:</span> {formatDuracao(execucao.duracao)}
             </div>
           </div>
 
           <div className="flex gap-4 flex-1 min-h-0">
             <div className="w-80 border rounded-lg overflow-y-auto flex-shrink-0">
               <div className="sticky top-0 bg-background border-b p-3 font-semibold">
-                Etapas ({logs.length})
+                {t('pipeline.detail.stepsTitle')} ({logs.length})
               </div>
               {loading ? (
-                <div className="p-4 text-center text-muted-foreground">Carregando...</div>
+                <div className="p-4 text-center text-muted-foreground">{t('common.state.loading')}</div>
               ) : logs.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">Nenhum log encontrado</div>
+                <div className="p-4 text-center text-muted-foreground">{t('execution.detail.emptyLogs')}</div>
               ) : (
                 <div className="divide-y">
                   {logs.map((log) => (
@@ -170,7 +185,7 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-sm truncate">
-                          {log.pipelineEtapa?.nome || 'Log Geral'}
+                          {log.pipelineEtapa?.nome || t('execution.detail.generalLog')}
                         </span>
                         <Badge
                           variant={
@@ -183,7 +198,7 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                           className="ml-2 flex items-center gap-1"
                         >
                           {nivelLogIconMap[log.nivel]}
-                          {NivelLogLabels[log.nivel]}
+                          {nivelLogLabels[log.nivel] || NivelLogLabels[log.nivel]}
                         </Badge>
                       </div>
                       {log.duracao != null && (
@@ -202,13 +217,13 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
               {selectedLog ? (
                 <div className="p-4 space-y-4">
                   <div>
-                    <h3 className="font-semibold mb-2">Mensagem</h3>
+                    <h3 className="font-semibold mb-2">{t('execution.detail.message')}</h3>
                     <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded">{selectedLog.mensagem}</p>
                   </div>
 
                   {selectedLog.contexto && (
                     <div>
-                      <h3 className="font-semibold mb-2">Contexto</h3>
+                      <h3 className="font-semibold mb-2">{t('execution.detail.context')}</h3>
                       <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.contexto}</pre>
                     </div>
                   )}
@@ -216,7 +231,7 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                   {selectedLog.requisicao && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">Requisição</h3>
+                        <h3 className="font-semibold">{t('execution.detail.request')}</h3>
                         <button
                           onClick={handleCopyRequisicao}
                           className="flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-accent transition-colors"
@@ -224,12 +239,12 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                           {copiedRequisicao ? (
                             <>
                               <Check size={14} className="text-green-600" />
-                              <span>Copiado!</span>
+                              <span>{t('common.action.copied')}</span>
                             </>
                           ) : (
                             <>
                               <Copy size={14} />
-                              <span>Copiar</span>
+                              <span>{t('common.action.copy')}</span>
                             </>
                           )}
                         </button>
@@ -242,7 +257,7 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold">
-                          Resposta
+                          {t('execution.detail.response')}
                           {selectedLog.statusHttpCode && (
                             <Badge variant="outline" className="ml-2">
                               HTTP {selectedLog.statusHttpCode}
@@ -256,12 +271,12 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
                           {copiedResposta ? (
                             <>
                               <Check size={14} className="text-green-600" />
-                              <span>Copiado!</span>
+                              <span>{t('common.action.copied')}</span>
                             </>
                           ) : (
                             <>
                               <Copy size={14} />
-                              <span>Copiar</span>
+                              <span>{t('common.action.copy')}</span>
                             </>
                           )}
                         </button>
@@ -272,14 +287,14 @@ export default function ExecucaoDetalheModal({ open, onOpenChange, execucao }: E
 
                   {selectedLog.duracao != null && (
                     <div>
-                      <h3 className="font-semibold mb-2">Duração</h3>
+                      <h3 className="font-semibold mb-2">{t('common.column.duration')}</h3>
                       <p className="text-sm">{formatDuracao(selectedLog.duracao)}</p>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                  Selecione uma etapa para ver os detalhes
+                  {t('execution.detail.selectStep')}
                 </div>
               )}
             </div>

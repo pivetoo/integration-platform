@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { conectorService } from '../../services/conectorService';
@@ -9,6 +9,7 @@ import type { Integracao } from '../../types/integracao';
 import ConectorFormModal from '../../components/modals/ConectorFormModal';
 
 export default function Conectores() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [conectores, setConectores] = useState<Conector[]>([]);
   const [selectedConectores, setSelectedConectores] = useState<Conector[]>([]);
@@ -24,7 +25,7 @@ export default function Conectores() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Conector removido com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('connector.list.removed'), variant: 'success' });
     },
   });
 
@@ -76,20 +77,20 @@ export default function Conectores() {
   };
 
   const columns: DataTableColumn<Conector>[] = [
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
     {
       key: 'integracao',
-      title: 'Integração',
+      title: t('common.column.integration'),
       dataIndex: 'integracao',
       render: (value: Integracao) => value?.nome || '-',
     },
     {
       key: 'ativo',
-      title: 'Ativo',
+      title: t('common.column.active'),
       dataIndex: 'ativo',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? 'Sim' : 'Não'}
+          {value ? t('common.boolean.yes') : t('common.boolean.no')}
         </Badge>
       ),
     },
@@ -97,7 +98,7 @@ export default function Conectores() {
 
   return (
     <PageLayout
-      title="Conectores"
+      title={t('connector.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -111,7 +112,7 @@ export default function Conectores() {
         selectedRows={selectedConectores}
         onSelectionChange={setSelectedConectores}
         onRowDoubleClick={handleRowDoubleClick}
-        emptyText="Nenhum conector encontrado"
+        emptyText={t('connector.list.empty')}
         loading={loading}
       />
 
@@ -119,10 +120,10 @@ export default function Conectores() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Conector"
-        description={`Tem certeza que deseja excluir ${selectedConectores.length} conector(es)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('connector.list.deleteTitle')}
+        description={t('connector.list.deleteDescription').replace('{0}', String(selectedConectores.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { referenciaService } from '../../services/referenciaService';
 import { conectorService } from '../../services/conectorService';
 import type { Referencia, CreateReferenciaRequest } from '../../types/referencia';
@@ -23,6 +23,7 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
   const isEditing = !!referencia;
   const [formData, setFormData] = useState<CreateReferenciaRequest>(initialFormData);
   const [conectores, setConectores] = useState<Conector[]>([]);
+  const { t } = useI18n();
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
@@ -82,20 +83,20 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Referência' : 'Nova Referência'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('reference.form.editTitle') : t('reference.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Conector</label>
+              <label className="text-sm font-medium">{t('common.column.connector')}</label>
               <Select
                 value={formData.conectorId ? formData.conectorId.toString() : ''}
                 onValueChange={(value) => handleChange('conectorId', parseInt(value))}
                 disabled={isEditing}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um conector" />
+                  <SelectValue placeholder={t('reference.form.connectorPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {conectores.map((conector) => (
@@ -108,18 +109,18 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="entidade" className="text-sm font-medium">Entidade</label>
+              <label htmlFor="entidade" className="text-sm font-medium">{t('reference.form.entityLabel')}</label>
               <Input
                 id="entidade"
                 value={formData.entidade}
                 onChange={(e) => handleChange('entidade', e.target.value)}
-                placeholder="Ex: Produto, Pedido, Cliente"
+                placeholder={t('reference.form.entityPlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="idInterno" className="text-sm font-medium">ID Interno</label>
+              <label htmlFor="idInterno" className="text-sm font-medium">{t('reference.form.internalId')}</label>
               <Input
                 id="idInterno"
                 value={formData.idInterno}
@@ -129,7 +130,7 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="idExterno" className="text-sm font-medium">ID Externo</label>
+              <label htmlFor="idExterno" className="text-sm font-medium">{t('reference.form.externalId')}</label>
               <Input
                 id="idExterno"
                 value={formData.idExterno}
@@ -141,10 +142,10 @@ export default function ReferenciaFormModal({ open, onOpenChange, referencia, on
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

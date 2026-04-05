@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { filaProcessamentoService } from '../../services/filaProcessamentoService';
@@ -25,6 +25,7 @@ function formatDateTime(dateStr?: string): string {
 }
 
 export default function FilaProcessamento() {
+  const { t } = useI18n();
   const [itens, setItens] = useState<FilaProcessamentoType[]>([]);
   const [selectedItens, setSelectedItens] = useState<FilaProcessamentoType[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -38,7 +39,7 @@ export default function FilaProcessamento() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Item da fila removido com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('processingQueue.list.removed'), variant: 'success' });
     },
   });
 
@@ -79,24 +80,24 @@ export default function FilaProcessamento() {
   const columns: DataTableColumn<FilaProcessamentoType>[] = [
     {
       key: 'conector',
-      title: 'Conector',
+      title: t('common.column.connector'),
       dataIndex: 'conector',
       render: (value: Conector) => value?.nome || '-',
     },
     {
       key: 'pipeline',
-      title: 'Pipeline',
+      title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
       render: (value: Pipeline) => value?.nome || '-',
     },
     {
       key: 'prioridade',
-      title: 'Prioridade',
+      title: t('common.column.priority'),
       dataIndex: 'prioridade',
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('common.column.status'),
       dataIndex: 'status',
       render: (value: StatusProcessamento) => (
         <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'info' | 'success' | 'destructive' | 'secondary'}>
@@ -106,13 +107,13 @@ export default function FilaProcessamento() {
     },
     {
       key: 'agendamento',
-      title: 'Agendamento',
+      title: t('common.column.scheduledAt'),
       dataIndex: 'agendamento',
       render: (value: string) => formatDateTime(value),
     },
     {
       key: 'criadoEm',
-      title: 'Criado em',
+      title: t('common.column.createdAt'),
       dataIndex: 'criadoEm',
       render: (value: string) => formatDateTime(value),
     },
@@ -120,7 +121,7 @@ export default function FilaProcessamento() {
 
   return (
     <PageLayout
-      title="Fila de Integração"
+      title={t('processingQueue.list.title')}
       onAdd={handleAdd}
       onDelete={handleDelete}
       onRefresh={loadItens}
@@ -132,7 +133,7 @@ export default function FilaProcessamento() {
         rowKey="id"
         selectedRows={selectedItens}
         onSelectionChange={setSelectedItens}
-        emptyText="Nenhum item na fila"
+        emptyText={t('processingQueue.list.empty')}
         loading={loading}
       />
 
@@ -140,10 +141,10 @@ export default function FilaProcessamento() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir da Fila"
-        description={`Tem certeza que deseja excluir ${selectedItens.length} item(ns) da fila?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('processingQueue.list.deleteTitle')}
+        description={t('processingQueue.list.deleteDescription').replace('{0}', String(selectedItens.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

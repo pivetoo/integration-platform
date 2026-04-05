@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { pipelineService } from '../../services/pipelineService';
@@ -10,6 +10,7 @@ import type { Integracao } from '../../types/integracao';
 import PipelineFormModal from '../../components/modals/PipelineFormModal';
 
 export default function Pipelines() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [selectedPipelines, setSelectedPipelines] = useState<Pipeline[]>([]);
@@ -25,7 +26,7 @@ export default function Pipelines() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Pipeline removido com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('pipeline.list.removed'), variant: 'success' });
     },
   });
 
@@ -77,27 +78,27 @@ export default function Pipelines() {
   };
 
   const columns: DataTableColumn<Pipeline>[] = [
-    { key: 'identificador', title: 'Identificador', dataIndex: 'identificador' },
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    { key: 'identificador', title: t('common.column.identifier'), dataIndex: 'identificador' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
     {
       key: 'integracao',
-      title: 'Integração',
+      title: t('common.column.integration'),
       dataIndex: 'integracao',
       render: (value: Integracao) => value?.nome || '-',
     },
     {
       key: 'ativo',
-      title: 'Ativo',
+      title: t('common.column.active'),
       dataIndex: 'ativo',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? 'Sim' : 'Não'}
+          {value ? t('common.boolean.yes') : t('common.boolean.no')}
         </Badge>
       ),
     },
     {
       key: 'acoes',
-      title: 'Ações',
+      title: t('common.column.actions'),
       width: 130,
       render: (_value, pipeline: Pipeline) => (
         <button
@@ -106,7 +107,7 @@ export default function Pipelines() {
           className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
           <ExternalLink size={14} />
-          Abrir
+          {t('common.action.open')}
         </button>
       ),
     },
@@ -114,7 +115,7 @@ export default function Pipelines() {
 
   return (
     <PageLayout
-      title="Pipelines"
+      title={t('pipeline.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -128,7 +129,7 @@ export default function Pipelines() {
         selectedRows={selectedPipelines}
         onSelectionChange={setSelectedPipelines}
         onRowDoubleClick={handleRowDoubleClick}
-        emptyText="Nenhum pipeline encontrado"
+        emptyText={t('pipeline.list.empty')}
         loading={loading}
       />
 
@@ -136,10 +137,10 @@ export default function Pipelines() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Pipeline"
-        description={`Tem certeza que deseja excluir ${selectedPipelines.length} pipeline(s)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('pipeline.list.deleteTitle')}
+        description={t('pipeline.list.deleteDescription').replace('{0}', String(selectedPipelines.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

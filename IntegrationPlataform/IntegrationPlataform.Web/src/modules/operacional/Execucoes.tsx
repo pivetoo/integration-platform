@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, useApi } from 'archon-ui';
+import { PageLayout, DataTable, Badge, useApi, useI18n } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { execucaoService } from '../../services/execucaoService';
@@ -40,6 +40,7 @@ function formatDateTime(dateStr?: string): string {
 }
 
 export default function Execucoes() {
+  const { t } = useI18n();
   const [execucoes, setExecucoes] = useState<Execucao[]>([]);
   const [selectedExecucao, setSelectedExecucao] = useState<Execucao | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -62,25 +63,25 @@ export default function Execucoes() {
   const columns: DataTableColumn<Execucao>[] = [
     {
       key: 'tipo',
-      title: 'Tipo',
+      title: t('common.column.type'),
       dataIndex: 'tipo',
       render: (value: TipoExecucao) => TipoExecucaoLabels[value] || '-',
     },
     {
       key: 'conector',
-      title: 'Conector',
+      title: t('common.column.connector'),
       dataIndex: 'conector',
       render: (value: Conector) => value?.nome || '-',
     },
     {
       key: 'pipeline',
-      title: 'Pipeline',
+      title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
       render: (value: Pipeline) => value?.nome || '-',
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('common.column.status'),
       dataIndex: 'status',
       render: (value: StatusExecucaoType) => (
         <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'success' | 'destructive' | 'secondary'}>
@@ -90,13 +91,13 @@ export default function Execucoes() {
     },
     {
       key: 'iniciadoEm',
-      title: 'Iniciado em',
+      title: t('common.column.startedAt'),
       dataIndex: 'iniciadoEm',
       render: (value: string) => formatDateTime(value),
     },
     {
       key: 'duracao',
-      title: 'Duração',
+      title: t('common.column.duration'),
       dataIndex: 'duracao',
       render: (value: number) => formatDuracao(value),
     },
@@ -116,14 +117,14 @@ export default function Execucoes() {
 
   return (
     <PageLayout
-      title="Execuções"
+      title={t('execution.list.title')}
       onRefresh={loadExecucoes}
     >
       <DataTable
         columns={columns}
         data={execucoes}
         rowKey="id"
-        emptyText="Nenhuma execução encontrada"
+        emptyText={t('execution.list.empty')}
         loading={loading}
         onRowClick={handleRowClick}
       />

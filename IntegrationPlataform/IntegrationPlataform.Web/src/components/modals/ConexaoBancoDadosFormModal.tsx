@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, toast } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
 import type { CreateConexaoBancoDadosRequest } from '../../types/conexaoBancoDados';
 import { TipoBancoDados, TipoBancoDadosLabels } from '../../types/conexaoBancoDados';
@@ -23,6 +23,7 @@ const initialFormData: CreateConexaoBancoDadosRequest = {
 };
 
 export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSuccess, conexao }: ConexaoBancoDadosFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!conexao;
   const [formData, setFormData] = useState<CreateConexaoBancoDadosRequest>(initialFormData);
 
@@ -58,14 +59,14 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
 
   const handleTestar = async () => {
     if (!formData.host || !formData.database || !formData.username || !formData.password) {
-      toast({ title: 'Preencha todos os campos para testar a conexão', variant: 'destructive' });
+      toast({ title: t('database.connection.form.testMissingFields'), variant: 'destructive' });
       return;
     }
     const result = await testarConexao(() => conexaoBancoDadosService.testar(formData));
     if (result) {
       toast({
         title: 'Sucesso',
-        description: result.message || 'Conexao testada com sucesso',
+        description: result.message || t('database.connection.form.testSuccess'),
         variant: 'success',
       });
     }
@@ -89,24 +90,24 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="3xl">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Conexão' : 'Nova Conexão de Banco'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('database.connection.form.editTitle') : t('database.connection.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
                 onChange={(e) => handleChange('nome', e.target.value)}
-                placeholder="Conexão Protheus"
+                placeholder={t('database.connection.form.namePlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo de Banco</label>
+              <label className="text-sm font-medium">{t('database.connection.form.databaseType')}</label>
               <Select
                 value={formData.tipo.toString()}
                 onValueChange={(value) => handleChange('tipo', parseInt(value))}
@@ -125,18 +126,18 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="host" className="text-sm font-medium">Host</label>
+              <label htmlFor="host" className="text-sm font-medium">{t('common.column.host')}</label>
               <Input
                 id="host"
                 value={formData.host}
                 onChange={(e) => handleChange('host', e.target.value)}
-                placeholder="localhost ou 192.168.1.100"
+                placeholder={t('database.connection.form.hostPlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="port" className="text-sm font-medium">Porta</label>
+              <label htmlFor="port" className="text-sm font-medium">{t('database.connection.form.port')}</label>
               <Input
                 id="port"
                 type="number"
@@ -147,29 +148,29 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="database" className="text-sm font-medium">Database</label>
+              <label htmlFor="database" className="text-sm font-medium">{t('common.column.database')}</label>
               <Input
                 id="database"
                 value={formData.database}
                 onChange={(e) => handleChange('database', e.target.value)}
-                placeholder="nome_do_banco"
+                placeholder={t('database.connection.form.databasePlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">Username</label>
+              <label htmlFor="username" className="text-sm font-medium">{t('common.column.username')}</label>
               <Input
                 id="username"
                 value={formData.username}
                 onChange={(e) => handleChange('username', e.target.value)}
-                placeholder="postgres"
+                placeholder={t('database.connection.form.usernamePlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">Password</label>
+              <label htmlFor="password" className="text-sm font-medium">{t('database.connection.form.password')}</label>
               <Input
                 id="password"
                 type="password"
@@ -182,13 +183,13 @@ export default function ConexaoBancoDadosFormModal({ open, onOpenChange, onSucce
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="button" variant="secondary" onClick={handleTestar} disabled={testando}>
-              {testando ? 'Testando...' : 'Testar Conexão'}
+              {testando ? t('common.action.testing') : t('database.connection.form.testAction')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

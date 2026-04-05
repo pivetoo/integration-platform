@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { chamadaApiService } from '../../services/chamadaApiService';
@@ -16,6 +16,7 @@ const metodoVariantMap: Record<number, string> = {
 };
 
 export default function ChamadasApi() {
+  const { t } = useI18n();
   const [chamadas, setChamadas] = useState<ChamadaApi[]>([]);
   const [selectedChamadas, setSelectedChamadas] = useState<ChamadaApi[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function ChamadasApi() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Chamada de API removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('apiCall.list.removed'), variant: 'success' });
     },
   });
 
@@ -83,10 +84,10 @@ export default function ChamadasApi() {
   };
 
   const columns: DataTableColumn<ChamadaApi>[] = [
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
     {
       key: 'metodo',
-      title: 'Método',
+      title: t('common.column.method'),
       dataIndex: 'metodo',
       render: (value: MetodoHttp) => (
         <Badge variant={(metodoVariantMap[value] || 'outline') as 'success' | 'default' | 'warning' | 'secondary' | 'destructive'}>
@@ -94,12 +95,12 @@ export default function ChamadasApi() {
         </Badge>
       ),
     },
-    { key: 'url', title: 'URL', dataIndex: 'url' },
+    { key: 'url', title: t('common.column.url'), dataIndex: 'url' },
   ];
 
   return (
     <PageLayout
-      title="Chamadas de API"
+      title={t('apiCall.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -112,7 +113,7 @@ export default function ChamadasApi() {
         rowKey="id"
         selectedRows={selectedChamadas}
         onSelectionChange={setSelectedChamadas}
-        emptyText="Nenhuma chamada de API encontrada"
+        emptyText={t('apiCall.list.empty')}
         loading={loading}
       />
 
@@ -120,10 +121,10 @@ export default function ChamadasApi() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Chamada de API"
-        description={`Tem certeza que deseja excluir ${selectedChamadas.length} chamada(s) de API?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('apiCall.list.deleteTitle')}
+        description={t('apiCall.list.deleteDescription').replace('{0}', String(selectedChamadas.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

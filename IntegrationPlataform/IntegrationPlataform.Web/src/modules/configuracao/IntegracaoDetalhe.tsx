@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Cable } from 'lucide-react';
-import { PageLayout, Badge, Button, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, Badge, Button, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import { integracaoService } from '../../services/integracaoService';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
 import type { Integracao } from '../../types/integracao';
@@ -11,6 +11,7 @@ import IntegracaoFormModal from '../../components/modals/IntegracaoFormModal';
 import IntegracaoAtributoFormModal from '../../components/modals/IntegracaoAtributoFormModal';
 
 export default function IntegracaoDetalhe() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const [integracao, setIntegracao] = useState<Integracao | null>(null);
   const [atributos, setAtributos] = useState<IntegracaoAtributo[]>([]);
@@ -32,7 +33,7 @@ export default function IntegracaoDetalhe() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Atributo removido com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('integration.detail.attributeRemoved'), variant: 'success' });
     },
   });
 
@@ -99,12 +100,12 @@ export default function IntegracaoDetalhe() {
 
   return (
     <PageLayout
-      title={integracao?.nome || 'Integração'}
+      title={integracao?.nome || t('integration.detail.fallbackTitle')}
       onRefresh={() => { loadIntegracao(); loadAtributos(); }}
       actions={[
         {
           key: 'edit-integracao',
-          label: 'Editar Integração',
+          label: t('integration.detail.editAction'),
           icon: <Pencil size={16} />,
           variant: 'secondary',
           onClick: () => setIsEditIntegracaoOpen(true),
@@ -116,22 +117,22 @@ export default function IntegracaoDetalhe() {
         {integracao && (
           <div className="grid grid-cols-2 gap-4 rounded-lg border bg-card p-4 md:grid-cols-4">
             <div>
-              <span className="text-xs text-muted-foreground">Identificador</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.identifier')}</span>
               <p className="font-medium">{integracao.identificador}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Nome</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.name')}</span>
               <p className="font-medium">{integracao.nome}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Categoria</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.category')}</span>
               <p className="font-medium">{integracao.categoria?.nome || '-'}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Status</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
                 <Badge variant={integracao.ativo ? 'success' : 'destructive'}>
-                  {integracao.ativo ? 'Ativo' : 'Inativo'}
+                  {integracao.ativo ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>
             </div>
@@ -140,18 +141,18 @@ export default function IntegracaoDetalhe() {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Atributos</h2>
+            <h2 className="text-lg font-semibold">{t('integration.detail.attributesTitle')}</h2>
             <Button size="sm" onClick={handleAddAtributo}>
               <Plus size={16} className="mr-2" />
-              Novo Atributo
+              {t('integration.detail.newAttribute')}
             </Button>
           </div>
 
           {atributos.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-muted-foreground">
               <Cable size={48} className="mb-4 opacity-50" />
-              <p>Nenhum atributo configurado</p>
-              <p className="text-sm">Adicione atributos para definir os campos desta integração</p>
+              <p>{t('integration.detail.emptyTitle')}</p>
+              <p className="text-sm">{t('integration.detail.emptyDescription')}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -169,24 +170,24 @@ export default function IntegracaoDetalhe() {
                       <span className="font-medium truncate">{atributo.label}</span>
                       <Badge variant="outline">{TipoCampoLabels[atributo.tipo]}</Badge>
                       {atributo.obrigatorio && (
-                        <Badge variant="destructive">Obrigatório</Badge>
+                        <Badge variant="destructive">{t('integration.detail.required')}</Badge>
                       )}
                       {atributo.sensivel && (
-                        <Badge variant="secondary">Sensível</Badge>
+                        <Badge variant="secondary">{t('integration.detail.sensitive')}</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <span>Campo: {atributo.campo}</span>
+                      <span>{t('integration.detail.fieldLabel')}: {atributo.campo}</span>
                       {atributo.grupo && (
                         <>
                           <span>|</span>
-                          <span>Grupo: {atributo.grupo}</span>
+                          <span>{t('integration.detail.groupLabel')}: {atributo.grupo}</span>
                         </>
                       )}
                       {atributo.valorPadrao && (
                         <>
                           <span>|</span>
-                          <span>Padrão: {atributo.valorPadrao}</span>
+                          <span>{t('integration.detail.defaultLabel')}: {atributo.valorPadrao}</span>
                         </>
                       )}
                     </div>
@@ -211,10 +212,10 @@ export default function IntegracaoDetalhe() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Atributo"
-        description={`Tem certeza que deseja excluir o atributo "${deletingAtributo?.label}"?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('integration.detail.deleteAttributeTitle')}
+        description={t('integration.detail.deleteAttributeDescription').replace('{0}', deletingAtributo?.label || '')}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

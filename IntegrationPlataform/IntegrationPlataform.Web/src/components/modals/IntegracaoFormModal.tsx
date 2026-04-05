@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { integracaoService } from '../../services/integracaoService';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
 import type { Integracao, CreateIntegracaoRequest } from '../../types/integracao';
@@ -21,6 +21,7 @@ const initialFormData: CreateIntegracaoRequest = {
 };
 
 export default function IntegracaoFormModal({ open, onOpenChange, integracao, onSuccess }: IntegracaoFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!integracao;
   const [formData, setFormData] = useState<CreateIntegracaoRequest>(initialFormData);
   const [categorias, setCategorias] = useState<CategoriaIntegracao[]>([]);
@@ -83,13 +84,13 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="lg">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Integração' : 'Nova Integração'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('integration.form.editTitle') : t('integration.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="identificador" className="text-sm font-medium">Identificador</label>
+              <label htmlFor="identificador" className="text-sm font-medium">{t('common.column.identifier')}</label>
               <Input
                 id="identificador"
                 value={formData.identificador}
@@ -99,7 +100,7 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
@@ -109,7 +110,7 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
                 value={formData.descricao || ''}
@@ -118,16 +119,16 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Categoria</label>
+              <label className="text-sm font-medium">{t('common.column.category')}</label>
               <Select
                 value={formData.categoriaId ? formData.categoriaId.toString() : '_none'}
                 onValueChange={(value) => handleChange('categoriaId', value === '_none' ? undefined : parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
+                  <SelectValue placeholder={t('integration.form.categoryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="_none">Sem categoria</SelectItem>
+                  <SelectItem value="_none">{t('integration.form.noCategory')}</SelectItem>
                   {categorias.map((categoria) => (
                     <SelectItem key={categoria.id} value={categoria.id.toString()}>
                       {categoria.nome}
@@ -144,15 +145,15 @@ export default function IntegracaoFormModal({ open, onOpenChange, integracao, on
               checked={formData.ativo}
               onCheckedChange={(checked) => handleChange('ativo', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium cursor-pointer">Ativo</label>
+            <label htmlFor="ativo" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

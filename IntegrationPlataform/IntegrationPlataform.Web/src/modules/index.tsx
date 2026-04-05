@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Card, CardContent, CardHeader, CardTitle, Badge,
-  AreaChart, ChartContainer, useApi
+  AreaChart, ChartContainer, useApi, useI18n
 } from 'archon-ui';
 import {
   LayoutDashboard, Cable, Plug, GitBranch, Play, CheckCircle,
@@ -57,6 +57,7 @@ function formatHorario(dateStr: string): string {
 }
 
 export default function Dashboard() {
+  const { t } = useI18n();
   const [data, setData] = useState<DashboardData | null>(null);
 
   const { execute: fetchData } = useApi<DashboardData>({
@@ -88,80 +89,80 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <LayoutDashboard className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Integrações</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.kpi.integrations.title')}</CardTitle>
             <Cable className="h-5 w-5 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">{kpis?.integracoesAtivas ?? '-'}</div>
-            <p className="text-xs text-muted-foreground">ativas</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.kpi.integrations.subtitle')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-violet-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Conectores</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.kpi.connectors.title')}</CardTitle>
             <Plug className="h-5 w-5 text-violet-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-violet-600">{kpis?.conectoresAtivos ?? '-'}</div>
-            <p className="text-xs text-muted-foreground">ativos</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.kpi.connectors.subtitle')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-cyan-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pipelines</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.kpi.pipelines.title')}</CardTitle>
             <GitBranch className="h-5 w-5 text-cyan-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-cyan-600">{kpis?.pipelinesAtivos ?? '-'}</div>
-            <p className="text-xs text-muted-foreground">ativos</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.kpi.pipelines.subtitle')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-amber-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Execuções Hoje</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.kpi.executionsToday.title')}</CardTitle>
             <Play className="h-5 w-5 text-amber-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-amber-600">{kpis?.execucoesHoje ?? '-'}</div>
-            <p className="text-xs text-muted-foreground">processadas</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.kpi.executionsToday.subtitle')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Taxa Sucesso</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.kpi.successRate.title')}</CardTitle>
             <Zap className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">{kpis ? `${kpis.taxaSucesso}%` : '-'}</div>
-            <p className="text-xs text-muted-foreground">hoje</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.kpi.successRate.subtitle')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-red-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Erros Hoje</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.kpi.errorsToday.title')}</CardTitle>
             <AlertTriangle className="h-5 w-5 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-red-600">{kpis?.errosHoje ?? '-'}</div>
-            <p className="text-xs text-muted-foreground">falhas</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.kpi.errorsToday.subtitle')}</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         <Card>
-          <ChartContainer title="Execuções Mensais" icon={<TrendingUp className="h-5 w-5" />} height={300}>
+          <ChartContainer title={t('dashboard.monthlyExecutions')} icon={<TrendingUp className="h-5 w-5" />} height={300}>
             <AreaChart
               data={chartMensais}
               dataKeys={['sucesso', 'erro']}
@@ -178,7 +179,7 @@ export default function Dashboard() {
         <Card className="min-h-[365px]">
           <CardHeader className="flex flex-row items-center gap-2 pb-4">
             <Clock className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-base font-semibold">Execuções Recentes</CardTitle>
+            <CardTitle className="text-base font-semibold">{t('dashboard.recentExecutions')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -206,7 +207,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {execucoesRecentes.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Nenhuma execução recente</p>
+                <p className="text-sm text-muted-foreground text-center py-4">{t('dashboard.noRecentExecutions')}</p>
               )}
             </div>
           </CardContent>

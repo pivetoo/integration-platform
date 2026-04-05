@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { conectorService } from '../../services/conectorService';
 import { integracaoService } from '../../services/integracaoService';
 import type { Conector, CreateConectorRequest } from '../../types/conector';
@@ -20,6 +20,7 @@ const initialFormData: CreateConectorRequest = {
 };
 
 export default function ConectorFormModal({ open, onOpenChange, conector, onSuccess }: ConectorFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!conector;
   const [formData, setFormData] = useState<CreateConectorRequest>(initialFormData);
   const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
@@ -81,13 +82,13 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="lg">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Conector' : 'Novo Conector'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('connector.form.editTitle') : t('connector.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
@@ -97,13 +98,13 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Integração</label>
+              <label className="text-sm font-medium">{t('common.column.integration')}</label>
               <Select
                 value={formData.integracaoId ? formData.integracaoId.toString() : ''}
                 onValueChange={(value) => handleChange('integracaoId', parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma integração" />
+                  <SelectValue placeholder={t('connector.form.integrationPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {integracoes.map((integracao) => (
@@ -116,7 +117,7 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="sistemaId" className="text-sm font-medium">Sistema ID</label>
+              <label htmlFor="sistemaId" className="text-sm font-medium">{t('connector.form.systemId')}</label>
               <Input
                 id="sistemaId"
                 value={formData.sistemaId || ''}
@@ -131,15 +132,15 @@ export default function ConectorFormModal({ open, onOpenChange, conector, onSucc
               checked={formData.ativo}
               onCheckedChange={(checked) => handleChange('ativo', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium">Ativo</label>
+            <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

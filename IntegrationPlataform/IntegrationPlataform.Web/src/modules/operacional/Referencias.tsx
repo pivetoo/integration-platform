@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { referenciaService } from '../../services/referenciaService';
@@ -15,6 +15,7 @@ function formatDateTime(dateStr?: string): string {
 }
 
 export default function Referencias() {
+  const { t } = useI18n();
   const [referencias, setReferencias] = useState<Referencia[]>([]);
   const [selectedReferencias, setSelectedReferencias] = useState<Referencia[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function Referencias() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Referência removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('reference.list.removed'), variant: 'success' });
     },
   });
 
@@ -79,28 +80,28 @@ export default function Referencias() {
   const columns: DataTableColumn<Referencia>[] = [
     {
       key: 'conector',
-      title: 'Conector',
+      title: t('common.column.connector'),
       dataIndex: 'conector',
       render: (value: Conector) => value?.nome || '-',
     },
     {
       key: 'entidade',
-      title: 'Entidade',
+      title: t('common.column.entity'),
       dataIndex: 'entidade',
     },
     {
       key: 'idInterno',
-      title: 'ID Interno',
+      title: t('common.column.internalId'),
       dataIndex: 'idInterno',
     },
     {
       key: 'idExterno',
-      title: 'ID Externo',
+      title: t('common.column.externalId'),
       dataIndex: 'idExterno',
     },
     {
       key: 'criadoEm',
-      title: 'Criado em',
+      title: t('common.column.createdAt'),
       dataIndex: 'criadoEm',
       render: (value: string) => formatDateTime(value),
     },
@@ -108,7 +109,7 @@ export default function Referencias() {
 
   return (
     <PageLayout
-      title="Referências"
+      title={t('reference.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -121,7 +122,7 @@ export default function Referencias() {
         rowKey="id"
         selectedRows={selectedReferencias}
         onSelectionChange={setSelectedReferencias}
-        emptyText="Nenhuma referência encontrada"
+        emptyText={t('reference.list.empty')}
         loading={loading}
       />
 
@@ -129,10 +130,10 @@ export default function Referencias() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Referência"
-        description={`Tem certeza que deseja excluir ${selectedReferencias.length} referência(s)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('reference.list.deleteTitle')}
+        description={t('reference.list.deleteDescription').replace('{0}', String(selectedReferencias.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

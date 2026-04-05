@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link2, Save, Eye, EyeOff } from 'lucide-react';
-import { PageLayout, Badge, Button, Input, Checkbox, useApi, toast } from 'archon-ui';
+import { PageLayout, Badge, Button, Input, Checkbox, useApi, useI18n, toast } from 'archon-ui';
 import { conectorService } from '../../services/conectorService';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
 import { conectorAtributoValorService } from '../../services/conectorAtributoValorService';
@@ -11,6 +11,7 @@ import { TipoCampo } from '../../types/integracaoAtributo';
 import type { ConectorAtributoValor } from '../../types/conectorAtributoValor';
 
 export default function ConectorDetalhe() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const [conector, setConector] = useState<Conector | null>(null);
   const [atributos, setAtributos] = useState<IntegracaoAtributo[]>([]);
@@ -122,7 +123,7 @@ export default function ConectorDetalhe() {
       const existing = valorMap[atributo.id];
 
       if (atributo.obrigatorio && !value.trim()) {
-        toast({ title: 'Erro', description: `O campo "${atributo.label}" e obrigatorio`, variant: 'destructive' });
+        toast({ title: t('common.toast.errorTitle'), description: t('connector.detail.requiredField').replace('{0}', atributo.label), variant: 'destructive' });
         hasError = true;
         break;
       }
@@ -156,7 +157,7 @@ export default function ConectorDetalhe() {
     }
 
     if (!hasError) {
-      toast({ title: 'Sucesso', description: 'Atributos salvos com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.successTitle'), description: t('connector.detail.attributesSaved'), variant: 'success' });
       loadValores();
     }
   };
@@ -206,7 +207,7 @@ export default function ConectorDetalhe() {
               onCheckedChange={(checked) => handleValueChange(atributo.id, checked ? 'true' : 'false')}
             />
             <label htmlFor={`atributo-${atributo.id}`} className="text-sm">
-              {atributo.placeholder || 'Sim'}
+              {atributo.placeholder || t('common.boolean.yes')}
             </label>
           </div>
         );
@@ -274,7 +275,7 @@ export default function ConectorDetalhe() {
 
   return (
     <PageLayout
-      title={conector?.nome || 'Conector'}
+      title={conector?.nome || t('connector.detail.fallbackTitle')}
       onRefresh={() => { loadConector(); loadValores(); }}
     >
       <div className="space-y-6">
@@ -282,18 +283,18 @@ export default function ConectorDetalhe() {
         {conector && (
           <div className="grid grid-cols-2 gap-4 rounded-lg border bg-card p-4 md:grid-cols-4">
             <div>
-              <span className="text-xs text-muted-foreground">Nome</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.name')}</span>
               <p className="font-medium">{conector.nome}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Integração</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.integration')}</span>
               <p className="font-medium">{conector.integracao?.nome || '-'}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Status</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
                 <Badge variant={conector.ativo ? 'success' : 'destructive'}>
-                  {conector.ativo ? 'Ativo' : 'Inativo'}
+                  {conector.ativo ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>
             </div>
@@ -302,11 +303,11 @@ export default function ConectorDetalhe() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Atributos</h2>
+            <h2 className="text-lg font-semibold">{t('connector.detail.attributesTitle')}</h2>
             {atributos.length > 0 && (
               <Button size="sm" onClick={handleSave} disabled={saving}>
                 <Save size={16} className="mr-2" />
-                {saving ? 'Salvando...' : 'Salvar Atributos'}
+                {saving ? t('common.action.saving') : t('connector.detail.saveAttributes')}
               </Button>
             )}
           </div>
@@ -314,8 +315,8 @@ export default function ConectorDetalhe() {
           {atributos.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-muted-foreground">
               <Link2 size={48} className="mb-4 opacity-50" />
-              <p>Nenhum atributo configurado</p>
-              <p className="text-sm">Esta integração não possui atributos definidos</p>
+              <p>{t('connector.detail.emptyTitle')}</p>
+              <p className="text-sm">{t('connector.detail.emptyDescription')}</p>
             </div>
           ) : (
             Object.entries(groupedAtributos).map(([grupo, grupoAtributos]) => (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { integracaoAtributoService } from '../../services/integracaoAtributoService';
-import { TipoCampo, TipoCampoLabels } from '../../types/integracaoAtributo';
+import { TipoCampo } from '../../types/integracaoAtributo';
 import type { IntegracaoAtributo, CreateIntegracaoAtributoRequest } from '../../types/integracaoAtributo';
 
 interface IntegracaoAtributoFormModalProps {
@@ -29,6 +29,7 @@ const initialFormData: Omit<CreateIntegracaoAtributoRequest, 'integracaoId'> = {
 export default function IntegracaoAtributoFormModal({ open, onOpenChange, integracaoId, atributo, nextOrdem, onSuccess }: IntegracaoAtributoFormModalProps) {
   const isEditing = !!atributo;
   const [formData, setFormData] = useState(initialFormData);
+  const { t } = useI18n();
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
@@ -95,54 +96,60 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
     }
   };
 
-  const tipoCampoOptions = Object.entries(TipoCampoLabels).map(([value, label]) => ({
-    value,
-    label,
-  }));
+  const tipoCampoOptions = [
+    { value: TipoCampo.Texto.toString(), label: t('integration.attribute.type.text') },
+    { value: TipoCampo.TextoLongo.toString(), label: t('integration.attribute.type.longText') },
+    { value: TipoCampo.Numero.toString(), label: t('integration.attribute.type.number') },
+    { value: TipoCampo.Decimal.toString(), label: t('integration.attribute.type.decimal') },
+    { value: TipoCampo.Booleano.toString(), label: t('integration.attribute.type.boolean') },
+    { value: TipoCampo.Data.toString(), label: t('integration.attribute.type.date') },
+    { value: TipoCampo.DataHora.toString(), label: t('integration.attribute.type.dateTime') },
+    { value: TipoCampo.Lista.toString(), label: t('integration.attribute.type.list') },
+  ];
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="lg">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Atributo' : 'Novo Atributo'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('integration.attribute.form.editTitle') : t('integration.attribute.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="campo" className="text-sm font-medium">Campo</label>
+              <label htmlFor="campo" className="text-sm font-medium">{t('integration.attribute.form.fieldLabel')}</label>
               <Input
                 id="campo"
                 value={formData.campo}
                 onChange={(e) => handleChange('campo', e.target.value)}
-                placeholder="nome_do_campo"
+                placeholder={t('integration.attribute.form.fieldPlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="label" className="text-sm font-medium">Label</label>
+              <label htmlFor="label" className="text-sm font-medium">{t('integration.attribute.form.labelLabel')}</label>
               <Input
                 id="label"
                 value={formData.label}
                 onChange={(e) => handleChange('label', e.target.value)}
-                placeholder="Nome de exibição"
+                placeholder={t('integration.attribute.form.labelPlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
                 value={formData.descricao || ''}
                 onChange={(e) => handleChange('descricao', e.target.value)}
-                placeholder="Descrição do atributo"
+                placeholder={t('integration.attribute.form.descriptionPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo</label>
+              <label className="text-sm font-medium">{t('common.column.type')}</label>
               <Select
                 value={formData.tipo.toString()}
                 onValueChange={(value) => handleChange('tipo', parseInt(value))}
@@ -161,7 +168,7 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="placeholder" className="text-sm font-medium">Placeholder</label>
+              <label htmlFor="placeholder" className="text-sm font-medium">{t('integration.attribute.form.placeholderLabel')}</label>
               <Input
                 id="placeholder"
                 value={formData.placeholder || ''}
@@ -170,7 +177,7 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="valorPadrao" className="text-sm font-medium">Valor Padrão</label>
+              <label htmlFor="valorPadrao" className="text-sm font-medium">{t('integration.attribute.form.defaultValueLabel')}</label>
               <Input
                 id="valorPadrao"
                 value={formData.valorPadrao || ''}
@@ -179,17 +186,17 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="grupo" className="text-sm font-medium">Grupo</label>
+              <label htmlFor="grupo" className="text-sm font-medium">{t('integration.attribute.form.groupLabel')}</label>
               <Input
                 id="grupo"
                 value={formData.grupo || ''}
                 onChange={(e) => handleChange('grupo', e.target.value)}
-                placeholder="Ex: Autenticação, Configuração"
+                placeholder={t('integration.attribute.form.groupPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="ordem" className="text-sm font-medium">Ordem</label>
+              <label htmlFor="ordem" className="text-sm font-medium">{t('common.column.order')}</label>
               <Input
                 id="ordem"
                 type="number"
@@ -207,7 +214,7 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
                 checked={formData.obrigatorio}
                 onCheckedChange={(checked) => handleChange('obrigatorio', !!checked)}
               />
-              <label htmlFor="obrigatorio" className="text-sm font-medium">Obrigatório</label>
+              <label htmlFor="obrigatorio" className="text-sm font-medium">{t('integration.detail.required')}</label>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -216,16 +223,16 @@ export default function IntegracaoAtributoFormModal({ open, onOpenChange, integr
                 checked={formData.sensivel}
                 onCheckedChange={(checked) => handleChange('sensivel', !!checked)}
               />
-              <label htmlFor="sensivel" className="text-sm font-medium">Sensível</label>
+              <label htmlFor="sensivel" className="text-sm font-medium">{t('integration.detail.sensitive')}</label>
             </div>
           </div>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

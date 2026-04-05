@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, useApi, useI18n } from 'archon-ui';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
 import type { CategoriaIntegracao, CreateCategoriaIntegracaoRequest } from '../../types/categoriaIntegracao';
 
@@ -16,6 +16,7 @@ const initialFormData: CreateCategoriaIntegracaoRequest = {
 };
 
 export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categoria, onSuccess }: CategoriaIntegracaoFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!categoria;
   const [formData, setFormData] = useState<CreateCategoriaIntegracaoRequest>(initialFormData);
   const [ativo, setAtivo] = useState(true);
@@ -60,28 +61,28 @@ export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categ
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Categoria' : 'Nova Categoria'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('integration.category.form.editTitle') : t('integration.category.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+            <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
             <Input
               id="nome"
               value={formData.nome}
               onChange={(e) => handleChange('nome', e.target.value)}
               required
-              placeholder="Ex: Marketplace"
+              placeholder={t('integration.category.form.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+            <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
             <Input
               id="descricao"
               value={formData.descricao || ''}
               onChange={(e) => handleChange('descricao', e.target.value)}
-              placeholder="Ex: Integrações com marketplaces"
+              placeholder={t('integration.category.form.descriptionPlaceholder')}
             />
           </div>
 
@@ -93,17 +94,17 @@ export default function CategoriaIntegracaoFormModal({ open, onOpenChange, categ
                 onCheckedChange={(checked) => setAtivo(checked as boolean)}
               />
               <label htmlFor="ativo" className="text-sm font-medium cursor-pointer">
-                Ativo
+                {t('common.column.active')}
               </label>
             </div>
           )}
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { GripVertical, Plus, Pencil, Trash2, Workflow, Bug } from 'lucide-react';
-import { PageLayout, Badge, Button, Card, CardContent, CardHeader, CardTitle, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, Badge, Button, Card, CardContent, CardHeader, CardTitle, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -112,6 +112,7 @@ function SortableEtapa({ etapa, selected, onSelect, onEdit, onDelete }: Sortable
 }
 
 export default function PipelineDetalhe() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
   const [etapas, setEtapas] = useState<PipelineEtapa[]>([]);
@@ -129,7 +130,7 @@ export default function PipelineDetalhe() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Etapa removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('pipeline.detail.stepRemoved'), variant: 'success' });
     },
   });
 
@@ -246,8 +247,8 @@ export default function PipelineDetalhe() {
 
   return (
     <PageLayout
-      title={pipeline?.nome || 'Pipeline'}
-      subtitle="Builder linear de etapas"
+      title={pipeline?.nome || t('pipeline.detail.fallbackTitle')}
+      subtitle={t('pipeline.detail.subtitle')}
       onRefresh={() => {
         loadPipeline();
         loadEtapas();
@@ -256,14 +257,14 @@ export default function PipelineDetalhe() {
       actions={[
         {
           key: 'debugger',
-          label: 'Debugger',
+          label: t('pipeline.detail.debuggerAction'),
           icon: <Bug size={16} />,
           variant: 'outline-danger',
           onClick: () => setIsDebuggerOpen(true),
         },
         {
           key: 'new-step',
-          label: 'Nova Etapa',
+          label: t('pipeline.detail.newStepAction'),
           icon: <Plus size={16} />,
           variant: 'secondary',
           onClick: handleAddEtapa,
@@ -274,18 +275,18 @@ export default function PipelineDetalhe() {
         {pipeline && (
           <div className="grid grid-cols-2 gap-4 rounded-lg border bg-card p-4 md:grid-cols-3">
             <div>
-              <span className="text-xs text-muted-foreground">Identificador</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.identifier')}</span>
               <p className="font-medium">{pipeline.identificador}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Integração</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.integration')}</span>
               <p className="font-medium">{pipeline.integracao?.nome || '-'}</p>
             </div>
             <div>
-              <span className="text-xs text-muted-foreground">Status</span>
+              <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
                 <Badge variant={pipeline.ativo ? 'success' : 'destructive'}>
-                  {pipeline.ativo ? 'Ativo' : 'Inativo'}
+                  {pipeline.ativo ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>
             </div>
@@ -295,14 +296,14 @@ export default function PipelineDetalhe() {
         <div className="grid gap-4 lg:grid-cols-12">
           <Card className="lg:col-span-5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Etapas</CardTitle>
-              <p className="text-sm text-muted-foreground">Arraste para reordenar a sequência do pipeline.</p>
+              <CardTitle className="text-base">{t('pipeline.detail.stepsTitle')}</CardTitle>
+              <p className="text-sm text-muted-foreground">{t('pipeline.detail.stepsDescription')}</p>
             </CardHeader>
             <CardContent>
               {etapas.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10 text-muted-foreground">
                   <Workflow size={42} className="mb-3 opacity-50" />
-                  <p>Nenhuma etapa configurada</p>
+                  <p>{t('pipeline.detail.emptyTitle')}</p>
                 </div>
               ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -327,52 +328,52 @@ export default function PipelineDetalhe() {
 
           <Card className="lg:col-span-7">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Detalhes da Etapa</CardTitle>
+              <CardTitle className="text-base">{t('pipeline.detail.stepDetailsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {!selectedEtapa ? (
                 <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-                  Selecione uma etapa para visualizar os detalhes.
+                  {t('pipeline.detail.selectStep')}
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-lg font-semibold">{selectedEtapa.nome}</p>
-                      <p className="text-sm text-muted-foreground">Ordem {selectedEtapa.ordem}</p>
+                      <p className="text-sm text-muted-foreground">{t('pipeline.detail.orderLabel')} {selectedEtapa.ordem}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleEditEtapa(selectedEtapa)}>
                         <Pencil size={14} className="mr-1.5" />
-                        Editar
+                        {t('common.action.edit')}
                       </Button>
                       <Button size="sm" variant="outline-danger" onClick={() => handleDeleteEtapa(selectedEtapa)}>
                         <Trash2 size={14} className="mr-1.5" />
-                        Excluir
+                        {t('common.action.delete')}
                       </Button>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Badge variant={selectedEtapa.ativo ? 'success' : 'destructive'}>
-                      {selectedEtapa.ativo ? 'Ativo' : 'Inativo'}
+                      {selectedEtapa.ativo ? t('common.status.active') : t('common.status.inactive')}
                     </Badge>
                     <Badge variant="outline">{TipoEtapaLabels[selectedEtapa.tipo]}</Badge>
-                    <Badge variant="outline">Ao erro: {AcaoErroLabels[selectedEtapa.aoErro]}</Badge>
-                    {selectedEtapa.ignorarNoRetorno && <Badge variant="outline">Ignorar retorno</Badge>}
+                    <Badge variant="outline">{t('pipeline.detail.onErrorLabel')}: {AcaoErroLabels[selectedEtapa.aoErro]}</Badge>
+                    {selectedEtapa.ignorarNoRetorno && <Badge variant="outline">{t('pipeline.detail.ignoreReturn')}</Badge>}
                   </div>
 
                   <div className="grid gap-3 rounded-lg border p-3 md:grid-cols-2">
                     <div>
-                      <p className="text-xs text-muted-foreground">Chamada API</p>
+                      <p className="text-xs text-muted-foreground">{t('pipeline.detail.apiCall')}</p>
                       <p className="text-sm font-medium">{selectedEtapa.chamadaApi?.nome || '-'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Função JavaScript</p>
+                      <p className="text-xs text-muted-foreground">{t('pipeline.detail.javaScriptFunction')}</p>
                       <p className="text-sm font-medium">{selectedEtapa.funcaoJavaScript?.nome || '-'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Script SQL</p>
+                      <p className="text-xs text-muted-foreground">{t('pipeline.detail.sqlScript')}</p>
                       <p className="text-sm font-medium">{selectedEtapa.scriptBancoDados?.nome || '-'}</p>
                     </div>
                   </div>
@@ -387,10 +388,10 @@ export default function PipelineDetalhe() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Etapa"
-        description={`Tem certeza que deseja excluir a etapa "${deletingEtapa?.nome}"?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('pipeline.detail.deleteStepTitle')}
+        description={t('pipeline.detail.deleteStepDescription').replace('{0}', deletingEtapa?.nome || '')}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

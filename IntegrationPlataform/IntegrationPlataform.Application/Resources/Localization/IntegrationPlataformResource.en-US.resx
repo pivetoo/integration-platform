@@ -321,4 +321,336 @@
   <data name="request.route.idMismatch" xml:space="preserve">
     <value>Route id must match the request body id.</value>
   </data>
+  <data name="common.toast.removedTitle" xml:space="preserve"><value>Removed</value></data>
+  <data name="common.column.name" xml:space="preserve"><value>Name</value></data>
+  <data name="common.column.description" xml:space="preserve"><value>Description</value></data>
+  <data name="common.column.status" xml:space="preserve"><value>Status</value></data>
+  <data name="common.column.type" xml:space="preserve"><value>Type</value></data>
+  <data name="common.column.method" xml:space="preserve"><value>Method</value></data>
+  <data name="common.column.url" xml:space="preserve"><value>URL</value></data>
+  <data name="common.column.host" xml:space="preserve"><value>Host</value></data>
+  <data name="common.column.database" xml:space="preserve"><value>Database</value></data>
+  <data name="common.column.username" xml:space="preserve"><value>Username</value></data>
+  <data name="common.column.identifier" xml:space="preserve"><value>Identifier</value></data>
+  <data name="common.column.category" xml:space="preserve"><value>Category</value></data>
+  <data name="common.column.integration" xml:space="preserve"><value>Integration</value></data>
+  <data name="common.column.connector" xml:space="preserve"><value>Connector</value></data>
+  <data name="common.column.pipeline" xml:space="preserve"><value>Pipeline</value></data>
+  <data name="common.column.connection" xml:space="preserve"><value>Connection</value></data>
+  <data name="common.column.active" xml:space="preserve"><value>Active</value></data>
+  <data name="common.column.actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="common.column.createdAt" xml:space="preserve"><value>Created at</value></data>
+  <data name="common.column.startedAt" xml:space="preserve"><value>Started at</value></data>
+  <data name="common.column.duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="common.column.priority" xml:space="preserve"><value>Priority</value></data>
+  <data name="common.column.scheduledAt" xml:space="preserve"><value>Scheduled at</value></data>
+  <data name="common.column.entity" xml:space="preserve"><value>Entity</value></data>
+  <data name="common.column.internalId" xml:space="preserve"><value>Internal ID</value></data>
+  <data name="common.column.externalId" xml:space="preserve"><value>External ID</value></data>
+  <data name="common.boolean.yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="common.boolean.no" xml:space="preserve"><value>No</value></data>
+  <data name="common.status.active" xml:space="preserve"><value>Active</value></data>
+  <data name="common.status.inactive" xml:space="preserve"><value>Inactive</value></data>
+  <data name="common.action.open" xml:space="preserve"><value>Open</value></data>
+  <data name="common.action.delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="common.action.cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="common.action.export" xml:space="preserve"><value>Export</value></data>
+  <data name="common.action.import" xml:space="preserve"><value>Import</value></data>
+  <data name="layout.menu.general" xml:space="preserve"><value>General</value></data>
+  <data name="layout.menu.configuration" xml:space="preserve"><value>Configuration</value></data>
+  <data name="layout.menu.operational" xml:space="preserve"><value>Operational</value></data>
+  <data name="layout.menu.dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="layout.menu.categories" xml:space="preserve"><value>Categories</value></data>
+  <data name="layout.menu.integrations" xml:space="preserve"><value>Integrations</value></data>
+  <data name="layout.menu.connectors" xml:space="preserve"><value>Connectors</value></data>
+  <data name="layout.menu.pipelines" xml:space="preserve"><value>Pipelines</value></data>
+  <data name="layout.menu.databaseConnections" xml:space="preserve"><value>Database Connections</value></data>
+  <data name="layout.menu.databaseScripts" xml:space="preserve"><value>SQL Scripts</value></data>
+  <data name="layout.menu.apiCalls" xml:space="preserve"><value>API Calls</value></data>
+  <data name="layout.menu.javaScriptFunctions" xml:space="preserve"><value>JavaScript Functions</value></data>
+  <data name="layout.menu.automation" xml:space="preserve"><value>Automation</value></data>
+  <data name="layout.menu.executions" xml:space="preserve"><value>Executions</value></data>
+  <data name="layout.menu.processingQueue" xml:space="preserve"><value>Integration Queue</value></data>
+  <data name="layout.menu.references" xml:space="preserve"><value>References</value></data>
+  <data name="layout.breadcrumb.home" xml:space="preserve"><value>Home</value></data>
+  <data name="layout.breadcrumb.details" xml:space="preserve"><value>Details</value></data>
+  <data name="dashboard.title" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="dashboard.kpi.integrations.title" xml:space="preserve"><value>Integrations</value></data>
+  <data name="dashboard.kpi.integrations.subtitle" xml:space="preserve"><value>active</value></data>
+  <data name="dashboard.kpi.connectors.title" xml:space="preserve"><value>Connectors</value></data>
+  <data name="dashboard.kpi.connectors.subtitle" xml:space="preserve"><value>active</value></data>
+  <data name="dashboard.kpi.pipelines.title" xml:space="preserve"><value>Pipelines</value></data>
+  <data name="dashboard.kpi.pipelines.subtitle" xml:space="preserve"><value>active</value></data>
+  <data name="dashboard.kpi.executionsToday.title" xml:space="preserve"><value>Executions Today</value></data>
+  <data name="dashboard.kpi.executionsToday.subtitle" xml:space="preserve"><value>processed</value></data>
+  <data name="dashboard.kpi.successRate.title" xml:space="preserve"><value>Success Rate</value></data>
+  <data name="dashboard.kpi.successRate.subtitle" xml:space="preserve"><value>today</value></data>
+  <data name="dashboard.kpi.errorsToday.title" xml:space="preserve"><value>Errors Today</value></data>
+  <data name="dashboard.kpi.errorsToday.subtitle" xml:space="preserve"><value>failures</value></data>
+  <data name="dashboard.monthlyExecutions" xml:space="preserve"><value>Monthly Executions</value></data>
+  <data name="dashboard.recentExecutions" xml:space="preserve"><value>Recent Executions</value></data>
+  <data name="dashboard.noRecentExecutions" xml:space="preserve"><value>No recent executions</value></data>
+  <data name="integration.list.deleteTitle" xml:space="preserve"><value>Delete Integration</value></data>
+  <data name="integration.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} integration(s)?</value></data>
+  <data name="integration.category.list.title" xml:space="preserve"><value>Integration Categories</value></data>
+  <data name="integration.category.list.empty" xml:space="preserve"><value>No categories found</value></data>
+  <data name="integration.category.list.deleteTitle" xml:space="preserve"><value>Delete Category</value></data>
+  <data name="integration.category.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} category(ies)?</value></data>
+  <data name="integration.category.list.removed" xml:space="preserve"><value>Category removed successfully.</value></data>
+  <data name="apiCall.list.title" xml:space="preserve"><value>API Calls</value></data>
+  <data name="apiCall.list.empty" xml:space="preserve"><value>No API calls found</value></data>
+  <data name="apiCall.list.deleteTitle" xml:space="preserve"><value>Delete API Call</value></data>
+  <data name="apiCall.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} API call(s)?</value></data>
+  <data name="apiCall.list.removed" xml:space="preserve"><value>API call removed successfully.</value></data>
+  <data name="connector.list.title" xml:space="preserve"><value>Connectors</value></data>
+  <data name="connector.list.empty" xml:space="preserve"><value>No connectors found</value></data>
+  <data name="connector.list.deleteTitle" xml:space="preserve"><value>Delete Connector</value></data>
+  <data name="connector.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} connector(s)?</value></data>
+  <data name="connector.list.removed" xml:space="preserve"><value>Connector removed successfully.</value></data>
+  <data name="database.connection.list.title" xml:space="preserve"><value>Database Connections</value></data>
+  <data name="database.connection.list.empty" xml:space="preserve"><value>No connections found</value></data>
+  <data name="database.connection.list.deleteTitle" xml:space="preserve"><value>Confirm deletion</value></data>
+  <data name="database.connection.list.deleteDescription" xml:space="preserve"><value>Do you want to delete {0} connection(s)?</value></data>
+  <data name="database.connection.list.removed" xml:space="preserve"><value>Connection removed successfully.</value></data>
+  <data name="database.script.list.title" xml:space="preserve"><value>SQL Scripts</value></data>
+  <data name="database.script.list.empty" xml:space="preserve"><value>No database scripts found</value></data>
+  <data name="database.script.list.deleteTitle" xml:space="preserve"><value>Delete Script</value></data>
+  <data name="database.script.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} script(s)?</value></data>
+  <data name="database.script.list.removed" xml:space="preserve"><value>Script removed successfully.</value></data>
+  <data name="javaScriptFunction.list.title" xml:space="preserve"><value>JavaScript Functions</value></data>
+  <data name="javaScriptFunction.list.empty" xml:space="preserve"><value>No JavaScript functions found</value></data>
+  <data name="javaScriptFunction.list.deleteTitle" xml:space="preserve"><value>Delete JavaScript Function</value></data>
+  <data name="javaScriptFunction.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} function(s)?</value></data>
+  <data name="javaScriptFunction.list.removed" xml:space="preserve"><value>JavaScript function removed successfully.</value></data>
+  <data name="pipeline.list.title" xml:space="preserve"><value>Pipelines</value></data>
+  <data name="pipeline.list.empty" xml:space="preserve"><value>No pipelines found</value></data>
+  <data name="pipeline.list.deleteTitle" xml:space="preserve"><value>Delete Pipeline</value></data>
+  <data name="pipeline.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} pipeline(s)?</value></data>
+  <data name="pipeline.list.removed" xml:space="preserve"><value>Pipeline removed successfully.</value></data>
+  <data name="execution.list.title" xml:space="preserve"><value>Executions</value></data>
+  <data name="execution.list.empty" xml:space="preserve"><value>No executions found</value></data>
+  <data name="processingQueue.list.title" xml:space="preserve"><value>Integration Queue</value></data>
+  <data name="processingQueue.list.empty" xml:space="preserve"><value>No queue items</value></data>
+  <data name="processingQueue.list.deleteTitle" xml:space="preserve"><value>Delete from Queue</value></data>
+  <data name="processingQueue.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} queue item(s)?</value></data>
+  <data name="processingQueue.list.removed" xml:space="preserve"><value>Queue item removed successfully.</value></data>
+  <data name="reference.list.title" xml:space="preserve"><value>References</value></data>
+  <data name="reference.list.empty" xml:space="preserve"><value>No references found</value></data>
+  <data name="reference.list.deleteTitle" xml:space="preserve"><value>Delete Reference</value></data>
+  <data name="reference.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} reference(s)?</value></data>
+  <data name="reference.list.removed" xml:space="preserve"><value>Reference removed successfully.</value></data>
+  <data name="automation.list.title" xml:space="preserve"><value>Automation</value></data>
+  <data name="automation.list.empty" xml:space="preserve"><value>No routines found</value></data>
+  <data name="automation.list.deleteTitle" xml:space="preserve"><value>Delete Routine</value></data>
+  <data name="automation.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} routine(s)?</value></data>
+  <data name="automation.list.removed" xml:space="preserve"><value>Routine removed successfully.</value></data>
+  <data name="automation.list.intervalMinutes" xml:space="preserve"><value>Interval (min)</value></data>
+  <data name="automation.list.nextExecution" xml:space="preserve"><value>Next execution</value></data>
+  <data name="automation.list.lastExecution" xml:space="preserve"><value>Last execution</value></data>
+  <data name="common.toast.successTitle" xml:space="preserve"><value>Success</value></data>
+  <data name="common.toast.errorTitle" xml:space="preserve"><value>Error</value></data>
+  <data name="common.action.save" xml:space="preserve"><value>Save</value></data>
+  <data name="common.action.saving" xml:space="preserve"><value>Saving...</value></data>
+  <data name="common.action.edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="common.action.testing" xml:space="preserve"><value>Testing...</value></data>
+  <data name="integration.form.createTitle" xml:space="preserve"><value>New Integration</value></data>
+  <data name="integration.form.editTitle" xml:space="preserve"><value>Edit Integration</value></data>
+  <data name="integration.form.categoryPlaceholder" xml:space="preserve"><value>Select a category</value></data>
+  <data name="integration.form.noCategory" xml:space="preserve"><value>No category</value></data>
+  <data name="database.connection.form.createTitle" xml:space="preserve"><value>New Database Connection</value></data>
+  <data name="database.connection.form.editTitle" xml:space="preserve"><value>Edit Connection</value></data>
+  <data name="database.connection.form.namePlaceholder" xml:space="preserve"><value>Protheus Connection</value></data>
+  <data name="database.connection.form.databaseType" xml:space="preserve"><value>Database Type</value></data>
+  <data name="database.connection.form.hostPlaceholder" xml:space="preserve"><value>localhost or 192.168.1.100</value></data>
+  <data name="database.connection.form.port" xml:space="preserve"><value>Port</value></data>
+  <data name="database.connection.form.databasePlaceholder" xml:space="preserve"><value>database_name</value></data>
+  <data name="database.connection.form.usernamePlaceholder" xml:space="preserve"><value>postgres</value></data>
+  <data name="database.connection.form.password" xml:space="preserve"><value>Password</value></data>
+  <data name="database.connection.form.testAction" xml:space="preserve"><value>Test Connection</value></data>
+  <data name="database.connection.form.testMissingFields" xml:space="preserve"><value>Fill in all fields to test the connection</value></data>
+  <data name="database.connection.form.testSuccess" xml:space="preserve"><value>Connection tested successfully</value></data>
+  <data name="pipeline.form.createTitle" xml:space="preserve"><value>New Pipeline</value></data>
+  <data name="pipeline.form.editTitle" xml:space="preserve"><value>Edit Pipeline</value></data>
+  <data name="pipeline.form.integrationPlaceholder" xml:space="preserve"><value>Select an integration</value></data>
+  <data name="database.script.form.createTitle" xml:space="preserve"><value>New Script</value></data>
+  <data name="database.script.form.editTitle" xml:space="preserve"><value>Edit Script</value></data>
+  <data name="database.script.form.saved" xml:space="preserve"><value>Script saved successfully</value></data>
+  <data name="database.script.form.connectionPlaceholder" xml:space="preserve"><value>Select a connection</value></data>
+  <data name="database.script.form.scriptLabel" xml:space="preserve"><value>SQL Script</value></data>
+  <data name="database.script.form.scriptPlaceholder" xml:space="preserve"><value>SELECT * FROM table WHERE ...</value></data>
+  <data name="javaScriptFunction.form.createTitle" xml:space="preserve"><value>New JavaScript Function</value></data>
+  <data name="javaScriptFunction.form.editTitle" xml:space="preserve"><value>Edit JavaScript Function</value></data>
+  <data name="javaScriptFunction.form.codeLabel" xml:space="preserve"><value>JavaScript Code</value></data>
+  <data name="integration.detail.fallbackTitle" xml:space="preserve"><value>Integration</value></data>
+  <data name="integration.detail.editAction" xml:space="preserve"><value>Edit Integration</value></data>
+  <data name="integration.detail.attributesTitle" xml:space="preserve"><value>Attributes</value></data>
+  <data name="integration.detail.newAttribute" xml:space="preserve"><value>New Attribute</value></data>
+  <data name="integration.detail.emptyTitle" xml:space="preserve"><value>No attributes configured</value></data>
+  <data name="integration.detail.emptyDescription" xml:space="preserve"><value>Add attributes to define this integration's fields</value></data>
+  <data name="integration.detail.required" xml:space="preserve"><value>Required</value></data>
+  <data name="integration.detail.sensitive" xml:space="preserve"><value>Sensitive</value></data>
+  <data name="integration.detail.fieldLabel" xml:space="preserve"><value>Field</value></data>
+  <data name="integration.detail.groupLabel" xml:space="preserve"><value>Group</value></data>
+  <data name="integration.detail.defaultLabel" xml:space="preserve"><value>Default</value></data>
+  <data name="integration.detail.deleteAttributeTitle" xml:space="preserve"><value>Delete Attribute</value></data>
+  <data name="integration.detail.deleteAttributeDescription" xml:space="preserve"><value>Are you sure you want to delete attribute "{0}"?</value></data>
+  <data name="integration.detail.attributeRemoved" xml:space="preserve"><value>Attribute removed successfully.</value></data>
+  <data name="connector.detail.fallbackTitle" xml:space="preserve"><value>Connector</value></data>
+  <data name="connector.detail.attributesTitle" xml:space="preserve"><value>Attributes</value></data>
+  <data name="connector.detail.saveAttributes" xml:space="preserve"><value>Save Attributes</value></data>
+  <data name="connector.detail.emptyTitle" xml:space="preserve"><value>No attributes configured</value></data>
+  <data name="connector.detail.emptyDescription" xml:space="preserve"><value>This integration has no defined attributes</value></data>
+  <data name="connector.detail.requiredField" xml:space="preserve"><value>Field "{0}" is required</value></data>
+  <data name="connector.detail.attributesSaved" xml:space="preserve"><value>Attributes saved successfully</value></data>
+  <data name="pipeline.detail.fallbackTitle" xml:space="preserve"><value>Pipeline</value></data>
+  <data name="pipeline.detail.subtitle" xml:space="preserve"><value>Linear step builder</value></data>
+  <data name="pipeline.detail.debuggerAction" xml:space="preserve"><value>Debugger</value></data>
+  <data name="pipeline.detail.newStepAction" xml:space="preserve"><value>New Step</value></data>
+  <data name="pipeline.detail.stepsTitle" xml:space="preserve"><value>Steps</value></data>
+  <data name="pipeline.detail.stepsDescription" xml:space="preserve"><value>Drag to reorder the pipeline sequence.</value></data>
+  <data name="pipeline.detail.emptyTitle" xml:space="preserve"><value>No steps configured</value></data>
+  <data name="pipeline.detail.stepDetailsTitle" xml:space="preserve"><value>Step Details</value></data>
+  <data name="pipeline.detail.selectStep" xml:space="preserve"><value>Select a step to view details.</value></data>
+  <data name="pipeline.detail.orderLabel" xml:space="preserve"><value>Order</value></data>
+  <data name="pipeline.detail.onErrorLabel" xml:space="preserve"><value>On error</value></data>
+  <data name="pipeline.detail.ignoreReturn" xml:space="preserve"><value>Ignore return</value></data>
+  <data name="pipeline.detail.apiCall" xml:space="preserve"><value>API Call</value></data>
+  <data name="pipeline.detail.javaScriptFunction" xml:space="preserve"><value>JavaScript Function</value></data>
+  <data name="pipeline.detail.sqlScript" xml:space="preserve"><value>SQL Script</value></data>
+  <data name="pipeline.detail.deleteStepTitle" xml:space="preserve"><value>Delete Step</value></data>
+  <data name="pipeline.detail.deleteStepDescription" xml:space="preserve"><value>Are you sure you want to delete step "{0}"?</value></data>
+  <data name="pipeline.detail.stepRemoved" xml:space="preserve"><value>Step removed successfully.</value></data>
+  <data name="integration.category.form.createTitle" xml:space="preserve"><value>New Category</value></data>
+  <data name="integration.category.form.editTitle" xml:space="preserve"><value>Edit Category</value></data>
+  <data name="integration.category.form.namePlaceholder" xml:space="preserve"><value>Ex: Marketplace</value></data>
+  <data name="integration.category.form.descriptionPlaceholder" xml:space="preserve"><value>Ex: Marketplace integrations</value></data>
+  <data name="apiCall.form.createTitle" xml:space="preserve"><value>New API Call</value></data>
+  <data name="apiCall.form.editTitle" xml:space="preserve"><value>Edit API Call</value></data>
+  <data name="apiCall.form.urlPlaceholder" xml:space="preserve"><value>/api/products</value></data>
+  <data name="apiCall.form.headersTemplate" xml:space="preserve"><value>Headers (JSON Template)</value></data>
+  <data name="apiCall.form.headersPlaceholder" xml:space="preserve"><value>{"Content-Type": "application/json"}</value></data>
+  <data name="apiCall.form.bodyTemplate" xml:space="preserve"><value>Body (JSON Template)</value></data>
+  <data name="connector.form.createTitle" xml:space="preserve"><value>New Connector</value></data>
+  <data name="connector.form.editTitle" xml:space="preserve"><value>Edit Connector</value></data>
+  <data name="connector.form.integrationPlaceholder" xml:space="preserve"><value>Select an integration</value></data>
+  <data name="connector.form.systemId" xml:space="preserve"><value>System ID</value></data>
+  <data name="about.title" xml:space="preserve"><value>About the Integration Hub</value></data>
+  <data name="about.badge" xml:space="preserve"><value>Integration Platform</value></data>
+  <data name="about.description" xml:space="preserve"><value>Configuration and execution center for integrations with pipelines, connectors, API calls and operational monitoring.</value></data>
+  <data name="about.info.system" xml:space="preserve"><value>System</value></data>
+  <data name="about.info.company" xml:space="preserve"><value>Company</value></data>
+  <data name="about.info.user" xml:space="preserve"><value>User</value></data>
+  <data name="about.feature.pipelines.title" xml:space="preserve"><value>Pipelines</value></data>
+  <data name="about.feature.pipelines.description" xml:space="preserve"><value>Orchestrates step flows with ordering, error rules and sequential processing.</value></data>
+  <data name="about.feature.connectors.title" xml:space="preserve"><value>Connectors</value></data>
+  <data name="about.feature.connectors.description" xml:space="preserve"><value>Defines integrations with external systems and authentication/communication parameters.</value></data>
+  <data name="about.feature.integrations.title" xml:space="preserve"><value>Integrations</value></data>
+  <data name="about.feature.integrations.description" xml:space="preserve"><value>Groups resources by business domain and centralizes connection governance.</value></data>
+  <data name="about.feature.operations.title" xml:space="preserve"><value>Operations</value></data>
+  <data name="about.feature.operations.description" xml:space="preserve"><value>Tracks executions, processing queues and references for operational auditing.</value></data>
+  <data name="about.bestPractices.title" xml:space="preserve"><value>Best practices</value></data>
+  <data name="about.bestPractices.description" xml:space="preserve"><value>Use clear pipelines, standardized names and explicit error handling in each step to improve maintenance and observability.</value></data>
+  <data name="common.column.order" xml:space="preserve"><value>Order</value></data>
+  <data name="common.state.loading" xml:space="preserve"><value>Loading...</value></data>
+  <data name="common.action.copy" xml:space="preserve"><value>Copy</value></data>
+  <data name="common.action.copied" xml:space="preserve"><value>Copied</value></data>
+  <data name="common.option.none" xml:space="preserve"><value>None</value></data>
+  <data name="queue.form.createTitle" xml:space="preserve"><value>Queue Pipeline</value></data>
+  <data name="queue.form.connectorPlaceholder" xml:space="preserve"><value>Select a connector</value></data>
+  <data name="queue.form.pipelinePlaceholder" xml:space="preserve"><value>Select a pipeline</value></data>
+  <data name="queue.form.scheduledAt" xml:space="preserve"><value>Schedule</value></data>
+  <data name="queue.form.payloadLabel" xml:space="preserve"><value>Payload (JSON)</value></data>
+  <data name="queue.form.submitting" xml:space="preserve"><value>Queueing...</value></data>
+  <data name="queue.form.submit" xml:space="preserve"><value>Queue</value></data>
+  <data name="reference.form.createTitle" xml:space="preserve"><value>New Reference</value></data>
+  <data name="reference.form.editTitle" xml:space="preserve"><value>Edit Reference</value></data>
+  <data name="reference.form.connectorPlaceholder" xml:space="preserve"><value>Select a connector</value></data>
+  <data name="reference.form.entityLabel" xml:space="preserve"><value>Entity</value></data>
+  <data name="reference.form.entityPlaceholder" xml:space="preserve"><value>Ex: Product, Order, Customer</value></data>
+  <data name="reference.form.internalId" xml:space="preserve"><value>Internal ID</value></data>
+  <data name="reference.form.externalId" xml:space="preserve"><value>External ID</value></data>
+  <data name="pipeline.routine.form.createTitle" xml:space="preserve"><value>New Routine</value></data>
+  <data name="pipeline.routine.form.editTitle" xml:space="preserve"><value>Edit Routine</value></data>
+  <data name="pipeline.routine.form.created" xml:space="preserve"><value>Routine created successfully</value></data>
+  <data name="pipeline.routine.form.updated" xml:space="preserve"><value>Routine updated successfully</value></data>
+  <data name="pipeline.routine.form.connectorPlaceholder" xml:space="preserve"><value>Select a connector</value></data>
+  <data name="pipeline.routine.form.pipelinePlaceholder" xml:space="preserve"><value>Select a pipeline</value></data>
+  <data name="pipeline.routine.form.intervalMinutes" xml:space="preserve"><value>Interval (minutes)</value></data>
+  <data name="pipeline.routine.form.nextExecution" xml:space="preserve"><value>Next execution</value></data>
+  <data name="pipeline.routine.form.defaultPayload" xml:space="preserve"><value>Default payload (JSON)</value></data>
+  <data name="integration.attribute.form.createTitle" xml:space="preserve"><value>New Attribute</value></data>
+  <data name="integration.attribute.form.editTitle" xml:space="preserve"><value>Edit Attribute</value></data>
+  <data name="integration.attribute.form.fieldLabel" xml:space="preserve"><value>Field</value></data>
+  <data name="integration.attribute.form.fieldPlaceholder" xml:space="preserve"><value>field_name</value></data>
+  <data name="integration.attribute.form.labelLabel" xml:space="preserve"><value>Label</value></data>
+  <data name="integration.attribute.form.labelPlaceholder" xml:space="preserve"><value>Display name</value></data>
+  <data name="integration.attribute.form.descriptionPlaceholder" xml:space="preserve"><value>Attribute description</value></data>
+  <data name="integration.attribute.form.placeholderLabel" xml:space="preserve"><value>Placeholder</value></data>
+  <data name="integration.attribute.form.defaultValueLabel" xml:space="preserve"><value>Default Value</value></data>
+  <data name="integration.attribute.form.groupLabel" xml:space="preserve"><value>Group</value></data>
+  <data name="integration.attribute.form.groupPlaceholder" xml:space="preserve"><value>Ex: Authentication, Configuration</value></data>
+  <data name="integration.attribute.type.text" xml:space="preserve"><value>Text</value></data>
+  <data name="integration.attribute.type.longText" xml:space="preserve"><value>Long Text</value></data>
+  <data name="integration.attribute.type.number" xml:space="preserve"><value>Number</value></data>
+  <data name="integration.attribute.type.decimal" xml:space="preserve"><value>Decimal</value></data>
+  <data name="integration.attribute.type.boolean" xml:space="preserve"><value>Boolean</value></data>
+  <data name="integration.attribute.type.date" xml:space="preserve"><value>Date</value></data>
+  <data name="integration.attribute.type.dateTime" xml:space="preserve"><value>Date/Time</value></data>
+  <data name="integration.attribute.type.list" xml:space="preserve"><value>List</value></data>
+  <data name="pipeline.step.form.createTitle" xml:space="preserve"><value>New Step</value></data>
+  <data name="pipeline.step.form.editTitle" xml:space="preserve"><value>Edit Step</value></data>
+  <data name="pipeline.step.form.loadingApiCalls" xml:space="preserve"><value>Loading API calls...</value></data>
+  <data name="pipeline.step.form.apiCallPlaceholder" xml:space="preserve"><value>Select an API call</value></data>
+  <data name="pipeline.step.form.loadingJavaScriptFunctions" xml:space="preserve"><value>Loading functions...</value></data>
+  <data name="pipeline.step.form.javaScriptFunctionPlaceholder" xml:space="preserve"><value>Select a function</value></data>
+  <data name="pipeline.step.form.databaseScriptLabel" xml:space="preserve"><value>Database Script</value></data>
+  <data name="pipeline.step.form.loadingDatabaseScripts" xml:space="preserve"><value>Loading scripts...</value></data>
+  <data name="pipeline.step.form.databaseScriptPlaceholder" xml:space="preserve"><value>Select a script</value></data>
+  <data name="pipeline.step.form.ignoreOnApiReturn" xml:space="preserve"><value>Ignore in API response</value></data>
+  <data name="pipeline.step.type.httpRequest" xml:space="preserve"><value>HTTP Request</value></data>
+  <data name="pipeline.step.type.javaScriptFunction" xml:space="preserve"><value>JavaScript Function</value></data>
+  <data name="pipeline.step.type.executeSqlScript" xml:space="preserve"><value>Execute SQL Script</value></data>
+  <data name="pipeline.step.errorAction.stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="pipeline.step.errorAction.continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="execution.status.running" xml:space="preserve"><value>Running</value></data>
+  <data name="execution.status.success" xml:space="preserve"><value>Success</value></data>
+  <data name="execution.status.error" xml:space="preserve"><value>Error</value></data>
+  <data name="execution.status.partial" xml:space="preserve"><value>Partial</value></data>
+  <data name="execution.log.level.debug" xml:space="preserve"><value>Debug</value></data>
+  <data name="execution.log.level.info" xml:space="preserve"><value>Info</value></data>
+  <data name="execution.log.level.warning" xml:space="preserve"><value>Warning</value></data>
+  <data name="execution.log.level.error" xml:space="preserve"><value>Error</value></data>
+  <data name="execution.detail.title" xml:space="preserve"><value>Execution Details</value></data>
+  <data name="execution.detail.emptyLogs" xml:space="preserve"><value>No logs found</value></data>
+  <data name="execution.detail.generalLog" xml:space="preserve"><value>General Log</value></data>
+  <data name="execution.detail.message" xml:space="preserve"><value>Message</value></data>
+  <data name="execution.detail.context" xml:space="preserve"><value>Context</value></data>
+  <data name="execution.detail.request" xml:space="preserve"><value>Request</value></data>
+  <data name="execution.detail.response" xml:space="preserve"><value>Response</value></data>
+  <data name="execution.detail.selectStep" xml:space="preserve"><value>Select a step to view details</value></data>
+  <data name="pipeline.debugger.title" xml:space="preserve"><value>Pipeline Debugger</value></data>
+  <data name="pipeline.debugger.inputPayload" xml:space="preserve"><value>Input payload (JSON)</value></data>
+  <data name="pipeline.debugger.execution" xml:space="preserve"><value>Execution</value></data>
+  <data name="pipeline.debugger.run" xml:space="preserve"><value>Run</value></data>
+  <data name="pipeline.debugger.rerun" xml:space="preserve"><value>Rerun</value></data>
+  <data name="pipeline.debugger.startDebug" xml:space="preserve"><value>Start Debug</value></data>
+  <data name="pipeline.debugger.nextStep" xml:space="preserve"><value>Next Step</value></data>
+  <data name="pipeline.debugger.finishDebug" xml:space="preserve"><value>Finish Debug</value></data>
+  <data name="pipeline.debugger.session" xml:space="preserve"><value>Session</value></data>
+  <data name="pipeline.debugger.remaining" xml:space="preserve"><value>Remaining</value></data>
+  <data name="pipeline.debugger.next" xml:space="preserve"><value>Next</value></data>
+  <data name="pipeline.debugger.currentExecution" xml:space="preserve"><value>Current execution</value></data>
+  <data name="pipeline.debugger.stepStatus.error" xml:space="preserve"><value>Error</value></data>
+  <data name="pipeline.debugger.stepStatus.warning" xml:space="preserve"><value>Warning</value></data>
+  <data name="pipeline.debugger.stepStatus.ok" xml:space="preserve"><value>OK</value></data>
+  <data name="pipeline.debugger.stepStatus.waiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="pipeline.debugger.filters" xml:space="preserve"><value>Filters</value></data>
+  <data name="pipeline.debugger.selectStep" xml:space="preserve"><value>Select a step to debug</value></data>
+  <data name="pipeline.debugger.stepInput" xml:space="preserve"><value>Step input</value></data>
+  <data name="pipeline.debugger.copyJson" xml:space="preserve"><value>Copy JSON</value></data>
+  <data name="pipeline.debugger.stepOutput" xml:space="preserve"><value>Step output</value></data>
+  <data name="pipeline.debugger.downloadFile" xml:space="preserve"><value>Download file</value></data>
+  <data name="pipeline.debugger.diffWithPrevious" xml:space="preserve"><value>Diff with previous execution</value></data>
+  <data name="pipeline.debugger.copyDiff" xml:space="preserve"><value>Copy Diff</value></data>
+  <data name="pipeline.debugger.emptyLogs" xml:space="preserve"><value>No logs for the selected filters.</value></data>
 </root>

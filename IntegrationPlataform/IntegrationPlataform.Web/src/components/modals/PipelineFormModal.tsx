@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { pipelineService } from '../../services/pipelineService';
 import { integracaoService } from '../../services/integracaoService';
 import type { Pipeline, CreatePipelineRequest } from '../../types/pipeline';
@@ -21,6 +21,7 @@ const initialFormData: CreatePipelineRequest = {
 };
 
 export default function PipelineFormModal({ open, onOpenChange, pipeline, onSuccess }: PipelineFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!pipeline;
   const [formData, setFormData] = useState<CreatePipelineRequest>(initialFormData);
   const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
@@ -83,13 +84,13 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="lg">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Pipeline' : 'Novo Pipeline'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('pipeline.form.editTitle') : t('pipeline.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="identificador" className="text-sm font-medium">Identificador</label>
+              <label htmlFor="identificador" className="text-sm font-medium">{t('common.column.identifier')}</label>
               <Input
                 id="identificador"
                 value={formData.identificador}
@@ -99,7 +100,7 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
@@ -109,7 +110,7 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
                 value={formData.descricao || ''}
@@ -118,13 +119,13 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Integração</label>
+              <label className="text-sm font-medium">{t('common.column.integration')}</label>
               <Select
                 value={formData.integracaoId ? formData.integracaoId.toString() : ''}
                 onValueChange={(value) => handleChange('integracaoId', parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma integração" />
+                  <SelectValue placeholder={t('pipeline.form.integrationPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {integracoes.map((integracao) => (
@@ -143,15 +144,15 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
               checked={formData.ativo}
               onCheckedChange={(checked) => handleChange('ativo', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium">Ativo</label>
+            <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, useApi, useI18n } from 'archon-ui';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';
 import type { FuncaoJavaScript, CreateFuncaoJavaScriptRequest } from '../../types/funcaoJavaScript';
 
@@ -17,6 +17,7 @@ const initialFormData: CreateFuncaoJavaScriptRequest = {
 };
 
 export default function FuncaoJavaScriptFormModal({ open, onOpenChange, funcaoJavaScript, onSuccess }: FuncaoJavaScriptFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!funcaoJavaScript;
   const [formData, setFormData] = useState<CreateFuncaoJavaScriptRequest>(initialFormData);
 
@@ -59,13 +60,13 @@ export default function FuncaoJavaScriptFormModal({ open, onOpenChange, funcaoJa
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="3xl">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Função JavaScript' : 'Nova Função JavaScript'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('javaScriptFunction.form.editTitle') : t('javaScriptFunction.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
@@ -75,7 +76,7 @@ export default function FuncaoJavaScriptFormModal({ open, onOpenChange, funcaoJa
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
                 value={formData.descricao || ''}
@@ -84,7 +85,7 @@ export default function FuncaoJavaScriptFormModal({ open, onOpenChange, funcaoJa
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="codigo" className="text-sm font-medium">Código JavaScript</label>
+              <label htmlFor="codigo" className="text-sm font-medium">{t('javaScriptFunction.form.codeLabel')}</label>
               <textarea
                 id="codigo"
                 className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -98,10 +99,10 @@ export default function FuncaoJavaScriptFormModal({ open, onOpenChange, funcaoJa
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

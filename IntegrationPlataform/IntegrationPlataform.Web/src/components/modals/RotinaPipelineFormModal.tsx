@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, toast } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { rotinaPipelineService } from '../../services/rotinaPipelineService';
 import { conectorService } from '../../services/conectorService';
 import { pipelineService } from '../../services/pipelineService';
@@ -28,14 +28,15 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
   const [formData, setFormData] = useState<CreateRotinaPipelineRequest>(initialFormData);
   const [conectores, setConectores] = useState<Conector[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const { t } = useI18n();
 
   const { execute, loading } = useApi({
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
       toast({
-        title: 'Sucesso',
-        description: isEditing ? 'Rotina atualizada com sucesso' : 'Rotina criada com sucesso',
+        title: t('common.toast.successTitle'),
+        description: isEditing ? t('pipeline.routine.form.updated') : t('pipeline.routine.form.created'),
         variant: 'success',
       });
     },
@@ -118,20 +119,20 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="lg">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Rotina' : 'Nova Rotina'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('pipeline.routine.form.editTitle') : t('pipeline.routine.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Conector</label>
+              <label className="text-sm font-medium">{t('common.column.connector')}</label>
               <Select
                 value={formData.conectorId ? formData.conectorId.toString() : ''}
                 onValueChange={(value) => handleChange('conectorId', parseInt(value, 10))}
                 disabled={isEditing}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um conector" />
+                  <SelectValue placeholder={t('pipeline.routine.form.connectorPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {conectores.map((conector) => (
@@ -144,14 +145,14 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Pipeline</label>
+              <label className="text-sm font-medium">{t('common.column.pipeline')}</label>
               <Select
                 value={formData.pipelineId ? formData.pipelineId.toString() : ''}
                 onValueChange={(value) => handleChange('pipelineId', parseInt(value, 10))}
                 disabled={isEditing}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um pipeline" />
+                  <SelectValue placeholder={t('pipeline.routine.form.pipelinePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {pipelines.map((pipeline) => (
@@ -164,7 +165,7 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="intervaloMinutos" className="text-sm font-medium">Intervalo (minutos)</label>
+              <label htmlFor="intervaloMinutos" className="text-sm font-medium">{t('pipeline.routine.form.intervalMinutes')}</label>
               <Input
                 id="intervaloMinutos"
                 type="number"
@@ -176,7 +177,7 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="proximaExecucao" className="text-sm font-medium">Próxima execução</label>
+              <label htmlFor="proximaExecucao" className="text-sm font-medium">{t('pipeline.routine.form.nextExecution')}</label>
               <Input
                 id="proximaExecucao"
                 type="datetime-local"
@@ -186,7 +187,7 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="payloadPadrao" className="text-sm font-medium">Payload padrão (JSON)</label>
+              <label htmlFor="payloadPadrao" className="text-sm font-medium">{t('pipeline.routine.form.defaultPayload')}</label>
               <textarea
                 id="payloadPadrao"
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -203,15 +204,15 @@ export default function RotinaPipelineFormModal({ open, onOpenChange, rotina, on
               checked={formData.ativo}
               onCheckedChange={(checked) => handleChange('ativo', !!checked)}
             />
-            <label htmlFor="ativo" className="text-sm font-medium">Ativo</label>
+            <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

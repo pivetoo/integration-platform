@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { scriptBancoDadosService } from '../../services/scriptBancoDadosService';
@@ -8,6 +8,7 @@ import type { ConexaoBancoDados } from '../../types/conexaoBancoDados';
 import ScriptBancoDadosFormModal from '../../components/modals/ScriptBancoDadosFormModal';
 
 export default function ScriptsBancoDados() {
+  const { t } = useI18n();
   const [scripts, setScripts] = useState<ScriptBancoDados[]>([]);
   const [selectedScripts, setSelectedScripts] = useState<ScriptBancoDados[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -22,7 +23,7 @@ export default function ScriptsBancoDados() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Script removido com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('database.script.list.removed'), variant: 'success' });
     },
   });
 
@@ -70,19 +71,19 @@ export default function ScriptsBancoDados() {
   };
 
   const columns: DataTableColumn<ScriptBancoDados>[] = [
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
     {
       key: 'conexaoBancoDados',
-      title: 'Conexão',
+      title: t('common.column.connection'),
       dataIndex: 'conexaoBancoDados',
       render: (value: ConexaoBancoDados) => value?.nome || '-',
     },
-    { key: 'descricao', title: 'Descrição', dataIndex: 'descricao' },
+    { key: 'descricao', title: t('common.column.description'), dataIndex: 'descricao' },
   ];
 
   return (
     <PageLayout
-      title="Scripts SQL"
+      title={t('database.script.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -95,7 +96,7 @@ export default function ScriptsBancoDados() {
         rowKey="id"
         selectedRows={selectedScripts}
         onSelectionChange={setSelectedScripts}
-        emptyText="Nenhum script de banco de dados encontrado"
+        emptyText={t('database.script.list.empty')}
         loading={loading}
       />
 
@@ -103,10 +104,10 @@ export default function ScriptsBancoDados() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Script"
-        description={`Tem certeza que deseja excluir ${selectedScripts.length} script(s)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('database.script.list.deleteTitle')}
+        description={t('database.script.list.deleteDescription').replace('{0}', String(selectedScripts.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { chamadaApiService } from '../../services/chamadaApiService';
 import { MetodoHttp, MetodoHttpLabels } from '../../types/chamadaApi';
 import type { ChamadaApi, CreateChamadaApiRequest } from '../../types/chamadaApi';
@@ -21,6 +21,7 @@ const initialFormData: CreateChamadaApiRequest = {
 };
 
 export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, onSuccess }: ChamadaApiFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!chamadaApi;
   const [formData, setFormData] = useState<CreateChamadaApiRequest>(initialFormData);
 
@@ -70,13 +71,13 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="3xl">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Chamada de API' : 'Nova Chamada de API'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('apiCall.form.editTitle') : t('apiCall.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
@@ -87,7 +88,7 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
                 value={formData.descricao || ''}
@@ -96,7 +97,7 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Método</label>
+              <label className="text-sm font-medium">{t('common.column.method')}</label>
               <Select
                 value={formData.metodo.toString()}
                 onValueChange={(value) => handleChange('metodo', parseInt(value))}
@@ -115,31 +116,31 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="url" className="text-sm font-medium">URL</label>
+              <label htmlFor="url" className="text-sm font-medium">{t('common.column.url')}</label>
               <Input
                 id="url"
                 value={formData.url}
                 onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="/api/produtos"
+                placeholder={t('apiCall.form.urlPlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="headersTemplate" className="text-sm font-medium">Headers (JSON Template)</label>
+              <label htmlFor="headersTemplate" className="text-sm font-medium">{t('apiCall.form.headersTemplate')}</label>
               <textarea
                 id="headersTemplate"
                 className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={formData.headersTemplate || ''}
                 onChange={(e) => handleChange('headersTemplate', e.target.value)}
-                placeholder='{"Content-Type": "application/json"}'
+                placeholder={t('apiCall.form.headersPlaceholder')}
                 rows={2}
               />
             </div>
 
             {showBody && (
               <div className="space-y-2 col-span-2">
-                <label htmlFor="bodyTemplate" className="text-sm font-medium">Body (JSON Template)</label>
+                <label htmlFor="bodyTemplate" className="text-sm font-medium">{t('apiCall.form.bodyTemplate')}</label>
                 <textarea
                   id="bodyTemplate"
                   className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -153,10 +154,10 @@ export default function ChamadaApiFormModal({ open, onOpenChange, chamadaApi, on
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, Badge, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, ConfirmModal, Badge, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { categoriaIntegracaoService } from '../../services/categoriaIntegracaoService';
@@ -7,6 +7,7 @@ import type { CategoriaIntegracao } from '../../types/categoriaIntegracao';
 import CategoriaIntegracaoFormModal from '../../components/modals/CategoriaIntegracaoFormModal';
 
 export default function CategoriasIntegracao() {
+  const { t } = useI18n();
   const [categorias, setCategorias] = useState<CategoriaIntegracao[]>([]);
   const [selectedCategorias, setSelectedCategorias] = useState<CategoriaIntegracao[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function CategoriasIntegracao() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Categoria removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('integration.category.list.removed'), variant: 'success' });
     },
   });
 
@@ -69,16 +70,16 @@ export default function CategoriasIntegracao() {
   };
 
   const columns: DataTableColumn<CategoriaIntegracao>[] = [
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
-    { key: 'descricao', title: 'Descrição', dataIndex: 'descricao' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+    { key: 'descricao', title: t('common.column.description'), dataIndex: 'descricao' },
     {
       key: 'ativo',
-      title: 'Status',
+      title: t('common.column.status'),
       dataIndex: 'ativo',
       width: 120,
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'secondary'}>
-          {value ? 'Ativo' : 'Inativo'}
+          {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
     },
@@ -86,7 +87,7 @@ export default function CategoriasIntegracao() {
 
   return (
     <PageLayout
-      title="Categorias de Integração"
+      title={t('integration.category.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -100,7 +101,7 @@ export default function CategoriasIntegracao() {
           rowKey="id"
           selectedRows={selectedCategorias}
           onSelectionChange={setSelectedCategorias}
-          emptyText="Nenhuma categoria encontrada"
+          emptyText={t('integration.category.list.empty')}
           loading={loading}
         />
       </div>
@@ -109,10 +110,10 @@ export default function CategoriasIntegracao() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Categoria"
-        description={`Tem certeza que deseja excluir ${selectedCategorias.length} categoria(s)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('integration.category.list.deleteTitle')}
+        description={t('integration.category.list.deleteDescription').replace('{0}', String(selectedCategorias.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
@@ -15,6 +15,7 @@ const tipoBancoVariantMap: Record<number, string> = {
 };
 
 export default function ConexoesBancoDados() {
+  const { t } = useI18n();
   const [conexoes, setConexoes] = useState<ConexaoBancoDados[]>([]);
   const [selectedConexoes, setSelectedConexoes] = useState<ConexaoBancoDados[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function ConexoesBancoDados() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Conexão removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('database.connection.list.removed'), variant: 'success' });
     },
   });
 
@@ -77,10 +78,10 @@ export default function ConexoesBancoDados() {
   };
 
   const columns: DataTableColumn<ConexaoBancoDados>[] = [
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
     {
       key: 'tipo',
-      title: 'Tipo',
+      title: t('common.column.type'),
       dataIndex: 'tipo',
       render: (value: TipoBancoDados) => (
         <Badge variant={(tipoBancoVariantMap[value] || 'outline') as 'default' | 'secondary' | 'warning' | 'success'}>
@@ -88,14 +89,14 @@ export default function ConexoesBancoDados() {
         </Badge>
       ),
     },
-    { key: 'host', title: 'Host', dataIndex: 'host' },
-    { key: 'database', title: 'Database', dataIndex: 'database' },
-    { key: 'username', title: 'Username', dataIndex: 'username' },
+    { key: 'host', title: t('common.column.host'), dataIndex: 'host' },
+    { key: 'database', title: t('common.column.database'), dataIndex: 'database' },
+    { key: 'username', title: t('common.column.username'), dataIndex: 'username' },
   ];
 
   return (
     <PageLayout
-      title="Conexões de Banco de Dados"
+      title={t('database.connection.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -110,6 +111,7 @@ export default function ConexoesBancoDados() {
         selectable
         selectedRows={selectedConexoes}
         onSelectionChange={setSelectedConexoes}
+        emptyText={t('database.connection.list.empty')}
       />
 
       <ConexaoBancoDadosFormModal
@@ -123,8 +125,10 @@ export default function ConexoesBancoDados() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Confirmar exclusão"
-        description={`Deseja excluir ${selectedConexoes.length} conexão(ões)?`}
+        title={t('database.connection.list.deleteTitle')}
+        description={t('database.connection.list.deleteDescription').replace('{0}', String(selectedConexoes.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
       />
     </PageLayout>
   );

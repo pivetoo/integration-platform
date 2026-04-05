@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { rotinaPipelineService } from '../../services/rotinaPipelineService';
@@ -17,6 +17,7 @@ function formatDateTime(dateStr?: string): string {
 }
 
 export default function Automacao() {
+  const { t } = useI18n();
   const [rotinas, setRotinas] = useState<RotinaPipeline[]>([]);
   const [selectedRotinas, setSelectedRotinas] = useState<RotinaPipeline[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -31,7 +32,7 @@ export default function Automacao() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Rotina removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('automation.list.removed'), variant: 'success' });
     },
   });
 
@@ -82,40 +83,40 @@ export default function Automacao() {
   const columns: DataTableColumn<RotinaPipeline>[] = [
     {
       key: 'conector',
-      title: 'Conector',
+      title: t('common.column.connector'),
       dataIndex: 'conector',
       render: (value: Conector) => value?.nome || '-',
     },
     {
       key: 'pipeline',
-      title: 'Pipeline',
+      title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
       render: (value: Pipeline) => value?.nome || '-',
     },
     {
       key: 'intervaloMinutos',
-      title: 'Intervalo (min)',
+      title: t('automation.list.intervalMinutes'),
       dataIndex: 'intervaloMinutos',
     },
     {
       key: 'ativo',
-      title: 'Ativo',
+      title: t('common.column.active'),
       dataIndex: 'ativo',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? 'Sim' : 'Não'}
+          {value ? t('common.boolean.yes') : t('common.boolean.no')}
         </Badge>
       ),
     },
     {
       key: 'proximaExecucao',
-      title: 'Próxima execução',
+      title: t('automation.list.nextExecution'),
       dataIndex: 'proximaExecucao',
       render: (value: string) => formatDateTime(value),
     },
     {
       key: 'ultimaExecucao',
-      title: 'Última execução',
+      title: t('automation.list.lastExecution'),
       dataIndex: 'ultimaExecucao',
       render: (value: string) => formatDateTime(value),
     },
@@ -123,7 +124,7 @@ export default function Automacao() {
 
   return (
     <PageLayout
-      title="Automação"
+      title={t('automation.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -136,7 +137,7 @@ export default function Automacao() {
         rowKey="id"
         selectedRows={selectedRotinas}
         onSelectionChange={setSelectedRotinas}
-        emptyText="Nenhuma rotina encontrada"
+        emptyText={t('automation.list.empty')}
         loading={loading}
       />
 
@@ -144,10 +145,10 @@ export default function Automacao() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Rotina"
-        description={`Tem certeza que deseja excluir ${selectedRotinas.length} rotina(s)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('automation.list.deleteTitle')}
+        description={t('automation.list.deleteDescription').replace('{0}', String(selectedRotinas.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

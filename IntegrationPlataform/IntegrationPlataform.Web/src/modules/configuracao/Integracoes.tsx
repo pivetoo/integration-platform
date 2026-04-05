@@ -132,21 +132,21 @@ export default function Integracoes() {
   };
 
   const columns: DataTableColumn<Integracao>[] = [
-    { key: 'identificador', title: 'Identificador', dataIndex: 'identificador' },
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
+    { key: 'identificador', title: t('common.column.identifier'), dataIndex: 'identificador' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
     {
       key: 'categoria',
-      title: 'Categoria',
+      title: t('common.column.category'),
       dataIndex: 'categoria',
       render: (value: CategoriaIntegracao) => value?.nome || '-',
     },
     {
       key: 'ativo',
-      title: 'Ativo',
+      title: t('common.column.active'),
       dataIndex: 'ativo',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? 'Sim' : 'Não'}
+          {value ? t('common.boolean.yes') : t('common.boolean.no')}
         </Badge>
       ),
     },
@@ -163,7 +163,7 @@ export default function Integracoes() {
       actions={[
         {
           key: 'exportar',
-          label: 'Exportar',
+          label: t('common.action.export'),
           icon: <Download size={16} />,
           variant: 'outline',
           onClick: handleExport,
@@ -171,7 +171,7 @@ export default function Integracoes() {
         },
         {
           key: 'importar',
-          label: 'Importar',
+          label: t('common.action.import'),
           icon: <Upload size={16} />,
           variant: 'outline',
           onClick: handleImportClick,
@@ -200,10 +200,10 @@ export default function Integracoes() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Integração"
-        description={`Tem certeza que deseja excluir ${selectedIntegracoes.length} integração(ões)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('integration.list.deleteTitle')}
+        description={t('integration.list.deleteDescription').replace('{0}', String(selectedIntegracoes.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

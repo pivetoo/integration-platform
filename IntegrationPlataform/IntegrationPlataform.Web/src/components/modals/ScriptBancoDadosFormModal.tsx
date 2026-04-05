@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, toast } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { scriptBancoDadosService } from '../../services/scriptBancoDadosService';
 import { conexaoBancoDadosService } from '../../services/conexaoBancoDadosService';
 import type { ScriptBancoDados, CreateScriptBancoDadosRequest } from '../../types/scriptBancoDados';
@@ -20,6 +20,7 @@ const initialFormData: CreateScriptBancoDadosRequest = {
 };
 
 export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBancoDados, onSuccess }: ScriptBancoDadosFormModalProps) {
+  const { t } = useI18n();
   const isEditing = !!scriptBancoDados;
   const [formData, setFormData] = useState<CreateScriptBancoDadosRequest>(initialFormData);
   const [conexoes, setConexoes] = useState<ConexaoBancoDados[]>([]);
@@ -79,8 +80,8 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
 
       if (result) {
         toast({
-          title: 'Sucesso',
-          description: result.message || 'Script salvo com sucesso',
+          title: t('common.toast.successTitle'),
+          description: result.message || t('database.script.form.saved'),
           variant: 'success',
         });
       }
@@ -95,13 +96,13 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="3xl">
         <ModalHeader>
-          <ModalTitle>{isEditing ? 'Editar Script' : 'Novo Script'}</ModalTitle>
+          <ModalTitle>{isEditing ? t('database.script.form.editTitle') : t('database.script.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="nome" className="text-sm font-medium">Nome</label>
+              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
               <Input
                 id="nome"
                 value={formData.nome}
@@ -111,13 +112,13 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Conexão Banco de Dados</label>
+              <label className="text-sm font-medium">{t('common.column.connection')}</label>
               <Select
                 value={formData.conexaoBancoDadosId ? formData.conexaoBancoDadosId.toString() : ''}
                 onValueChange={(value) => handleChange('conexaoBancoDadosId', parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma conexão" />
+                  <SelectValue placeholder={t('database.script.form.connectionPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {conexoes.map((conexao) => (
@@ -130,7 +131,7 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">Descrição</label>
+              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
               <Input
                 id="descricao"
                 value={formData.descricao || ''}
@@ -139,7 +140,7 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
             </div>
 
             <div className="space-y-2 col-span-2">
-              <label htmlFor="script" className="text-sm font-medium">Script SQL</label>
+              <label htmlFor="script" className="text-sm font-medium">{t('database.script.form.scriptLabel')}</label>
               <textarea
                 id="script"
                 className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -147,17 +148,17 @@ export default function ScriptBancoDadosFormModal({ open, onOpenChange, scriptBa
                 onChange={(e) => handleChange('script', e.target.value)}
                 required
                 rows={8}
-                placeholder="SELECT * FROM tabela WHERE ..."
+                placeholder={t('database.script.form.scriptPlaceholder')}
               />
             </div>
           </div>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('common.action.saving') : t('common.action.save')}
             </Button>
           </ModalFooter>
         </form>

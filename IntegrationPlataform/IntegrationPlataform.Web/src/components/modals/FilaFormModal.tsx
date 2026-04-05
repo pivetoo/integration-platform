@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi } from 'archon-ui';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { filaProcessamentoService } from '../../services/filaProcessamentoService';
 import { conectorService } from '../../services/conectorService';
 import { pipelineService } from '../../services/pipelineService';
@@ -25,6 +25,7 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
   const [formData, setFormData] = useState<CreateFilaProcessamentoRequest>(initialFormData);
   const [conectores, setConectores] = useState<Conector[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const { t } = useI18n();
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
@@ -84,19 +85,19 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>Enfileirar Pipeline</ModalTitle>
+          <ModalTitle>{t('queue.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Conector</label>
+              <label className="text-sm font-medium">{t('common.column.connector')}</label>
               <Select
                 value={formData.conectorId ? formData.conectorId.toString() : ''}
                 onValueChange={(value) => handleChange('conectorId', parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um conector" />
+                  <SelectValue placeholder={t('queue.form.connectorPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {conectores.map((conector) => (
@@ -109,13 +110,13 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Pipeline</label>
+              <label className="text-sm font-medium">{t('common.column.pipeline')}</label>
               <Select
                 value={formData.pipelineId ? formData.pipelineId.toString() : ''}
                 onValueChange={(value) => handleChange('pipelineId', parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um pipeline" />
+                  <SelectValue placeholder={t('queue.form.pipelinePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {pipelines.map((pipeline) => (
@@ -128,7 +129,7 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="prioridade" className="text-sm font-medium">Prioridade</label>
+              <label htmlFor="prioridade" className="text-sm font-medium">{t('common.column.priority')}</label>
               <Input
                 id="prioridade"
                 type="number"
@@ -139,7 +140,7 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="agendamento" className="text-sm font-medium">Agendamento</label>
+              <label htmlFor="agendamento" className="text-sm font-medium">{t('queue.form.scheduledAt')}</label>
               <Input
                 id="agendamento"
                 type="datetime-local"
@@ -149,7 +150,7 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="payload" className="text-sm font-medium">Payload (JSON)</label>
+              <label htmlFor="payload" className="text-sm font-medium">{t('queue.form.payloadLabel')}</label>
               <textarea
                 id="payload"
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -162,10 +163,10 @@ export default function FilaFormModal({ open, onOpenChange, onSuccess }: FilaFor
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Enfileirando...' : 'Enfileirar'}
+              {loading ? t('queue.form.submitting') : t('queue.form.submit')}
             </Button>
           </ModalFooter>
         </form>

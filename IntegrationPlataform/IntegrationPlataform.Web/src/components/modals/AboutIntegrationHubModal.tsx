@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Activity, GitBranch, Plug2, ShieldCheck, Workflow } from 'lucide-react';
-import { Badge, Modal, ModalContent, ModalDescription, ModalHeader, ModalTitle } from 'archon-ui';
+import { Badge, Modal, ModalContent, ModalDescription, ModalHeader, ModalTitle, useI18n } from 'archon-ui';
 
 interface AboutIntegrationHubModalProps {
   open: boolean;
@@ -46,59 +46,59 @@ export default function AboutIntegrationHubModal({
   companyName,
   userName,
 }: AboutIntegrationHubModalProps) {
+  const { t } = useI18n();
+
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="2xl" className="p-0 overflow-hidden">
         <div className="border-b bg-gradient-to-r from-primary/12 via-primary/5 to-transparent px-6 py-5">
           <ModalHeader className="space-y-2">
             <div className="flex items-center gap-2">
-              <ModalTitle>Sobre o Hub de Integrações</ModalTitle>
-              <Badge variant="destructive">Plataforma de Integração</Badge>
+              <ModalTitle>{t('about.title')}</ModalTitle>
+              <Badge variant="destructive">{t('about.badge')}</Badge>
             </div>
             <ModalDescription>
-              Centro de configuração e execução de integrações com pipelines, conectores, chamadas de API e monitoramento
-              operacional.
+              {t('about.description')}
             </ModalDescription>
           </ModalHeader>
         </div>
 
         <div className="space-y-5 px-6 py-5">
           <div className="grid gap-2 md:grid-cols-3">
-            <InfoItem label="Sistema" value={systemName} />
-            <InfoItem label="Empresa" value={companyName || '-'} />
-            <InfoItem label="Usuário" value={userName || '-'} />
+            <InfoItem label={t('about.info.system')} value={systemName} />
+            <InfoItem label={t('about.info.company')} value={companyName || '-'} />
+            <InfoItem label={t('about.info.user')} value={userName || '-'} />
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <FeatureItem
               icon={<Workflow size={16} />}
-              title="Pipelines"
-              description="Orquestra fluxos de etapas com ordenação, regras de erro e processamento sequencial."
+              title={t('about.feature.pipelines.title')}
+              description={t('about.feature.pipelines.description')}
             />
             <FeatureItem
               icon={<Plug2 size={16} />}
-              title="Conectores"
-              description="Define integrações com sistemas externos e parâmetros de autenticação/comunicação."
+              title={t('about.feature.connectors.title')}
+              description={t('about.feature.connectors.description')}
             />
             <FeatureItem
               icon={<GitBranch size={16} />}
-              title="Integrações"
-              description="Agrupa recursos por domínio de negócio e centraliza a governança das conexões."
+              title={t('about.feature.integrations.title')}
+              description={t('about.feature.integrations.description')}
             />
             <FeatureItem
               icon={<Activity size={16} />}
-              title="Operação"
-              description="Acompanha execuções, filas de processamento e referências para auditoria operacional."
+              title={t('about.feature.operations.title')}
+              description={t('about.feature.operations.description')}
             />
           </div>
 
           <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-xs text-muted-foreground">
             <div className="mb-1 flex items-center gap-2 text-foreground">
               <ShieldCheck size={14} className="text-primary" />
-              <span className="font-semibold">Boas práticas</span>
+              <span className="font-semibold">{t('about.bestPractices.title')}</span>
             </div>
-            Use pipelines claros, com nomes padronizados e tratamento de erro explícito em cada etapa para facilitar manutenção
-            e observabilidade.
+            {t('about.bestPractices.description')}
           </div>
         </div>
       </ModalContent>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, useApi, toast } from 'archon-ui';
+import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../types/pagination';
 import { funcaoJavaScriptService } from '../../services/funcaoJavaScriptService';
@@ -7,6 +7,7 @@ import type { FuncaoJavaScript } from '../../types/funcaoJavaScript';
 import FuncaoJavaScriptFormModal from '../../components/modals/FuncaoJavaScriptFormModal';
 
 export default function FuncoesJavaScript() {
+  const { t } = useI18n();
   const [funcoes, setFuncoes] = useState<FuncaoJavaScript[]>([]);
   const [selectedFuncoes, setSelectedFuncoes] = useState<FuncaoJavaScript[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function FuncoesJavaScript() {
     showSuccessMessage: false,
     showErrorMessage: true,
     onSuccess: () => {
-      toast({ title: 'Removido', description: 'Função JavaScript removida com sucesso', variant: 'success' });
+      toast({ title: t('common.toast.removedTitle'), description: t('javaScriptFunction.list.removed'), variant: 'success' });
     },
   });
 
@@ -69,13 +70,13 @@ export default function FuncoesJavaScript() {
   };
 
   const columns: DataTableColumn<FuncaoJavaScript>[] = [
-    { key: 'nome', title: 'Nome', dataIndex: 'nome' },
-    { key: 'descricao', title: 'Descrição', dataIndex: 'descricao' },
+    { key: 'nome', title: t('common.column.name'), dataIndex: 'nome' },
+    { key: 'descricao', title: t('common.column.description'), dataIndex: 'descricao' },
   ];
 
   return (
     <PageLayout
-      title="Funções JavaScript"
+      title={t('javaScriptFunction.list.title')}
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
@@ -88,7 +89,7 @@ export default function FuncoesJavaScript() {
         rowKey="id"
         selectedRows={selectedFuncoes}
         onSelectionChange={setSelectedFuncoes}
-        emptyText="Nenhuma função JavaScript encontrada"
+        emptyText={t('javaScriptFunction.list.empty')}
         loading={loading}
       />
 
@@ -96,10 +97,10 @@ export default function FuncoesJavaScript() {
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Função JavaScript"
-        description={`Tem certeza que deseja excluir ${selectedFuncoes.length} função(ões)?`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
+        title={t('javaScriptFunction.list.deleteTitle')}
+        description={t('javaScriptFunction.list.deleteDescription').replace('{0}', String(selectedFuncoes.length))}
+        confirmText={t('common.action.delete')}
+        cancelText={t('common.action.cancel')}
         variant="danger"
       />
 

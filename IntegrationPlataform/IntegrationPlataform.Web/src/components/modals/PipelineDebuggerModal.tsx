@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, Play, RefreshCcw, Filter, Bug } from 'lucide-react';
-import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi } from 'archon-ui';
+import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi, useI18n } from 'archon-ui';
 import { conectorService } from '../../services/conectorService';
 import { execucaoService } from '../../services/execucaoService';
 import { execucaoLogService } from '../../services/execucaoLogService';
@@ -162,6 +162,7 @@ export default function PipelineDebuggerModal({
   etapas,
   initialEtapaId,
 }: PipelineDebuggerModalProps) {
+  const { t } = useI18n();
   const [conector, setConector] = useState<Conector | null>(null);
   const [payloadText, setPayloadText] = useState<string>('{}');
   const [selectedEtapaId, setSelectedEtapaId] = useState<number | null>(initialEtapaId ?? null);
@@ -281,6 +282,21 @@ export default function PipelineDebuggerModal({
       })
       : prettyJson(outputAtual);
   const loadingAnyAction = loadingConectores || loadingDebug || loadingLogs || loadingStartDebug || loadingNextDebugStep || loadingFinalizeDebug;
+  const tipoEtapaLabels: Record<number, string> = {
+    1: t('pipeline.step.type.httpRequest'),
+    2: t('pipeline.step.type.javaScriptFunction'),
+    3: t('pipeline.step.type.executeSqlScript'),
+  };
+  const acaoErroLabels: Record<number, string> = {
+    1: t('pipeline.step.errorAction.stop'),
+    2: t('pipeline.step.errorAction.continue'),
+  };
+  const nivelLogLabels: Record<number, string> = {
+    1: t('execution.log.level.debug'),
+    2: t('execution.log.level.info'),
+    3: t('execution.log.level.warning'),
+    4: t('execution.log.level.error'),
+  };
 
   const normalizePayload = (): string => {
     let normalizedPayload = payloadText;
@@ -442,13 +458,13 @@ export default function PipelineDebuggerModal({
         <ModalHeader>
           <ModalTitle className="flex items-center gap-2">
             <Bug size={18} />
-            Debugger de Pipeline
+            {t('pipeline.debugger.title')}
           </ModalTitle>
         </ModalHeader>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium">Payload de entrada (JSON)</label>
+            <label className="text-sm font-medium">{t('pipeline.debugger.inputPayload')}</label>
             <textarea
               value={payloadText}
               onChange={(event) => setPayloadText(event.target.value)}
@@ -458,7 +474,7 @@ export default function PipelineDebuggerModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Execução</label>
+            <label className="text-sm font-medium">{t('pipeline.debugger.execution')}</label>
             <div className="space-y-2 rounded-md border bg-card p-2.5">
               <div className="grid grid-cols-2 gap-2">
               <Button
@@ -469,7 +485,7 @@ export default function PipelineDebuggerModal({
                 className="h-8 px-2 text-xs"
               >
                 <Play size={13} className="mr-1" />
-                Executar
+                {t('pipeline.debugger.run')}
               </Button>
               <Button
                 variant="outline"
@@ -479,7 +495,7 @@ export default function PipelineDebuggerModal({
                 className="h-8 px-2 text-xs"
               >
                 <RefreshCcw size={13} className="mr-1" />
-                Reexecutar
+                {t('pipeline.debugger.rerun')}
               </Button>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -490,7 +506,7 @@ export default function PipelineDebuggerModal({
                 disabled={!selectedEtapaId || !conector || loadingAnyAction || !!debugSessionId}
                 className="h-8 px-2 text-xs"
               >
-                Iniciar Debug
+                {t('pipeline.debugger.startDebug')}
               </Button>
               <Button
                 variant="outline"
@@ -499,7 +515,7 @@ export default function PipelineDebuggerModal({
                 disabled={!debugSessionId || debugFlowFinished || loadingAnyAction}
                 className="h-8 px-2 text-xs"
               >
-                Próxima Etapa
+                {t('pipeline.debugger.nextStep')}
               </Button>
               </div>
               <Button
@@ -509,16 +525,16 @@ export default function PipelineDebuggerModal({
                 disabled={!debugSessionId || loadingAnyAction}
                 className="h-8 w-full px-2 text-xs"
               >
-                Finalizar Debug
+                {t('pipeline.debugger.finishDebug')}
               </Button>
               {debugSessionId && (
                 <div className="space-y-0.5 rounded border bg-muted/20 p-2 text-[11px] text-muted-foreground">
-                  <p className="truncate">Sessão: {debugSessionId}</p>
-                  <p>Restantes: {remainingSteps} | Próxima: {nextStepName || '-'}</p>
+                  <p className="truncate">{t('pipeline.debugger.session')}: {debugSessionId}</p>
+                  <p>{t('pipeline.debugger.remaining')}: {remainingSteps} | {t('pipeline.debugger.next')}: {nextStepName || '-'}</p>
                 </div>
               )}
               {currentRun && (
-                <p className="text-[11px] text-muted-foreground">Execução atual: #{currentRun.execucaoId}</p>
+                <p className="text-[11px] text-muted-foreground">{t('pipeline.debugger.currentExecution')} #{currentRun.execucaoId}</p>
               )}
             </div>
           </div>
@@ -526,11 +542,11 @@ export default function PipelineDebuggerModal({
 
         <div className="mt-4 grid min-h-0 flex-1 gap-4 md:grid-cols-12">
           <div className="md:col-span-4 border rounded-lg overflow-y-auto">
-            <div className="sticky top-0 border-b bg-background px-3 py-2 text-sm font-semibold">Etapas</div>
+            <div className="sticky top-0 border-b bg-background px-3 py-2 text-sm font-semibold">{t('pipeline.detail.stepsTitle')}</div>
             <div className="p-2 space-y-2">
               {etapas.map((etapa) => {
                 const status = stepStatus(etapa.id);
-                const statusLabel = status === 'error' ? 'Erro' : status === 'warn' ? 'Alerta' : status === 'ok' ? 'OK' : 'Aguardando';
+                const statusLabel = status === 'error' ? t('pipeline.debugger.stepStatus.error') : status === 'warn' ? t('pipeline.debugger.stepStatus.warning') : status === 'ok' ? t('pipeline.debugger.stepStatus.ok') : t('pipeline.debugger.stepStatus.waiting');
                 const variant = status === 'error' ? 'destructive' : status === 'warn' ? 'warning' : status === 'ok' ? 'success' : 'outline';
 
                 return (
@@ -545,8 +561,8 @@ export default function PipelineDebuggerModal({
                       <Badge variant={variant as 'outline' | 'success' | 'warning' | 'destructive'}>{statusLabel}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-1 text-xs">
-                      <Badge variant="outline">{TipoEtapaLabels[etapa.tipo]}</Badge>
-                      <Badge variant="outline">Ao erro: {AcaoErroLabels[etapa.aoErro]}</Badge>
+                      <Badge variant="outline">{tipoEtapaLabels[etapa.tipo] || TipoEtapaLabels[etapa.tipo]}</Badge>
+                      <Badge variant="outline">{t('pipeline.detail.onErrorLabel')}: {acaoErroLabels[etapa.aoErro] || AcaoErroLabels[etapa.aoErro]}</Badge>
                     </div>
                   </button>
                 );
@@ -564,10 +580,10 @@ export default function PipelineDebuggerModal({
 
                 {activeTab === 'logs' && (
                   <div className="ml-auto flex items-center gap-1 text-xs">
-                    <span className="inline-flex items-center gap-1 text-muted-foreground"><Filter size={12} /> Filtros</span>
-                    <button type="button" className={`rounded px-2 py-1 ${logFilters.info ? 'bg-accent' : 'bg-muted/40 text-muted-foreground'}`} onClick={() => setLogFilters((prev) => ({ ...prev, info: !prev.info }))}>Info</button>
-                    <button type="button" className={`rounded px-2 py-1 ${logFilters.warning ? 'bg-warning/20' : 'bg-muted/40 text-muted-foreground'}`} onClick={() => setLogFilters((prev) => ({ ...prev, warning: !prev.warning }))}>Warn</button>
-                    <button type="button" className={`rounded px-2 py-1 ${logFilters.error ? 'bg-destructive/20' : 'bg-muted/40 text-muted-foreground'}`} onClick={() => setLogFilters((prev) => ({ ...prev, error: !prev.error }))}>Error</button>
+                    <span className="inline-flex items-center gap-1 text-muted-foreground"><Filter size={12} /> {t('pipeline.debugger.filters')}</span>
+                    <button type="button" className={`rounded px-2 py-1 ${logFilters.info ? 'bg-accent' : 'bg-muted/40 text-muted-foreground'}`} onClick={() => setLogFilters((prev) => ({ ...prev, info: !prev.info }))}>{t('execution.log.level.info')}</button>
+                    <button type="button" className={`rounded px-2 py-1 ${logFilters.warning ? 'bg-warning/20' : 'bg-muted/40 text-muted-foreground'}`} onClick={() => setLogFilters((prev) => ({ ...prev, warning: !prev.warning }))}>{t('execution.log.level.warning')}</button>
+                    <button type="button" className={`rounded px-2 py-1 ${logFilters.error ? 'bg-destructive/20' : 'bg-muted/40 text-muted-foreground'}`} onClick={() => setLogFilters((prev) => ({ ...prev, error: !prev.error }))}>{t('execution.log.level.error')}</button>
                   </div>
                 )}
               </div>
@@ -575,18 +591,18 @@ export default function PipelineDebuggerModal({
 
             <div className="flex-1 overflow-auto p-3">
               {!selectedEtapa ? (
-                <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Selecione uma etapa para depurar</div>
+                <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{t('pipeline.debugger.selectStep')}</div>
               ) : activeTab === 'input' ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">Input da etapa</p>
+                    <p className="text-sm font-medium">{t('pipeline.debugger.stepInput')}</p>
                     <button
                       type="button"
                       onClick={() => copyText('input', inputAtualText)}
                       disabled={!inputAtualText}
                       className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {copied === 'input' ? <Check size={13} /> : <Copy size={13} />} {copied === 'input' ? 'Copiado' : 'Copiar JSON'}
+                      {copied === 'input' ? <Check size={13} /> : <Copy size={13} />} {copied === 'input' ? t('common.action.copied') : t('pipeline.debugger.copyJson')}
                     </button>
                   </div>
                   <pre className="rounded-md border bg-muted/40 p-3 text-xs overflow-auto">{inputAtualText}</pre>
@@ -594,7 +610,7 @@ export default function PipelineDebuggerModal({
               ) : activeTab === 'output' ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">Output da etapa</p>
+                    <p className="text-sm font-medium">{t('pipeline.debugger.stepOutput')}</p>
                     <div className="flex items-center gap-2">
                       {binaryOutputAtual && (
                         <button
@@ -606,7 +622,7 @@ export default function PipelineDebuggerModal({
                           )}
                           className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs hover:bg-accent"
                         >
-                          Baixar arquivo
+                          {t('pipeline.debugger.downloadFile')}
                         </button>
                       )}
                       <button
@@ -615,7 +631,7 @@ export default function PipelineDebuggerModal({
                         disabled={!outputAtualText}
                         className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {copied === 'output' ? <Check size={13} /> : <Copy size={13} />} {copied === 'output' ? 'Copiado' : 'Copiar JSON'}
+                        {copied === 'output' ? <Check size={13} /> : <Copy size={13} />} {copied === 'output' ? t('common.action.copied') : t('pipeline.debugger.copyJson')}
                       </button>
                     </div>
                   </div>
@@ -624,13 +640,13 @@ export default function PipelineDebuggerModal({
               ) : activeTab === 'diff' ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">Diff com execução anterior</p>
+                    <p className="text-sm font-medium">{t('pipeline.debugger.diffWithPrevious')}</p>
                     <button
                       type="button"
                       onClick={() => copyText('diff', outputDiff)}
                       className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs hover:bg-accent"
                     >
-                      {copied === 'diff' ? <Check size={13} /> : <Copy size={13} />} {copied === 'diff' ? 'Copiado' : 'Copiar Diff'}
+                      {copied === 'diff' ? <Check size={13} /> : <Copy size={13} />} {copied === 'diff' ? t('common.action.copied') : t('pipeline.debugger.copyDiff')}
                     </button>
                   </div>
                   <pre className="rounded-md border bg-muted/40 p-3 text-xs overflow-auto">{outputDiff}</pre>
@@ -638,13 +654,13 @@ export default function PipelineDebuggerModal({
               ) : (
                 <div className="space-y-2">
                   {filteredLogs.length === 0 ? (
-                    <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">Nenhum log para os filtros selecionados.</div>
+                    <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">{t('pipeline.debugger.emptyLogs')}</div>
                   ) : (
                     filteredLogs.map((log) => (
                       <div key={log.id} className="rounded-md border p-2">
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <Badge variant={log.nivel === NivelLog.Error ? 'destructive' : log.nivel === NivelLog.Warning ? 'warning' : 'secondary'}>
-                            {NivelLogLabels[log.nivel]}
+                            {nivelLogLabels[log.nivel] || NivelLogLabels[log.nivel]}
                           </Badge>
                           {log.duracao != null && <span className="text-xs text-muted-foreground">{log.duracao}ms</span>}
                         </div>
