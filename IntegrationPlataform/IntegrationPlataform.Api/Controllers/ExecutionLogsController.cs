@@ -22,7 +22,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os logs de execução registrados na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -34,7 +34,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de um log de execução específico.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -43,7 +43,7 @@ namespace IntegrationPlataform.Api.Controllers
             return log is null ? Http404(Localizer["execution.log.notFound"]) : Http200(MapExecutionLog(log));
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os logs vinculados a uma execução específica.")]
         [GetEndpoint("execution/{executionId:long}")]
         public async Task<IActionResult> GetByExecution(long executionId, CancellationToken cancellationToken)
         {
@@ -57,7 +57,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(logs.Select(MapExecutionLog).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir um log de execução registrado.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

@@ -23,7 +23,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os scripts SQL cadastrados na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +35,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de um script SQL específico.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             return script is null ? Http404(Localizer["database.script.notFound"]) : Http200(MapDatabaseScript(script));
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar um novo script SQL reutilizável.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateDatabaseScriptRequest request, CancellationToken cancellationToken)
         {
@@ -58,7 +58,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapDatabaseScript(script), Localizer["database.script.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar um script SQL cadastrado na plataforma.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateDatabaseScriptRequest request, CancellationToken cancellationToken)
         {
@@ -72,7 +72,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(MapDatabaseScript(script), Localizer["database.script.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir um script SQL cadastrado.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

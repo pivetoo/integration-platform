@@ -23,7 +23,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os pipelines cadastrados na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +35,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de um pipeline específico.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             return pipeline is null ? Http404(Localizer["pipeline.notFound"]) : Http200(MapPipeline(pipeline));
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os pipelines vinculados a uma integração específica.")]
         [GetEndpoint("integration/{integrationId:long}")]
         public async Task<IActionResult> GetByIntegration(long integrationId, CancellationToken cancellationToken)
         {
@@ -58,7 +58,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(pipelines.Select(MapPipeline).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar apenas os pipelines ativos.")]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
@@ -67,7 +67,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(pipelines.Select(MapPipeline).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar um novo pipeline para uma integração.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreatePipelineRequest request, CancellationToken cancellationToken)
         {
@@ -81,7 +81,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapPipeline(pipeline), Localizer["pipeline.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar a configuração de um pipeline cadastrado.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdatePipelineRequest request, CancellationToken cancellationToken)
         {
@@ -95,7 +95,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(MapPipeline(pipeline), Localizer["pipeline.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir um pipeline cadastrado na plataforma.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

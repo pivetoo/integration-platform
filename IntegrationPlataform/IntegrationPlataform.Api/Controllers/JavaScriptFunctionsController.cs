@@ -21,7 +21,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar as funções JavaScript cadastradas na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -29,7 +29,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(result);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de uma função JavaScript específica.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -42,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar uma nova função JavaScript reutilizável.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateJavaScriptFunctionRequest request, CancellationToken cancellationToken)
         {
@@ -56,7 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(function, Localizer["javaScriptFunction.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar uma função JavaScript cadastrada na plataforma.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateJavaScriptFunctionRequest request, CancellationToken cancellationToken)
         {
@@ -70,7 +70,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(function, Localizer["javaScriptFunction.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir uma função JavaScript cadastrada.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

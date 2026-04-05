@@ -23,7 +23,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar as integrações cadastradas na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +35,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de uma integração específica.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             return integration is null ? Http404(Localizer["integration.notFound"]) : Http200(integration);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar apenas as integrações ativas.")]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
@@ -52,7 +52,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(integrations.Select(MapIntegration).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar uma nova integração na plataforma.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationRequest request, CancellationToken cancellationToken)
         {
@@ -66,7 +66,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapIntegration(integration), Localizer["integration.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar os dados de uma integração cadastrada.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateIntegrationRequest request, CancellationToken cancellationToken)
         {
@@ -80,7 +80,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(MapIntegration(integration), Localizer["integration.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir uma integração cadastrada na plataforma.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

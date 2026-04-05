@@ -23,7 +23,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os conectores cadastrados na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +35,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de um conector específico.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             return connector is null ? Http404(Localizer["connector.notFound"]) : Http200(MapConnector(connector));
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os conectores vinculados a uma integração específica.")]
         [GetEndpoint("integration/{integrationId:long}")]
         public async Task<IActionResult> GetByIntegration(long integrationId, CancellationToken cancellationToken)
         {
@@ -58,7 +58,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(connectors.Select(MapConnector).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar apenas os conectores ativos.")]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
@@ -67,7 +67,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(connectors.Select(MapConnector).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar um novo conector para uma integração.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateConnectorRequest request, CancellationToken cancellationToken)
         {
@@ -81,7 +81,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapConnector(connector), Localizer["connector.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar a configuração de um conector cadastrado.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorRequest request, CancellationToken cancellationToken)
         {
@@ -95,7 +95,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(MapConnector(connector), Localizer["connector.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir um conector cadastrado na plataforma.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

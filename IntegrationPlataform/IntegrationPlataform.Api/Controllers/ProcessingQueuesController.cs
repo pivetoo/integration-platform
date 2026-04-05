@@ -30,7 +30,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os itens da fila de processamento da plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -42,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de um item da fila de processamento.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -51,7 +51,7 @@ namespace IntegrationPlataform.Api.Controllers
             return item is null ? Http404(Localizer["processingQueue.notFound"]) : Http200(MapProcessingQueue(item));
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os itens pendentes da fila de processamento.")]
         [GetEndpoint("pending")]
         public async Task<IActionResult> GetPending(CancellationToken cancellationToken)
         {
@@ -60,7 +60,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(items.Select(MapProcessingQueue).ToList());
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite enfileirar a execução de um pipeline para processamento posterior.")]
         [PostEndpoint("enqueue")]
         public async Task<IActionResult> Enqueue([FromBody] EnqueuePipelineRequest request, CancellationToken cancellationToken)
         {
@@ -80,7 +80,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapProcessingQueue(queue ?? item), Localizer["processingQueue.enqueued"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite processar manualmente um item específico da fila.")]
         [PostEndpoint("{processingQueueId:long}/process")]
         public async Task<IActionResult> Process(long processingQueueId, CancellationToken cancellationToken)
         {
@@ -93,7 +93,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(message: Localizer["processingQueue.processed"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir um item da fila de processamento.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

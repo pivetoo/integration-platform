@@ -21,7 +21,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os valores de atributos configurados nos conectores.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -29,7 +29,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(result);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de um valor de atributo de conector.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -42,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar os valores de atributos configurados para um conector específico.")]
         [GetEndpoint("connector/{connectorId:long}")]
         public async Task<IActionResult> GetByConnector(long connectorId, CancellationToken cancellationToken)
         {
@@ -55,7 +55,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(values);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar um novo valor de atributo para um conector.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {
@@ -75,7 +75,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(value, Localizer["connector.attributeValue.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar um valor de atributo configurado em um conector.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {
@@ -94,7 +94,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(updatedValue, Localizer["connector.attributeValue.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir um valor de atributo configurado em um conector.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

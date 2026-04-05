@@ -21,7 +21,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar as categorias de integração cadastradas na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -29,7 +29,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(result);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de uma categoria de integração específica.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -42,7 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar uma nova categoria de integração.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationCategoryRequest request, CancellationToken cancellationToken)
         {
@@ -56,7 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(category, Localizer["integration.category.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar os dados de uma categoria de integração cadastrada.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateIntegrationCategoryRequest request, CancellationToken cancellationToken)
         {
@@ -70,7 +70,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(category, Localizer["integration.category.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar apenas as categorias de integração ativas.")]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
@@ -78,7 +78,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(categories);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir uma categoria de integração cadastrada.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

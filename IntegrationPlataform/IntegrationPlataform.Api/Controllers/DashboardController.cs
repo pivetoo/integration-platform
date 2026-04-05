@@ -14,7 +14,7 @@ namespace IntegrationPlataform.Api.Controllers
             this.dashboardService = dashboardService;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite visualizar os indicadores consolidados do dashboard da plataforma de integrações.")]
         [GetEndpoint]
         public async Task<IActionResult> GetDashboardData(CancellationToken cancellationToken)
         {

@@ -23,7 +23,7 @@ namespace IntegrationPlataform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite listar as chamadas de API cadastradas na plataforma.")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +35,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite consultar os detalhes de uma chamada de API específica.")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -43,7 +43,7 @@ namespace IntegrationPlataform.Api.Controllers
             return apiCall is null ? Http404(Localizer["apiCall.notFound"]) : Http200(MapApiCall(apiCall));
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite cadastrar uma nova chamada de API reutilizável.")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateApiCallRequest request, CancellationToken cancellationToken)
         {
@@ -57,7 +57,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapApiCall(apiCall), Localizer["apiCall.created"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite atualizar a configuração de uma chamada de API cadastrada.")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateApiCallRequest request, CancellationToken cancellationToken)
         {
@@ -71,7 +71,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(MapApiCall(apiCall), Localizer["apiCall.updated"]);
         }
 
-        [RequireAccess]
+        [RequireAccess("Permite excluir uma chamada de API cadastrada na plataforma.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

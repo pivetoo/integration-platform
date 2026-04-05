@@ -54,10 +54,15 @@ if (hasIdentityManagementConfiguration)
 
 app.MapControllers();
 
+if (hasIdentityManagementConfiguration)
+{
+    await app.UseArchonAccessSyncAsync();
+}
+
 app.Run();
 
 static bool HasIdentityManagementConfiguration(IConfiguration configuration)
 {
-    return !string.IsNullOrWhiteSpace(configuration["IdentityManagement:Authority"]) ||
-           !string.IsNullOrWhiteSpace(configuration["IdentityManagement:BaseUrl"]);
+    return !string.IsNullOrWhiteSpace(configuration["IdentityManagement:Authority"]) &&
+           !string.IsNullOrWhiteSpace(configuration["IdentityManagement:IntegrationSecret"]);
 }
