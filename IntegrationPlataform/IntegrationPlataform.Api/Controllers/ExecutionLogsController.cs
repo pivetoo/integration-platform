@@ -1,49 +1,46 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Execution;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ExecutionLogsController : IntegrationPlataformReadOnlyController<ExecutionLog>
+    public sealed class ExecutionLogsController : ApiControllerBase
     {
         private readonly IExecutionLogService executionLogService;
+        private static readonly Func<ExecutionLog, ExecutionLogContract> MapExecutionLog = ExecutionLogContract.Projection.Compile();
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
 
-        public ExecutionLogsController(DbContext dbContext, IExecutionLogService executionLogService) : base(dbContext)
+        public ExecutionLogsController(IExecutionLogService executionLogService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.executionLogService = executionLogService;
-        }
-
-        private IQueryable<ExecutionLogContract> QueryContracts()
-        {
-            return DbContext.Set<ExecutionLog>()
-                .AsNoTracking()
-                .Select(ExecutionLogContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderByDescending(item => item.CreatedAt)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<ExecutionLog> result = await executionLogService.GetExecutionLogs(request, cancellationToken);
+            return Http200(new PagedResult<ExecutionLogContract>
+            {
+                Items = result.Items.Select(MapExecutionLog).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            ExecutionLogContract? log = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+            ExecutionLog? log = await executionLogService.GetExecutionLogById(id, cancellationToken);
 
-            return log is null ? Http404(Localizer["execution.log.notFound"]) : Http200(log);
+            return log is null ? Http404(Localizer["execution.log.notFound"]) : Http200(MapExecutionLog(log));
         }
 
         [RequireAccess]
@@ -55,12 +52,9 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.execution.id.required"]);
             }
 
-            List<ExecutionLogContract> logs = await QueryContracts()
-                .Where(item => item.ExecutionId == executionId)
-                .OrderBy(item => item.CreatedAt)
-                .ToListAsync(cancellationToken);
+            List<ExecutionLog> logs = await executionLogService.GetExecutionLogsByExecution(executionId, cancellationToken);
 
-            return Http200(logs);
+            return Http200(logs.Select(MapExecutionLog).ToList());
         }
 
         [RequireAccess]
@@ -73,7 +67,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(executionLogService.GetErrorMessages());
             }
 
-            return Http200(log, Localizer["execution.log.deleted"]);
+            return Http200(MapExecutionLog(log), Localizer["execution.log.deleted"]);
         }
     }
 }

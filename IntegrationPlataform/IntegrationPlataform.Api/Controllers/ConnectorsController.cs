@@ -1,48 +1,47 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Connectors;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Connectors;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ConnectorsController : IntegrationPlataformReadOnlyController<Connector>
+    public sealed class ConnectorsController : ApiControllerBase
     {
         private readonly IConnectorService connectorService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<Connector, ConnectorContract> MapConnector = ConnectorContract.Projection.Compile();
 
-        public ConnectorsController(DbContext dbContext, IConnectorService connectorService) : base(dbContext)
+        public ConnectorsController(IConnectorService connectorService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.connectorService = connectorService;
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await DbContext.Set<Connector>()
-                .AsNoTracking()
-                .OrderBy(item => item.Name)
-                .Select(ConnectorContract.Projection)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<Connector> result = await connectorService.GetConnectors(request, cancellationToken);
+            return Http200(new PagedResult<ConnectorContract>
+            {
+                Items = result.Items.Select(MapConnector).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            var connector = await DbContext.Set<Connector>()
-                .AsNoTracking()
-                .Where(item => item.Id == id)
-                .Select(ConnectorContract.Projection)
-                .FirstOrDefaultAsync(cancellationToken);
+            Connector? connector = await connectorService.GetConnectorById(id, cancellationToken);
 
-            return connector is null ? Http404(Localizer["connector.notFound"]) : Http200(connector);
+            return connector is null ? Http404(Localizer["connector.notFound"]) : Http200(MapConnector(connector));
         }
 
         [RequireAccess]
@@ -54,28 +53,18 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.integration.id.required"]);
             }
 
-            var connectors = await DbContext.Set<Connector>()
-                .AsNoTracking()
-                .Where(item => item.IntegrationId == integrationId)
-                .OrderBy(item => item.Name)
-                .Select(ConnectorContract.Projection)
-                .ToListAsync(cancellationToken);
+            List<Connector> connectors = await connectorService.GetConnectorsByIntegration(integrationId, cancellationToken);
 
-            return Http200(connectors);
+            return Http200(connectors.Select(MapConnector).ToList());
         }
 
         [RequireAccess]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
-            var connectors = await DbContext.Set<Connector>()
-                .AsNoTracking()
-                .Where(item => item.IsActive)
-                .OrderBy(item => item.Name)
-                .Select(ConnectorContract.Projection)
-                .ToListAsync(cancellationToken);
+            List<Connector> connectors = await connectorService.GetActiveConnectors(cancellationToken);
 
-            return Http200(connectors);
+            return Http200(connectors.Select(MapConnector).ToList());
         }
 
         [RequireAccess]
@@ -89,14 +78,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Connector connector = await connectorService.CreateConnector(request, cancellationToken);
-
-            ConnectorContract? contract = await DbContext.Set<Connector>()
-                .AsNoTracking()
-                .Where(item => item.Id == connector.Id)
-                .Select(ConnectorContract.Projection)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            return Http201(contract ?? ConnectorContract.Projection.Compile()(connector), Localizer["connector.created"]);
+            return Http201(MapConnector(connector), Localizer["connector.created"]);
         }
 
         [RequireAccess]
@@ -110,14 +92,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Connector connector = await connectorService.UpdateConnector(id, request, cancellationToken);
-
-            ConnectorContract? contract = await DbContext.Set<Connector>()
-                .AsNoTracking()
-                .Where(item => item.Id == connector.Id)
-                .Select(ConnectorContract.Projection)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            return Http200(contract ?? ConnectorContract.Projection.Compile()(connector), Localizer["connector.updated"]);
+            return Http200(MapConnector(connector), Localizer["connector.updated"]);
         }
 
         [RequireAccess]
@@ -130,18 +105,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(connectorService.GetErrorMessages());
             }
 
-            ConnectorContract contract = new()
-            {
-                Id = connector.Id,
-                SystemApplicationId = connector.SystemApplicationId,
-                IntegrationId = connector.IntegrationId,
-                Name = connector.Name,
-                IsActive = connector.IsActive,
-                CreatedAt = connector.CreatedAt,
-                UpdatedAt = connector.UpdatedAt
-            };
-
-            return Http200(contract, Localizer["connector.deleted"]);
+            return Http200(MapConnector(connector), Localizer["connector.deleted"]);
         }
     }
 }

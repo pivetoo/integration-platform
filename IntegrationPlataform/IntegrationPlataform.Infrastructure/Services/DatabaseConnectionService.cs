@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.DatabaseConnections;
@@ -6,6 +8,8 @@ using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Data.SqlClient;
+using Npgsql;
 
 namespace IntegrationPlataform.Infrastructure.Services
 {
@@ -16,6 +20,21 @@ namespace IntegrationPlataform.Infrastructure.Services
         public DatabaseConnectionService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
             Localizer = localizer;
+        }
+
+        public async Task<PagedResult<DatabaseConnection>> GetDatabaseConnections(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<DatabaseConnection>()
+                .AsNoTracking()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<DatabaseConnection?> GetDatabaseConnectionById(long id, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<DatabaseConnection>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
         }
 
         public async Task<DatabaseConnection> CreateDatabaseConnection(CreateDatabaseConnectionRequest request, CancellationToken cancellationToken = default)
@@ -72,6 +91,41 @@ namespace IntegrationPlataform.Infrastructure.Services
             return result;
         }
 
+        public async Task TestDatabaseConnection(CreateDatabaseConnectionRequest request, CancellationToken cancellationToken = default)
+        {
+            DatabaseType databaseType = NormalizeDatabaseType(request.Type);
+            string connectionString = BuildConnectionString(request, databaseType);
+
+            try
+            {
+                switch (databaseType)
+                {
+                    case DatabaseType.PostgreSql:
+                    {
+                        await using NpgsqlConnection connection = new(connectionString);
+                        await connection.OpenAsync(cancellationToken);
+                        break;
+                    }
+                    case DatabaseType.SqlServer:
+                    {
+                        await using SqlConnection connection = new(connectionString);
+                        await connection.OpenAsync(cancellationToken);
+                        break;
+                    }
+                    default:
+                        throw new InvalidOperationException(Localizer["database.connection.test.unsupportedType", databaseType]);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(Localizer["database.connection.test.failed", ex.Message]);
+            }
+        }
+
         private DatabaseType NormalizeDatabaseType(int value)
         {
             int normalizedValue = Enum.IsDefined(typeof(DatabaseType), value)
@@ -84,6 +138,18 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return (DatabaseType)normalizedValue;
+        }
+
+        private string BuildConnectionString(CreateDatabaseConnectionRequest request, DatabaseType databaseType)
+        {
+            return databaseType switch
+            {
+                DatabaseType.PostgreSql =>
+                    $"Host={request.Host};Port={request.Port};Database={request.Database};Username={request.Username};Password={request.Password}",
+                DatabaseType.SqlServer =>
+                    $"Server={request.Host},{request.Port};Database={request.Database};User Id={request.Username};Password={request.Password};TrustServerCertificate=true;Encrypt=false",
+                _ => throw new InvalidOperationException(Localizer["database.connection.type.unsupported"])
+            };
         }
 
         public override async Task<DatabaseConnection?> Delete(long id, CancellationToken cancellationToken = default)

@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.DatabaseScripts;
@@ -17,6 +19,19 @@ namespace IntegrationPlataform.Infrastructure.Services
             Localizer = localizer;
         }
 
+        public async Task<PagedResult<DatabaseScript>> GetDatabaseScripts(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<DatabaseScript?> GetDatabaseScriptById(long id, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
         public async Task<DatabaseScript> CreateDatabaseScript(CreateDatabaseScriptRequest request, CancellationToken cancellationToken = default)
         {
             await EnsureDatabaseConnectionExists(request.DatabaseConnectionId, cancellationToken);
@@ -28,7 +43,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return script;
+            return await GetDatabaseScriptById(script.Id, cancellationToken) ?? script;
         }
 
         public async Task<DatabaseScript> UpdateDatabaseScript(long id, UpdateDatabaseScriptRequest request, CancellationToken cancellationToken = default)
@@ -57,7 +72,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return result;
+            return await GetDatabaseScriptById(result.Id, cancellationToken) ?? result;
         }
 
         private async Task EnsureDatabaseConnectionExists(long databaseConnectionId, CancellationToken cancellationToken)
@@ -76,9 +91,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             MutableMessages.Clear();
 
-            DatabaseScript? script = await DbContext.Set<DatabaseScript>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+            DatabaseScript? script = await GetDatabaseScriptById(id, cancellationToken);
 
             if (script is null)
             {
@@ -87,6 +100,13 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return await Delete([script], cancellationToken) ? script : null;
+        }
+
+        private IQueryable<DatabaseScript> QueryWithDetails()
+        {
+            return DbContext.Set<DatabaseScript>()
+                .AsNoTracking()
+                .Include(item => item.DatabaseConnection);
         }
     }
 }

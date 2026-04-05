@@ -1,50 +1,47 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.DatabaseScripts;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.DatabaseScripts;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class DatabaseScriptsController : IntegrationPlataformReadOnlyController<DatabaseScript>
+    public sealed class DatabaseScriptsController : ApiControllerBase
     {
         private readonly IDatabaseScriptService databaseScriptService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<DatabaseScript, DatabaseScriptContract> MapDatabaseScript = DatabaseScriptContract.Projection.Compile();
 
-        public DatabaseScriptsController(DbContext dbContext, IDatabaseScriptService databaseScriptService) : base(dbContext)
+        public DatabaseScriptsController(IDatabaseScriptService databaseScriptService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.databaseScriptService = databaseScriptService;
-        }
-
-        private IQueryable<DatabaseScriptContract> QueryContracts()
-        {
-            return DbContext.Set<DatabaseScript>()
-                .AsNoTracking()
-                .Select(DatabaseScriptContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderBy(item => item.Name)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<DatabaseScript> result = await databaseScriptService.GetDatabaseScripts(request, cancellationToken);
+            return Http200(new PagedResult<DatabaseScriptContract>
+            {
+                Items = result.Items.Select(MapDatabaseScript).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            DatabaseScriptContract? script = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+            DatabaseScript? script = await databaseScriptService.GetDatabaseScriptById(id, cancellationToken);
 
-            return script is null ? Http404(Localizer["database.script.notFound"]) : Http200(script);
+            return script is null ? Http404(Localizer["database.script.notFound"]) : Http200(MapDatabaseScript(script));
         }
 
         [RequireAccess]
@@ -58,10 +55,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseScript script = await databaseScriptService.CreateDatabaseScript(request, cancellationToken);
-            DatabaseScriptContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == script.Id, cancellationToken);
-
-            return Http201(contract ?? DatabaseScriptContract.Projection.Compile()(script), Localizer["database.script.created"]);
+            return Http201(MapDatabaseScript(script), Localizer["database.script.created"]);
         }
 
         [RequireAccess]
@@ -75,26 +69,20 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseScript script = await databaseScriptService.UpdateDatabaseScript(id, request, cancellationToken);
-            DatabaseScriptContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == script.Id, cancellationToken);
-
-            return Http200(contract ?? DatabaseScriptContract.Projection.Compile()(script), Localizer["database.script.updated"]);
+            return Http200(MapDatabaseScript(script), Localizer["database.script.updated"]);
         }
 
         [RequireAccess]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            DatabaseScriptContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
             DatabaseScript? script = await databaseScriptService.Delete(id, cancellationToken);
             if (script is null)
             {
                 return Http404(databaseScriptService.GetErrorMessages());
             }
 
-            return Http200(contract ?? DatabaseScriptContract.Projection.Compile()(script), Localizer["database.script.deleted"]);
+            return Http200(MapDatabaseScript(script), Localizer["database.script.deleted"]);
         }
     }
 }

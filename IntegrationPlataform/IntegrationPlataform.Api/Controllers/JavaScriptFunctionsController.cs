@@ -1,34 +1,45 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.JavaScriptFunctions;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class JavaScriptFunctionsController : IntegrationPlataformReadOnlyController<JavaScriptFunction>
+    public sealed class JavaScriptFunctionsController : ApiControllerBase
     {
         private readonly IJavaScriptFunctionService javaScriptFunctionService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
 
-        public JavaScriptFunctionsController(DbContext dbContext, IJavaScriptFunctionService javaScriptFunctionService) : base(dbContext)
+        public JavaScriptFunctionsController(IJavaScriptFunctionService javaScriptFunctionService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.javaScriptFunctionService = javaScriptFunctionService;
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            PagedResult<JavaScriptFunction> result = await javaScriptFunctionService.GetJavaScriptFunctions(request, cancellationToken);
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            if (id <= 0)
+            {
+                return Http400(Localizer["request.id.required"]);
+            }
+
+            JavaScriptFunction? entity = await javaScriptFunctionService.GetJavaScriptFunctionById(id, cancellationToken);
+            return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
         [RequireAccess]

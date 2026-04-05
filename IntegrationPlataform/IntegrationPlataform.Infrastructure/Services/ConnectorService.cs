@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Connectors;
@@ -17,6 +19,35 @@ namespace IntegrationPlataform.Infrastructure.Services
             Localizer = localizer;
         }
 
+        public async Task<PagedResult<Connector>> GetConnectors(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<Connector?> GetConnectorById(long id, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
+        public async Task<List<Connector>> GetConnectorsByIntegration(long integrationId, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .Where(item => item.IntegrationId == integrationId)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Connector>> GetActiveConnectors(CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .Where(item => item.IsActive)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Connector> CreateConnector(CreateConnectorRequest request, CancellationToken cancellationToken = default)
         {
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);
@@ -28,7 +59,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return connector;
+            return await GetConnectorById(connector.Id, cancellationToken) ?? connector;
         }
 
         public async Task<Connector> UpdateConnector(long id, UpdateConnectorRequest request, CancellationToken cancellationToken = default)
@@ -57,7 +88,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return result;
+            return await GetConnectorById(result.Id, cancellationToken) ?? result;
         }
 
         private async Task EnsureIntegrationExists(long integrationId, CancellationToken cancellationToken)
@@ -76,8 +107,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             MutableMessages.Clear();
 
-            Connector? connector = await DbContext.Set<Connector>()
-                .AsNoTracking()
+            Connector? connector = await QueryWithDetails()
                 .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
 
             if (connector is null)
@@ -87,6 +117,14 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return await Delete([connector], cancellationToken) ? connector : null;
+        }
+
+        private IQueryable<Connector> QueryWithDetails()
+        {
+            return DbContext.Set<Connector>()
+                .AsNoTracking()
+                .Include(item => item.Integration)
+                .ThenInclude(item => item!.IntegrationCategory);
         }
     }
 }

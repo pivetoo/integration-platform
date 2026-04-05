@@ -1,71 +1,63 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.ProcessingQueues;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ProcessingQueuesController : IntegrationPlataformReadOnlyController<ProcessingQueue>
+    public sealed class ProcessingQueuesController : ApiControllerBase
     {
         private readonly IExecutionService executionService;
         private readonly IProcessingQueueService processingQueueService;
         private readonly IQueueProcessorService queueProcessorService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<ProcessingQueue, ProcessingQueueContract> MapProcessingQueue = ProcessingQueueContract.Projection.Compile();
 
         public ProcessingQueuesController(
-            DbContext dbContext,
             IExecutionService executionService,
             IProcessingQueueService processingQueueService,
-            IQueueProcessorService queueProcessorService) : base(dbContext)
+            IQueueProcessorService queueProcessorService,
+            IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.executionService = executionService;
             this.processingQueueService = processingQueueService;
             this.queueProcessorService = queueProcessorService;
-        }
-
-        private IQueryable<ProcessingQueueContract> QueryContracts()
-        {
-            return DbContext.Set<ProcessingQueue>()
-                .AsNoTracking()
-                .Select(ProcessingQueueContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderByDescending(item => item.CreatedAt)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<ProcessingQueue> result = await processingQueueService.GetProcessingQueues(request, cancellationToken);
+            return Http200(new PagedResult<ProcessingQueueContract>
+            {
+                Items = result.Items.Select(MapProcessingQueue).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            ProcessingQueueContract? item = await QueryContracts()
-                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
+            ProcessingQueue? item = await processingQueueService.GetProcessingQueueById(id, cancellationToken);
 
-            return item is null ? Http404(Localizer["processingQueue.notFound"]) : Http200(item);
+            return item is null ? Http404(Localizer["processingQueue.notFound"]) : Http200(MapProcessingQueue(item));
         }
 
         [RequireAccess]
         [GetEndpoint("pending")]
         public async Task<IActionResult> GetPending(CancellationToken cancellationToken)
         {
-            var items = await QueryContracts()
-                .Where(item => item.Status == Domain.ValueObjects.ProcessingStatus.Pending &&
-                    (!item.ScheduledAt.HasValue || item.ScheduledAt <= DateTimeOffset.UtcNow))
-                .OrderBy(item => item.Priority)
-                .ThenBy(item => item.CreatedAt)
-                .ToListAsync(cancellationToken);
+            List<ProcessingQueue> items = await processingQueueService.GetPendingProcessingQueues(cancellationToken);
 
-            return Http200(items);
+            return Http200(items.Select(MapProcessingQueue).ToList());
         }
 
         [RequireAccess]
@@ -84,11 +76,8 @@ namespace IntegrationPlataform.Api.Controllers
                 request.Payload,
                 request.Priority,
                 cancellationToken);
-
-            ProcessingQueueContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(current => current.Id == item.Id, cancellationToken);
-
-            return Http201(contract ?? ProcessingQueueContract.Projection.Compile()(item), Localizer["processingQueue.enqueued"]);
+            ProcessingQueue? queue = await processingQueueService.GetProcessingQueueById(item.Id, cancellationToken);
+            return Http201(MapProcessingQueue(queue ?? item), Localizer["processingQueue.enqueued"]);
         }
 
         [RequireAccess]
@@ -108,16 +97,13 @@ namespace IntegrationPlataform.Api.Controllers
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            ProcessingQueueContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
-
             ProcessingQueue? queue = await processingQueueService.Delete(id, cancellationToken);
             if (queue is null)
             {
                 return Http404(processingQueueService.GetErrorMessages());
             }
 
-            return Http200(contract ?? ProcessingQueueContract.Projection.Compile()(queue), Localizer["processingQueue.deleted"]);
+            return Http200(MapProcessingQueue(queue), Localizer["processingQueue.deleted"]);
         }
     }
 }

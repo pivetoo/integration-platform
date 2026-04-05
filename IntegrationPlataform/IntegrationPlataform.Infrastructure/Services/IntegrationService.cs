@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Integrations;
@@ -17,6 +19,27 @@ namespace IntegrationPlataform.Infrastructure.Services
             Localizer = localizer;
         }
 
+        public async Task<PagedResult<Integration>> GetIntegrations(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<Integration?> GetIntegrationById(long id, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
+        public async Task<List<Integration>> GetActiveIntegrations(CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .Where(item => item.IsActive)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Integration> CreateIntegration(CreateIntegrationRequest request, CancellationToken cancellationToken = default)
         {
             await EnsureUniqueIdentifier(request.Identifier, null, cancellationToken);
@@ -28,7 +51,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return integration;
+            return await GetIntegrationById(integration.Id, cancellationToken) ?? integration;
         }
 
         public async Task<Integration> UpdateIntegration(long id, UpdateIntegrationRequest request, CancellationToken cancellationToken = default)
@@ -57,7 +80,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return result;
+            return await GetIntegrationById(result.Id, cancellationToken) ?? result;
         }
 
         private async Task EnsureUniqueIdentifier(string identifier, long? currentId, CancellationToken cancellationToken)
@@ -79,8 +102,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             MutableMessages.Clear();
 
-            Integration? integration = await DbContext.Set<Integration>()
-                .AsNoTracking()
+            Integration? integration = await QueryWithDetails()
                 .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
 
             if (integration is null)
@@ -90,6 +112,13 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return await Delete([integration], cancellationToken) ? integration : null;
+        }
+
+        private IQueryable<Integration> QueryWithDetails()
+        {
+            return DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Include(item => item.IntegrationCategory);
         }
     }
 }

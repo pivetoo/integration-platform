@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.IntegrationCategories;
@@ -15,6 +17,30 @@ namespace IntegrationPlataform.Infrastructure.Services
         public IntegrationCategoryService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
             Localizer = localizer;
+        }
+
+        public async Task<PagedResult<IntegrationCategory>> GetIntegrationCategories(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<IntegrationCategory>()
+                .AsNoTracking()
+                .OrderByDescending(item => item.Id)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<IntegrationCategory?> GetIntegrationCategoryById(long id, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<IntegrationCategory>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
+        public async Task<List<IntegrationCategory>> GetActiveIntegrationCategories(CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<IntegrationCategory>()
+                .AsNoTracking()
+                .Where(item => item.IsActive)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<IntegrationCategory> CreateIntegrationCategory(CreateIntegrationCategoryRequest request, CancellationToken cancellationToken = default)

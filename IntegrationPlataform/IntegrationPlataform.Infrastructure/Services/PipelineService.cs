@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Pipelines;
@@ -17,6 +19,35 @@ namespace IntegrationPlataform.Infrastructure.Services
             Localizer = localizer;
         }
 
+        public async Task<PagedResult<Pipeline>> GetPipelines(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<Pipeline?> GetPipelineById(long id, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
+        public async Task<List<Pipeline>> GetPipelinesByIntegration(long integrationId, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .Where(item => item.IntegrationId == integrationId)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Pipeline>> GetActivePipelines(CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .Where(item => item.IsActive)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Pipeline> CreatePipeline(CreatePipelineRequest request, CancellationToken cancellationToken = default)
         {
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);
@@ -29,7 +60,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return pipeline;
+            return await GetPipelineById(pipeline.Id, cancellationToken) ?? pipeline;
         }
 
         public async Task<Pipeline> UpdatePipeline(long id, UpdatePipelineRequest request, CancellationToken cancellationToken = default)
@@ -59,7 +90,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return result;
+            return await GetPipelineById(result.Id, cancellationToken) ?? result;
         }
 
         private async Task EnsureIntegrationExists(long integrationId, CancellationToken cancellationToken)
@@ -94,8 +125,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             MutableMessages.Clear();
 
-            Pipeline? pipeline = await DbContext.Set<Pipeline>()
-                .AsNoTracking()
+            Pipeline? pipeline = await QueryWithDetails()
                 .FirstOrDefaultAsync(current => current.Id == id, cancellationToken);
 
             if (pipeline is null)
@@ -105,6 +135,14 @@ namespace IntegrationPlataform.Infrastructure.Services
             }
 
             return await Delete([pipeline], cancellationToken) ? pipeline : null;
+        }
+
+        private IQueryable<Pipeline> QueryWithDetails()
+        {
+            return DbContext.Set<Pipeline>()
+                .AsNoTracking()
+                .Include(item => item.Integration)
+                .ThenInclude(item => item!.IntegrationCategory);
         }
     }
 }

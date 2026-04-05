@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Clock, AlertCircle, Info as InfoIcon, Copy, Check } from 'lucide-react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi, useI18n } from 'archon-ui';
 import type { Execution } from '../../types/execution';
+import { ExecutionStatus } from '../../types/execution';
 import type { ExecutionLog } from '../../types/executionLog';
 import { LogLevelLabels } from '../../types/executionLog';
+import { executionService } from '../../services/executionService';
 import { executionLogService } from '../../services/executionLogService';
 import { ExecutionStatusLabels } from '../../types/execution';
 
@@ -46,10 +48,15 @@ function formatDuracao(ms?: number): string {
 
 export default function ExecutionDetailModal({ open, onOpenChange, execution }: ExecutionDetailModalProps) {
   const { t } = useI18n();
+  const [currentExecution, setCurrentExecution] = useState<Execution | null>(null);
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
   const [selectedLog, setSelectedLog] = useState<ExecutionLog | null>(null);
   const [copiedRequest, setCopiedRequest] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
+
+  const { execute: fetchExecution } = useApi<Execution>({
+    showErrorMessage: true,
+  });
 
   const { execute: fetchLogs, loading } = useApi<ExecutionLog[]>({
     showErrorMessage: true,
@@ -57,20 +64,42 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
 
   useEffect(() => {
     if (open && execution) {
-      loadLogs();
+      setCurrentExecution(execution);
+      loadExecution(execution.id);
+      loadLogs(execution.id);
     } else {
+      setCurrentExecution(null);
       setLogs([]);
       setSelectedLog(null);
     }
   }, [open, execution]);
 
-  const loadLogs = async () => {
-    if (!execution) return;
-    const result = await fetchLogs(() => executionLogService.getByExecution(execution.id));
+  useEffect(() => {
+    if (!open || !currentExecution || currentExecution.status !== ExecutionStatus.Running) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      loadExecution(currentExecution.id);
+      loadLogs(currentExecution.id, false);
+    }, 3000);
+
+    return () => window.clearInterval(intervalId);
+  }, [open, currentExecution?.id, currentExecution?.status]);
+
+  const loadExecution = async (executionId: number) => {
+    const result = await fetchExecution(() => executionService.getById(executionId));
+    if (result) {
+      setCurrentExecution(result);
+    }
+  };
+
+  const loadLogs = async (executionId: number, resetSelection = true) => {
+    const result = await fetchLogs(() => executionLogService.getByExecution(executionId));
     if (result) {
       const grouped = groupLogsByStep(result);
       setLogs(grouped);
-      if (grouped.length > 0) {
+      if (resetSelection && grouped.length > 0) {
         setSelectedLog(grouped[0]);
       }
     }
@@ -126,41 +155,41 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
     4: t('execution.log.level.error'),
   };
 
-  if (!execution) return null;
+  if (!execution || !currentExecution) return null;
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="5xl" className="max-h-[90vh] flex flex-col">
         <ModalHeader>
           <ModalTitle className="flex items-center justify-between">
-            <span>{t('execution.detail.title')} #{execution.id}</span>
+            <span>{t('execution.detail.title')} #{currentExecution.id}</span>
           </ModalTitle>
         </ModalHeader>
 
         <div className="flex flex-col gap-4 mt-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-semibold">{t('common.column.connector')}:</span> {execution.connector?.name || '-'}
+              <span className="font-semibold">{t('common.column.connector')}:</span> {currentExecution.connector?.name || '-'}
             </div>
             <div>
-              <span className="font-semibold">{t('common.column.pipeline')}:</span> {execution.pipeline?.name || '-'}
+              <span className="font-semibold">{t('common.column.pipeline')}:</span> {currentExecution.pipeline?.name || '-'}
             </div>
             <div>
               <span className="font-semibold">{t('common.column.status')}:</span>{' '}
               <Badge
                 variant={
-                  (statusVariantMap[execution.status] || 'outline') as
+                  (statusVariantMap[currentExecution.status] || 'outline') as
                     | 'warning'
                     | 'success'
                     | 'destructive'
                     | 'secondary'
                 }
               >
-                {statusLabels[execution.status] || ExecutionStatusLabels[execution.status] || '-'}
+                {statusLabels[currentExecution.status] || ExecutionStatusLabels[currentExecution.status] || '-'}
               </Badge>
             </div>
             <div>
-              <span className="font-semibold">{t('common.column.duration')}:</span> {formatDuracao(execution.duration)}
+              <span className="font-semibold">{t('common.column.duration')}:</span> {formatDuracao(currentExecution.duration)}
             </div>
           </div>
 

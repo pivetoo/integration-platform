@@ -1,34 +1,45 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.IntegrationCategories;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class IntegrationCategoriesController : IntegrationPlataformReadOnlyController<IntegrationCategory>
+    public sealed class IntegrationCategoriesController : ApiControllerBase
     {
         private readonly IIntegrationCategoryService integrationCategoryService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
 
-        public IntegrationCategoriesController(DbContext dbContext, IIntegrationCategoryService integrationCategoryService) : base(dbContext)
+        public IntegrationCategoriesController(IIntegrationCategoryService integrationCategoryService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.integrationCategoryService = integrationCategoryService;
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            PagedResult<IntegrationCategory> result = await integrationCategoryService.GetIntegrationCategories(request, cancellationToken);
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            if (id <= 0)
+            {
+                return Http400(Localizer["request.id.required"]);
+            }
+
+            IntegrationCategory? entity = await integrationCategoryService.GetIntegrationCategoryById(id, cancellationToken);
+            return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
         [RequireAccess]
@@ -63,12 +74,7 @@ namespace IntegrationPlataform.Api.Controllers
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
-            List<IntegrationCategory> categories = await DbContext.Set<IntegrationCategory>()
-                .AsNoTracking()
-                .Where(item => item.IsActive)
-                .OrderBy(item => item.Name)
-                .ToListAsync(cancellationToken);
-
+            List<IntegrationCategory> categories = await integrationCategoryService.GetActiveIntegrationCategories(cancellationToken);
             return Http200(categories);
         }
 

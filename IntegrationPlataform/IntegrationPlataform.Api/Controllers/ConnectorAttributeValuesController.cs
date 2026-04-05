@@ -1,34 +1,45 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.ConnectorAttributeValues;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ConnectorAttributeValuesController : IntegrationPlataformReadOnlyController<ConnectorAttributeValue>
+    public sealed class ConnectorAttributeValuesController : ApiControllerBase
     {
         private readonly IConnectorAttributeValueService connectorAttributeValueService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
 
-        public ConnectorAttributeValuesController(DbContext dbContext, IConnectorAttributeValueService connectorAttributeValueService) : base(dbContext)
+        public ConnectorAttributeValuesController(IConnectorAttributeValueService connectorAttributeValueService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.connectorAttributeValueService = connectorAttributeValueService;
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            PagedResult<ConnectorAttributeValue> result = await connectorAttributeValueService.GetConnectorAttributeValues(request, cancellationToken);
+            return Http200(result);
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            if (id <= 0)
+            {
+                return Http400(Localizer["request.id.required"]);
+            }
+
+            ConnectorAttributeValue? entity = await connectorAttributeValueService.GetConnectorAttributeValueById(id, cancellationToken);
+            return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
         [RequireAccess]
@@ -40,12 +51,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.connector.id.required"]);
             }
 
-            List<ConnectorAttributeValue> values = await DbContext.Set<ConnectorAttributeValue>()
-                .AsNoTracking()
-                .Where(item => item.ConnectorId == connectorId)
-                .OrderBy(item => item.Id)
-                .ToListAsync(cancellationToken);
-
+            List<ConnectorAttributeValue> values = await connectorAttributeValueService.GetConnectorAttributeValuesByConnector(connectorId, cancellationToken);
             return Http200(values);
         }
 
@@ -79,27 +85,12 @@ namespace IntegrationPlataform.Api.Controllers
                 return validationResult;
             }
 
-            if (id != request.Id)
-            {
-                return Http400(Localizer["request.route.idMismatch"]);
-            }
-
-            ConnectorAttributeValue? value = await DbContext.Set<ConnectorAttributeValue>()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
-            if (value is null)
-            {
-                return Http404(Localizer["connector.attributeValue.notFound"]);
-            }
-
-            value.Update(request.IntegrationAttributeId, request.Value);
-
-            ConnectorAttributeValue? updatedValue = await connectorAttributeValueService.Update(value, cancellationToken);
-            if (updatedValue is null)
-            {
-                return Http400(connectorAttributeValueService.GetErrorMessages());
-            }
-
+            ConnectorAttributeValue updatedValue = await connectorAttributeValueService.UpdateConnectorAttributeValue(
+                id,
+                request.Id,
+                request.IntegrationAttributeId,
+                request.Value,
+                cancellationToken);
             return Http200(updatedValue, Localizer["connector.attributeValue.updated"]);
         }
 

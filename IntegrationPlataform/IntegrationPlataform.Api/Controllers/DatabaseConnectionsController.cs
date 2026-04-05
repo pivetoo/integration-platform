@@ -1,37 +1,46 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Contracts.DatabaseConnections;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.DatabaseConnections;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
-using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.SqlClient;
-using Npgsql;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class DatabaseConnectionsController : IntegrationPlataformReadOnlyController<DatabaseConnection>
+    public sealed class DatabaseConnectionsController : ApiControllerBase
     {
         private readonly IDatabaseConnectionService databaseConnectionService;
+        private static readonly Func<DatabaseConnection, DatabaseConnectionContract> MapDatabaseConnection = DatabaseConnectionContract.Projection.Compile();
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
 
-        public DatabaseConnectionsController(DbContext dbContext, IDatabaseConnectionService databaseConnectionService) : base(dbContext)
+        public DatabaseConnectionsController(IDatabaseConnectionService databaseConnectionService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.databaseConnectionService = databaseConnectionService;
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            PagedResult<DatabaseConnection> result = await databaseConnectionService.GetDatabaseConnections(request, cancellationToken);
+            return Http200(new PagedResult<DatabaseConnectionContract>
+            {
+                Items = result.Items.Select(MapDatabaseConnection).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            DatabaseConnection? connection = await databaseConnectionService.GetDatabaseConnectionById(id, cancellationToken);
+            return connection is null ? Http404(Localizer["database.connection.notFound"]) : Http200(MapDatabaseConnection(connection));
         }
 
         [RequireAccess]
@@ -45,7 +54,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseConnection connection = await databaseConnectionService.CreateDatabaseConnection(request, cancellationToken);
-            return Http201(connection, Localizer["database.connection.created"]);
+            return Http201(MapDatabaseConnection(connection), Localizer["database.connection.created"]);
         }
 
         [RequireAccess]
@@ -59,7 +68,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             DatabaseConnection connection = await databaseConnectionService.UpdateDatabaseConnection(id, request, cancellationToken);
-            return Http200(connection, Localizer["database.connection.updated"]);
+            return Http200(MapDatabaseConnection(connection), Localizer["database.connection.updated"]);
         }
 
         [RequireAccess]
@@ -74,32 +83,12 @@ namespace IntegrationPlataform.Api.Controllers
 
             try
             {
-                DatabaseType databaseType = NormalizeDatabaseType(request.Type);
-                string connectionString = BuildConnectionString(request, databaseType);
-
-                switch (databaseType)
-                {
-                    case DatabaseType.PostgreSql:
-                    {
-                        await using NpgsqlConnection connection = new(connectionString);
-                        await connection.OpenAsync(cancellationToken);
-                        break;
-                    }
-                    case DatabaseType.SqlServer:
-                    {
-                        await using SqlConnection connection = new(connectionString);
-                        await connection.OpenAsync(cancellationToken);
-                        break;
-                    }
-                    default:
-                        return Http400(Localizer["database.connection.test.unsupportedType", databaseType]);
-                }
-
+                await databaseConnectionService.TestDatabaseConnection(request, cancellationToken);
                 return Http200(new { message = Localizer["database.connection.test.success"].Value });
             }
-            catch (Exception ex)
+            catch (InvalidOperationException exception)
             {
-                return Http400(Localizer["database.connection.test.failed", ex.Message]);
+                return Http400(exception.Message);
             }
         }
 
@@ -113,33 +102,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(databaseConnectionService.GetErrorMessages());
             }
 
-            return Http200(connection, Localizer["database.connection.deleted"]);
-        }
-
-        private DatabaseType NormalizeDatabaseType(int value)
-        {
-            int normalizedValue = Enum.IsDefined(typeof(DatabaseType), value)
-                ? value
-                : value + 1;
-
-            if (!Enum.IsDefined(typeof(DatabaseType), normalizedValue))
-            {
-                throw new InvalidOperationException(Localizer["database.connection.type.invalid"]);
-            }
-
-            return (DatabaseType)normalizedValue;
-        }
-
-        private string BuildConnectionString(CreateDatabaseConnectionRequest request, DatabaseType databaseType)
-        {
-            return databaseType switch
-            {
-                DatabaseType.PostgreSql =>
-                    $"Host={request.Host};Port={request.Port};Database={request.Database};Username={request.Username};Password={request.Password}",
-                DatabaseType.SqlServer =>
-                    $"Server={request.Host},{request.Port};Database={request.Database};User Id={request.Username};Password={request.Password};TrustServerCertificate=true;Encrypt=false",
-                _ => throw new InvalidOperationException(Localizer["database.connection.type.unsupported"])
-            };
+            return Http200(MapDatabaseConnection(connection), Localizer["database.connection.deleted"]);
         }
     }
 }

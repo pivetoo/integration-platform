@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.ApiCalls;
@@ -16,6 +18,21 @@ namespace IntegrationPlataform.Infrastructure.Services
         public ApiCallService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
             Localizer = localizer;
+        }
+
+        public async Task<PagedResult<ApiCall>> GetApiCalls(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<ApiCall>()
+                .AsNoTracking()
+                .OrderBy(item => item.Name)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<ApiCall?> GetApiCallById(long id, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<ApiCall>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
         }
 
         public async Task<ApiCall> CreateApiCall(CreateApiCallRequest request, CancellationToken cancellationToken = default)

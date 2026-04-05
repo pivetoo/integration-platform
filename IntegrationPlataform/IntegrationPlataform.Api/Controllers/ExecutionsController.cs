@@ -1,42 +1,40 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Execution;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ExecutionsController : IntegrationPlataformControllerBase
+    public sealed class ExecutionsController : ApiControllerBase
     {
-        private readonly DbContext dbContext;
+        private readonly IExecutionService executionService;
         private readonly IExecutionEngineService executionEngineService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<Execution, ExecutionContract> MapExecution = ExecutionContract.Projection.Compile();
 
-        public ExecutionsController(DbContext dbContext, IExecutionEngineService executionEngineService)
+        public ExecutionsController(IExecutionService executionService, IExecutionEngineService executionEngineService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
-            this.dbContext = dbContext;
+            this.executionService = executionService;
             this.executionEngineService = executionEngineService;
-        }
-
-        private IQueryable<ExecutionContract> QueryContracts()
-        {
-            return dbContext.Set<Execution>()
-                .AsNoTracking()
-                .Select(ExecutionContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderByDescending(item => item.StartedAt)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<Execution> result = await executionService.GetExecutions(request, cancellationToken);
+            return Http200(new PagedResult<ExecutionContract>
+            {
+                Items = result.Items.Select(MapExecution).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
@@ -48,10 +46,9 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.execution.id.required"]);
             }
 
-            ExecutionContract? execution = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+            Execution? execution = await executionService.GetExecutionById(id, cancellationToken);
 
-            return execution is null ? Http404(Localizer["execution.notFound"]) : Http200(execution);
+            return execution is null ? Http404(Localizer["execution.notFound"]) : Http200(MapExecution(execution));
         }
 
         [RequireAccess]
@@ -63,24 +60,18 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.connector.id.required"]);
             }
 
-            var executions = await QueryContracts()
-                .Where(item => item.ConnectorId == connectorId)
-                .OrderByDescending(item => item.StartedAt)
-                .ToListAsync(cancellationToken);
+            IReadOnlyCollection<Execution> executions = await executionService.GetByConnector(connectorId, cancellationToken);
 
-            return Http200(executions);
+            return Http200(executions.Select(MapExecution).ToList());
         }
 
         [RequireAccess]
         [GetEndpoint("status/{status}")]
         public async Task<IActionResult> GetByStatus(ExecutionStatus status, CancellationToken cancellationToken)
         {
-            var executions = await QueryContracts()
-                .Where(item => item.Status == status)
-                .OrderByDescending(item => item.StartedAt)
-                .ToListAsync(cancellationToken);
+            IReadOnlyCollection<Execution> executions = await executionService.GetByStatus(status, cancellationToken);
 
-            return Http200(executions);
+            return Http200(executions.Select(MapExecution).ToList());
         }
 
         [RequireAccess]
@@ -89,12 +80,9 @@ namespace IntegrationPlataform.Api.Controllers
         {
             int normalizedTake = take <= 0 ? 10 : take;
 
-            var executions = await QueryContracts()
-                .OrderByDescending(item => item.StartedAt)
-                .Take(normalizedTake)
-                .ToListAsync(cancellationToken);
+            IReadOnlyCollection<Execution> executions = await executionService.GetRecent(normalizedTake, cancellationToken);
 
-            return Http200(executions);
+            return Http200(executions.Select(MapExecution).ToList());
         }
 
         [RequireAccess]

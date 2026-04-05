@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
@@ -12,13 +14,24 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
         }
 
+        public async Task<PagedResult<Execution>> GetExecutions(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .OrderByDescending(item => item.StartedAt)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<Execution?> GetExecutionById(long id, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
         public async Task<IReadOnlyCollection<Execution>> GetByConnector(long connectorId, CancellationToken cancellationToken = default)
         {
-            List<Execution> executions = await (
-                from execution in DbContext.Set<Execution>().AsNoTracking()
-                where execution.ConnectorId == connectorId
-                orderby execution.StartedAt descending
-                select execution)
+            List<Execution> executions = await QueryWithDetails()
+                .Where(execution => execution.ConnectorId == connectorId)
+                .OrderByDescending(execution => execution.StartedAt)
                 .ToListAsync(cancellationToken);
 
             return executions;
@@ -26,11 +39,9 @@ namespace IntegrationPlataform.Infrastructure.Services
 
         public async Task<IReadOnlyCollection<Execution>> GetByStatus(ExecutionStatus status, CancellationToken cancellationToken = default)
         {
-            List<Execution> executions = await (
-                from execution in DbContext.Set<Execution>().AsNoTracking()
-                where execution.Status == status
-                orderby execution.StartedAt descending
-                select execution)
+            List<Execution> executions = await QueryWithDetails()
+                .Where(execution => execution.Status == status)
+                .OrderByDescending(execution => execution.StartedAt)
                 .ToListAsync(cancellationToken);
 
             return executions;
@@ -40,10 +51,7 @@ namespace IntegrationPlataform.Infrastructure.Services
         {
             int normalizedTake = take <= 0 ? 10 : take;
 
-            List<Execution> executions = await DbContext.Set<Execution>()
-                .AsNoTracking()
-                .Include(item => item.Connector)
-                .Include(item => item.Pipeline)
+            List<Execution> executions = await QueryWithDetails()
                 .OrderByDescending(item => item.StartedAt)
                 .Take(normalizedTake)
                 .ToListAsync(cancellationToken);
@@ -65,6 +73,18 @@ namespace IntegrationPlataform.Infrastructure.Services
             await DbContext.SaveChangesAsync(cancellationToken);
 
             return queueItem;
+        }
+
+        private IQueryable<Execution> QueryWithDetails()
+        {
+            return DbContext.Set<Execution>()
+                .AsNoTracking()
+                .Include(item => item.Connector)
+                .ThenInclude(item => item!.Integration)
+                .ThenInclude(item => item!.IntegrationCategory)
+                .Include(item => item.Pipeline)
+                .ThenInclude(item => item!.Integration)
+                .ThenInclude(item => item!.IntegrationCategory);
         }
     }
 }

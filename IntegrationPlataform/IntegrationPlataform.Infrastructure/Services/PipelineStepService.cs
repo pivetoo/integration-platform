@@ -1,3 +1,5 @@
+using Archon.Core.Pagination;
+using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.PipelineSteps;
@@ -16,6 +18,30 @@ namespace IntegrationPlataform.Infrastructure.Services
         public PipelineStepService(DbContext dbContext, IStringLocalizer<IntegrationPlataformResource> localizer) : base(dbContext)
         {
             Localizer = localizer;
+        }
+
+        public async Task<PagedResult<PipelineStep>> GetPipelineSteps(PagedRequest request, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<PipelineStep>()
+                .AsNoTracking()
+                .OrderBy(item => item.Order)
+                .ToPagedResultAsync(request, cancellationToken);
+        }
+
+        public async Task<PipelineStep?> GetPipelineStepById(long id, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<PipelineStep>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        }
+
+        public async Task<List<PipelineStep>> GetPipelineStepsByPipeline(long pipelineId, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Set<PipelineStep>()
+                .AsNoTracking()
+                .Where(item => item.PipelineId == pipelineId)
+                .OrderBy(item => item.Order)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<PipelineStep> CreatePipelineStep(CreatePipelineStepRequest request, CancellationToken cancellationToken = default)
@@ -41,7 +67,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return step;
+            return await GetPipelineStepById(step.Id, cancellationToken) ?? step;
         }
 
         public async Task<PipelineStep> UpdatePipelineStep(long id, UpdatePipelineStepRequest request, CancellationToken cancellationToken = default)
@@ -80,7 +106,7 @@ namespace IntegrationPlataform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
-            return result;
+            return await GetPipelineStepById(result.Id, cancellationToken) ?? result;
         }
 
         private async Task EnsurePipelineExists(long pipelineId, CancellationToken cancellationToken)

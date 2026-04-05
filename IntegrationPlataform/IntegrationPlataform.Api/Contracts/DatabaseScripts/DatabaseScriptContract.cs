@@ -1,5 +1,5 @@
+using IntegrationPlataform.Api.Contracts.DatabaseConnections;
 using IntegrationPlataform.Domain.Entities;
-using IntegrationPlataform.Domain.ValueObjects;
 using System.Linq.Expressions;
 
 namespace IntegrationPlataform.Api.Contracts.DatabaseScripts
@@ -49,26 +49,4 @@ namespace IntegrationPlataform.Api.Contracts.DatabaseScripts
         };
     }
 
-    public sealed class DatabaseConnectionContract
-    {
-        public long Id { get; init; }
-
-        public string Name { get; init; } = string.Empty;
-
-        public DatabaseType Type { get; init; }
-
-        public string Host { get; init; } = string.Empty;
-
-        public int Port { get; init; }
-
-        public string Database { get; init; } = string.Empty;
-
-        public string Username { get; init; } = string.Empty;
-
-        public string Password { get; init; } = string.Empty;
-
-        public DateTimeOffset CreatedAt { get; init; }
-
-        public DateTimeOffset? UpdatedAt { get; init; }
-    }
 }

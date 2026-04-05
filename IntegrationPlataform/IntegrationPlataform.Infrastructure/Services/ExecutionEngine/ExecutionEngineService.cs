@@ -261,7 +261,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
         public async Task<Execution> FinishDebugPipeline(string debugSessionId, CancellationToken cancellationToken = default)
         {
-            if (!DebugSessions.TryRemove(debugSessionId, out DebugSessionState? state))
+            if (!DebugSessions.TryGetValue(debugSessionId, out DebugSessionState? state))
             {
                 throw new KeyNotFoundException(Localizer["execution.debug.session.notFound"]);
             }
@@ -281,7 +281,8 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
                 CreateLog(state.Execution, null, LogLevelType.Info, Localizer["execution.log.debug.finished", finalStatus, state.Stopwatch.ElapsedMilliseconds])
             ];
 
-            await PersistResults(state.Execution, logs, null, finalStatus, state.Context.LastError, cancellationToken);
+            await PersistResults(state.Execution, logs, null, finalStatus, state.Context.LastError, CancellationToken.None);
+            DebugSessions.TryRemove(debugSessionId, out _);
             return state.Execution;
         }
 
@@ -387,8 +388,25 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
 
         private async Task PersistResults(Execution execution, List<ExecutionLog> logs, ProcessingQueue? queueItem, ExecutionStatus finalStatus, string? lastError, CancellationToken cancellationToken)
         {
-            Execution trackedExecution = await dbContext.Set<Execution>().FirstAsync(item => item.Id == execution.Id, cancellationToken);
-            dbContext.Entry(trackedExecution).CurrentValues.SetValues(execution);
+            Execution trackedExecution = await dbContext.Set<Execution>()
+                .AsTracking()
+                .FirstAsync(item => item.Id == execution.Id, CancellationToken.None);
+
+            trackedExecution.UpdateInput(execution.InputData);
+
+            if (execution.Status == ExecutionStatus.Running)
+            {
+                trackedExecution.MarkAsRunning();
+            }
+            else
+            {
+                trackedExecution.Complete(
+                    execution.Status,
+                    execution.FinishedAt ?? DateTimeOffset.UtcNow,
+                    execution.OutputData,
+                    execution.Errors);
+            }
+
             trackedExecution.SetCreatedAt(execution.CreatedAt);
             trackedExecution.SetUpdatedAt(DateTimeOffset.UtcNow);
 
@@ -407,7 +425,7 @@ namespace IntegrationPlataform.Infrastructure.Services.ExecutionEngine
             }
 
             dbContext.Set<ExecutionLog>().AddRange(logs);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.SaveChangesAsync(CancellationToken.None);
         }
 
         private async Task InsertLogs(IEnumerable<ExecutionLog> logs, CancellationToken cancellationToken)

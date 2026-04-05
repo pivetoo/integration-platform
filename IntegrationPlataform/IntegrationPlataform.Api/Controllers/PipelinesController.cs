@@ -1,52 +1,47 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.Pipelines;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Pipelines;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class PipelinesController : IntegrationPlataformReadOnlyController<Pipeline>
+    public sealed class PipelinesController : ApiControllerBase
     {
         private readonly IPipelineService pipelineService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<Pipeline, PipelineContract> MapPipeline = PipelineContract.Projection.Compile();
 
-        public PipelinesController(DbContext dbContext, IPipelineService pipelineService)
-            : base(dbContext)
+        public PipelinesController(IPipelineService pipelineService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.pipelineService = pipelineService;
-        }
-
-        private IQueryable<PipelineContract> QueryContracts()
-        {
-            return DbContext.Set<Pipeline>()
-                .AsNoTracking()
-                .Select(PipelineContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderBy(item => item.Name)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<Pipeline> result = await pipelineService.GetPipelines(request, cancellationToken);
+            return Http200(new PagedResult<PipelineContract>
+            {
+                Items = result.Items.Select(MapPipeline).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            var pipeline = await QueryContracts()
-                .Where(item => item.Id == id)
-                .FirstOrDefaultAsync(cancellationToken);
+            Pipeline? pipeline = await pipelineService.GetPipelineById(id, cancellationToken);
 
-            return pipeline is null ? Http404(Localizer["pipeline.notFound"]) : Http200(pipeline);
+            return pipeline is null ? Http404(Localizer["pipeline.notFound"]) : Http200(MapPipeline(pipeline));
         }
 
         [RequireAccess]
@@ -58,24 +53,18 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.integration.id.required"]);
             }
 
-            var pipelines = await QueryContracts()
-                .Where(item => item.IntegrationId == integrationId)
-                .OrderBy(item => item.Name)
-                .ToListAsync(cancellationToken);
+            List<Pipeline> pipelines = await pipelineService.GetPipelinesByIntegration(integrationId, cancellationToken);
 
-            return Http200(pipelines);
+            return Http200(pipelines.Select(MapPipeline).ToList());
         }
 
         [RequireAccess]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
-            var pipelines = await QueryContracts()
-                .Where(item => item.IsActive)
-                .OrderBy(item => item.Name)
-                .ToListAsync(cancellationToken);
+            List<Pipeline> pipelines = await pipelineService.GetActivePipelines(cancellationToken);
 
-            return Http200(pipelines);
+            return Http200(pipelines.Select(MapPipeline).ToList());
         }
 
         [RequireAccess]
@@ -89,10 +78,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Pipeline pipeline = await pipelineService.CreatePipeline(request, cancellationToken);
-            PipelineContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == pipeline.Id, cancellationToken);
-
-            return Http201(contract ?? PipelineContract.Projection.Compile()(pipeline), Localizer["pipeline.created"]);
+            return Http201(MapPipeline(pipeline), Localizer["pipeline.created"]);
         }
 
         [RequireAccess]
@@ -106,26 +92,20 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             Pipeline pipeline = await pipelineService.UpdatePipeline(id, request, cancellationToken);
-            PipelineContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == pipeline.Id, cancellationToken);
-
-            return Http200(contract ?? PipelineContract.Projection.Compile()(pipeline), Localizer["pipeline.updated"]);
+            return Http200(MapPipeline(pipeline), Localizer["pipeline.updated"]);
         }
 
         [RequireAccess]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            PipelineContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
             Pipeline? pipeline = await pipelineService.Delete(id, cancellationToken);
             if (pipeline is null)
             {
                 return Http404(pipelineService.GetErrorMessages());
             }
 
-            return Http200(contract ?? PipelineContract.Projection.Compile()(pipeline), Localizer["pipeline.deleted"]);
+            return Http200(MapPipeline(pipeline), Localizer["pipeline.deleted"]);
         }
     }
 }

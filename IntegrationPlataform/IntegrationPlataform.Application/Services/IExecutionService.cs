@@ -1,3 +1,4 @@
+using Archon.Core.Pagination;
 using Archon.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
@@ -6,6 +7,10 @@ namespace IntegrationPlataform.Application.Services
 {
     public interface IExecutionService : ICrudService<Execution>
     {
+        Task<PagedResult<Execution>> GetExecutions(PagedRequest request, CancellationToken cancellationToken = default);
+
+        Task<Execution?> GetExecutionById(long id, CancellationToken cancellationToken = default);
+
         Task<IReadOnlyCollection<Execution>> GetByConnector(long connectorId, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyCollection<Execution>> GetByStatus(ExecutionStatus status, CancellationToken cancellationToken = default);

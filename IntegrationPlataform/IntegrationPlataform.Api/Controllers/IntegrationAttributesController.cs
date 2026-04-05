@@ -1,50 +1,47 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.IntegrationAttributes;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.IntegrationAttributes;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class IntegrationAttributesController : IntegrationPlataformReadOnlyController<IntegrationAttribute>
+    public sealed class IntegrationAttributesController : ApiControllerBase
     {
         private readonly IIntegrationAttributeService integrationAttributeService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<IntegrationAttribute, IntegrationAttributeContract> MapIntegrationAttribute = IntegrationAttributeContract.Projection.Compile();
 
-        public IntegrationAttributesController(DbContext dbContext, IIntegrationAttributeService integrationAttributeService) : base(dbContext)
+        public IntegrationAttributesController(IIntegrationAttributeService integrationAttributeService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.integrationAttributeService = integrationAttributeService;
-        }
-
-        private IQueryable<IntegrationAttributeContract> QueryContracts()
-        {
-            return DbContext.Set<IntegrationAttribute>()
-                .AsNoTracking()
-                .Select(IntegrationAttributeContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderBy(item => item.Order)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<IntegrationAttribute> result = await integrationAttributeService.GetIntegrationAttributes(request, cancellationToken);
+            return Http200(new PagedResult<IntegrationAttributeContract>
+            {
+                Items = result.Items.Select(MapIntegrationAttribute).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            IntegrationAttributeContract? attribute = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+            IntegrationAttribute? attribute = await integrationAttributeService.GetIntegrationAttributeById(id, cancellationToken);
 
-            return attribute is null ? Http404(Localizer["integration.attribute.notFound"]) : Http200(attribute);
+            return attribute is null ? Http404(Localizer["integration.attribute.notFound"]) : Http200(MapIntegrationAttribute(attribute));
         }
 
         [RequireAccess]
@@ -56,12 +53,9 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.integration.id.required"]);
             }
 
-            List<IntegrationAttributeContract> attributes = await QueryContracts()
-                .Where(item => item.IntegrationId == integrationId)
-                .OrderBy(item => item.Order)
-                .ToListAsync(cancellationToken);
+            List<IntegrationAttribute> attributes = await integrationAttributeService.GetIntegrationAttributesByIntegration(integrationId, cancellationToken);
 
-            return Http200(attributes);
+            return Http200(attributes.Select(MapIntegrationAttribute).ToList());
         }
 
         [RequireAccess]
@@ -93,10 +87,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(integrationAttributeService.GetErrorMessages());
             }
 
-            IntegrationAttributeContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == attribute.Id, cancellationToken);
-
-            return Http201(contract ?? IntegrationAttributeContract.Projection.Compile()(attribute), Localizer["integration.attribute.created"]);
+            return Http201(MapIntegrationAttribute(attribute), Localizer["integration.attribute.created"]);
         }
 
         [RequireAccess]
@@ -109,20 +100,9 @@ namespace IntegrationPlataform.Api.Controllers
                 return validationResult;
             }
 
-            if (id != request.Id)
-            {
-                return Http400(Localizer["request.route.idMismatch"]);
-            }
-
-            IntegrationAttribute? attribute = await DbContext.Set<IntegrationAttribute>()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
-            if (attribute is null)
-            {
-                return Http404(Localizer["integration.attribute.notFound"]);
-            }
-
-            attribute.Update(
+            IntegrationAttribute updatedAttribute = await integrationAttributeService.UpdateIntegrationAttribute(
+                id,
+                request.Id,
                 request.Field,
                 request.Label,
                 request.Type,
@@ -132,34 +112,23 @@ namespace IntegrationPlataform.Api.Controllers
                 request.Placeholder,
                 request.DefaultValue,
                 request.Group,
-                request.IsSensitive);
+                request.IsSensitive,
+                cancellationToken);
 
-            IntegrationAttribute? updatedAttribute = await integrationAttributeService.Update(attribute, cancellationToken);
-            if (updatedAttribute is null)
-            {
-                return Http400(integrationAttributeService.GetErrorMessages());
-            }
-
-            IntegrationAttributeContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == updatedAttribute.Id, cancellationToken);
-
-            return Http200(contract ?? IntegrationAttributeContract.Projection.Compile()(updatedAttribute), Localizer["integration.attribute.updated"]);
+            return Http200(MapIntegrationAttribute(updatedAttribute), Localizer["integration.attribute.updated"]);
         }
 
         [RequireAccess]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            IntegrationAttributeContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
             IntegrationAttribute? attribute = await integrationAttributeService.Delete(id, cancellationToken);
             if (attribute is null)
             {
                 return Http404(integrationAttributeService.GetErrorMessages());
             }
 
-            return Http200(contract ?? IntegrationAttributeContract.Projection.Compile()(attribute), Localizer["integration.attribute.deleted"]);
+            return Http200(MapIntegrationAttribute(attribute), Localizer["integration.attribute.deleted"]);
         }
     }
 }

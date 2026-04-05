@@ -1,51 +1,47 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlataform.Api.Contracts.PipelineSteps;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.PipelineSteps;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class PipelineStepsController : IntegrationPlataformReadOnlyController<PipelineStep>
+    public sealed class PipelineStepsController : ApiControllerBase
     {
         private readonly IPipelineStepService pipelineStepService;
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
+        private static readonly Func<PipelineStep, PipelineStepContract> MapPipelineStep = PipelineStepContract.Projection.Compile();
 
-        public PipelineStepsController(DbContext dbContext, IPipelineStepService pipelineStepService)
-            : base(dbContext)
+        public PipelineStepsController(IPipelineStepService pipelineStepService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.pipelineStepService = pipelineStepService;
-        }
-
-        private IQueryable<PipelineStepContract> QueryContracts()
-        {
-            return DbContext.Set<PipelineStep>()
-                .AsNoTracking()
-                .Select(PipelineStepContract.Projection);
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            var result = await QueryContracts()
-                .OrderBy(item => item.Order)
-                .ToPagedResultAsync(request, cancellationToken);
-
-            return Http200(result);
+            PagedResult<PipelineStep> result = await pipelineStepService.GetPipelineSteps(request, cancellationToken);
+            return Http200(new PagedResult<PipelineStepContract>
+            {
+                Items = result.Items.Select(MapPipelineStep).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            PipelineStepContract? step = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+            PipelineStep? step = await pipelineStepService.GetPipelineStepById(id, cancellationToken);
 
-            return step is null ? Http404(Localizer["pipeline.step.notFound"]) : Http200(step);
+            return step is null ? Http404(Localizer["pipeline.step.notFound"]) : Http200(MapPipelineStep(step));
         }
 
         [RequireAccess]
@@ -57,12 +53,9 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http400(Localizer["request.pipeline.id.required"]);
             }
 
-            List<PipelineStepContract> steps = await QueryContracts()
-                .Where(item => item.PipelineId == pipelineId)
-                .OrderBy(item => item.Order)
-                .ToListAsync(cancellationToken);
+            List<PipelineStep> steps = await pipelineStepService.GetPipelineStepsByPipeline(pipelineId, cancellationToken);
 
-            return Http200(steps);
+            return Http200(steps.Select(MapPipelineStep).ToList());
         }
 
         [RequireAccess]
@@ -76,11 +69,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             PipelineStep step = await pipelineStepService.CreatePipelineStep(request, cancellationToken);
-
-            PipelineStepContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == step.Id, cancellationToken);
-
-            return Http201(contract ?? PipelineStepContract.Projection.Compile()(step), Localizer["pipeline.step.created"]);
+            return Http201(MapPipelineStep(step), Localizer["pipeline.step.created"]);
         }
 
         [RequireAccess]
@@ -94,27 +83,20 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             PipelineStep step = await pipelineStepService.UpdatePipelineStep(id, request, cancellationToken);
-
-            PipelineStepContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == step.Id, cancellationToken);
-
-            return Http200(contract ?? PipelineStepContract.Projection.Compile()(step), Localizer["pipeline.step.updated"]);
+            return Http200(MapPipelineStep(step), Localizer["pipeline.step.updated"]);
         }
 
         [RequireAccess]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            PipelineStepContract? contract = await QueryContracts()
-                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-
             PipelineStep? step = await pipelineStepService.Delete(id, cancellationToken);
             if (step is null)
             {
                 return Http404(pipelineStepService.GetErrorMessages());
             }
 
-            return Http200(contract ?? PipelineStepContract.Projection.Compile()(step), Localizer["pipeline.step.deleted"]);
+            return Http200(MapPipelineStep(step), Localizer["pipeline.step.deleted"]);
         }
     }
 }

@@ -1,34 +1,46 @@
 using Archon.Api.Attributes;
+using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Contracts.ApiCalls;
+using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.ApiCalls;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlataform.Api.Controllers
 {
-    public sealed class ApiCallsController : IntegrationPlataformReadOnlyController<ApiCall>
+    public sealed class ApiCallsController : ApiControllerBase
     {
         private readonly IApiCallService apiCallService;
+        private static readonly Func<ApiCall, ApiCallContract> MapApiCall = ApiCallContract.Projection.Compile();
+        private new IStringLocalizer<IntegrationPlataformResource> Localizer { get; }
 
-        public ApiCallsController(DbContext dbContext, IApiCallService apiCallService) : base(dbContext)
+        public ApiCallsController(IApiCallService apiCallService, IStringLocalizer<IntegrationPlataformResource> localizer)
         {
             this.apiCallService = apiCallService;
+            Localizer = localizer;
         }
 
         [RequireAccess]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
-            return await base.Get(request, cancellationToken);
+            PagedResult<ApiCall> result = await apiCallService.GetApiCalls(request, cancellationToken);
+            return Http200(new PagedResult<ApiCallContract>
+            {
+                Items = result.Items.Select(MapApiCall).ToArray(),
+                Pagination = result.Pagination
+            });
         }
 
         [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
-            return await base.GetById(id, cancellationToken);
+            ApiCall? apiCall = await apiCallService.GetApiCallById(id, cancellationToken);
+            return apiCall is null ? Http404(Localizer["apiCall.notFound"]) : Http200(MapApiCall(apiCall));
         }
 
         [RequireAccess]
@@ -42,7 +54,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             ApiCall apiCall = await apiCallService.CreateApiCall(request, cancellationToken);
-            return Http201(apiCall, Localizer["apiCall.created"]);
+            return Http201(MapApiCall(apiCall), Localizer["apiCall.created"]);
         }
 
         [RequireAccess]
@@ -56,7 +68,7 @@ namespace IntegrationPlataform.Api.Controllers
             }
 
             ApiCall apiCall = await apiCallService.UpdateApiCall(id, request, cancellationToken);
-            return Http200(apiCall, Localizer["apiCall.updated"]);
+            return Http200(MapApiCall(apiCall), Localizer["apiCall.updated"]);
         }
 
         [RequireAccess]
@@ -69,7 +81,7 @@ namespace IntegrationPlataform.Api.Controllers
                 return Http404(apiCallService.GetErrorMessages());
             }
 
-            return Http200(apiCall, Localizer["apiCall.deleted"]);
+            return Http200(MapApiCall(apiCall), Localizer["apiCall.deleted"]);
         }
     }
 }
