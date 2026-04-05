@@ -1,68 +1,68 @@
 import { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
-import { pipelineService } from '../../services/pipelineService';
 import { integrationService } from '../../services/integrationService';
-import type { Pipeline, CreatePipelineRequest } from '../../types/pipeline';
-import type { Integration } from '../../types/integration';
+import { integrationCategoryService } from '../../services/integrationCategoryService';
+import type { Integration, CreateIntegrationRequest } from '../../types/integration';
+import type { IntegrationCategory } from '../../types/integrationCategory';
 
-interface PipelineFormModalProps {
+interface IntegrationFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  pipeline: Pipeline | null;
+  integracao: Integration | null;
   onSuccess: () => void;
 }
 
-const initialFormData: CreatePipelineRequest = {
-  integrationId: 0,
+const initialFormData: CreateIntegrationRequest = {
   identifier: '',
   name: '',
   description: '',
+  integrationCategoryId: undefined,
   isActive: true,
 };
 
-export default function PipelineFormModal({ open, onOpenChange, pipeline, onSuccess }: PipelineFormModalProps) {
+export default function IntegrationFormModal({ open, onOpenChange, integracao, onSuccess }: IntegrationFormModalProps) {
   const { t } = useI18n();
-  const isEditing = !!pipeline;
-  const [formData, setFormData] = useState<CreatePipelineRequest>(initialFormData);
-  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const isEditing = !!integracao;
+  const [formData, setFormData] = useState<CreateIntegrationRequest>(initialFormData);
+  const [categorias, setCategorias] = useState<IntegrationCategory[]>([]);
 
   const { execute, loading } = useApi({
     showSuccessMessage: true,
     showErrorMessage: true,
   });
 
-  const { execute: fetchIntegracoes } = useApi<Integration[]>({
+  const { execute: fetchCategorias } = useApi<IntegrationCategory[]>({
     showErrorMessage: true,
   });
 
   useEffect(() => {
     if (open) {
-      loadIntegrations();
+      loadCategorias();
     }
   }, [open]);
 
   useEffect(() => {
-    if (pipeline) {
+    if (integracao) {
       setFormData({
-        integrationId: pipeline.integrationId || pipeline.integration?.id || 0,
-        identifier: pipeline.identifier,
-        name: pipeline.name,
-        description: pipeline.description || '',
-        isActive: pipeline.isActive,
+        identifier: integracao.identifier,
+        name: integracao.name,
+        description: integracao.description || '',
+        integrationCategoryId: integracao.integrationCategoryId ?? integracao.integrationCategory?.id,
+        isActive: integracao.isActive,
       });
     } else {
       setFormData(initialFormData);
     }
-  }, [pipeline]);
+  }, [integracao]);
 
-  const loadIntegrations = async () => {
-    const result = await fetchIntegracoes(() => integrationService.getActive());
+  const loadCategorias = async () => {
+    const result = await fetchCategorias(() => integrationCategoryService.getActive());
     if (result) {
-      setIntegrations(result);
+      setCategorias(result);
     }
   };
 
-  const handleChange = (field: keyof CreatePipelineRequest, value: string | number | boolean) => {
+  const handleChange = (field: keyof CreateIntegrationRequest, value: string | number | boolean | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -70,9 +70,9 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
     e.preventDefault();
     try {
       if (isEditing) {
-        await execute(() => pipelineService.update(pipeline.id, formData));
+        await execute(() => integrationService.update(integracao.id, formData));
       } else {
-        await execute(() => pipelineService.create(formData));
+        await execute(() => integrationService.create(formData));
       }
       onSuccess();
     } catch {
@@ -84,7 +84,7 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent size="lg">
         <ModalHeader>
-          <ModalTitle>{isEditing ? t('pipeline.form.editTitle') : t('pipeline.form.createTitle')}</ModalTitle>
+          <ModalTitle>{isEditing ? t('integration.form.editTitle') : t('integration.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -119,18 +119,19 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.integration')}</label>
+              <label className="text-sm font-medium">{t('common.column.category')}</label>
               <Select
-                value={formData.integrationId ? formData.integrationId.toString() : ''}
-                onValueChange={(value) => handleChange('integrationId', parseInt(value))}
+                value={formData.integrationCategoryId ? formData.integrationCategoryId.toString() : '_none'}
+                onValueChange={(value) => handleChange('integrationCategoryId', value === '_none' ? undefined : parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('pipeline.form.integrationPlaceholder')} />
+                  <SelectValue placeholder={t('integration.form.categoryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {integrations.map((integration) => (
-                    <SelectItem key={integration.id} value={integration.id.toString()}>
-                      {integration.name}
+                  <SelectItem value="_none">{t('integration.form.noCategory')}</SelectItem>
+                  {categorias.map((categoria) => (
+                    <SelectItem key={categoria.id} value={categoria.id.toString()}>
+                      {categoria.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -144,7 +145,7 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
               checked={formData.isActive}
               onCheckedChange={(checked) => handleChange('isActive', !!checked)}
             />
-            <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
+            <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
           </div>
 
           <ModalFooter>

@@ -1,24 +1,24 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Callback, ProtectedRoute, useAuth } from 'archon-ui';
 import IntegrationHubLayout from '../layouts/IntegrationHubLayout';
-import Dashboard from '../modules';
-import Integracoes from '../modules/Configuracao/Integracoes';
-import CategoriasIntegracao from '../modules/Configuracao/CategoriasIntegracao';
-import Conectores from '../modules/Configuracao/Conectores';
-import Pipelines from '../modules/Configuracao/Pipelines';
-import PipelineDetalhe from '../modules/Configuracao/PipelineDetalhe';
-import ConectorDetalhe from '../modules/Configuracao/ConectorDetalhe';
-import IntegracaoDetalhe from '../modules/Configuracao/IntegracaoDetalhe';
-import ChamadasApi from '../modules/Configuracao/ChamadasApi';
-import FuncoesJavaScript from '../modules/Configuracao/FuncoesJavaScript';
-import ScriptsBancoDados from '../modules/Configuracao/ScriptsBancoDados';
-import ConexoesBancoDados from '../modules/Configuracao/ConexoesBancoDados';
-import Execucoes from '../modules/Operacional/Execucoes';
-import FilaProcessamento from '../modules/Operacional/FilaProcessamento';
-import Referencias from '../modules/Operacional/Referencias';
-import Automacao from '../modules/Automacao/Automacao';
+import Dashboard from '../modules/Dashboard';
+import Integrations from '../modules/Configuration/Integrations';
+import IntegrationDetail from '../modules/Configuration/Integrations/Detail';
+import IntegrationCategories from '../modules/Configuration/IntegrationCategories';
+import Connectors from '../modules/Configuration/Connectors';
+import ConnectorDetail from '../modules/Configuration/Connectors/Detail';
+import Pipelines from '../modules/Configuration/Pipelines';
+import PipelineDetail from '../modules/Configuration/Pipelines/Detail';
+import ApiCalls from '../modules/Configuration/ApiCalls';
+import JavaScriptFunctions from '../modules/Configuration/JavaScriptFunctions';
+import DatabaseScripts from '../modules/Configuration/DatabaseScripts';
+import DatabaseConnections from '../modules/Configuration/DatabaseConnections';
+import Executions from '../modules/Operations/Executions';
+import ProcessingQueue from '../modules/Operations/ProcessingQueue';
+import References from '../modules/Operations/References';
+import PipelineRoutines from '../modules/Automation/PipelineRoutines';
 
-const identityProviderUrl = import.meta.env.VITE_IDENTITY_PROVIDER_WEB;
+const identityManagementUrl = import.meta.env.VITE_IDENTITY_PROVIDER_WEB;
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -30,7 +30,7 @@ function AppRoutes() {
           path="/callback"
           element={
             <Callback
-              identityManagementUrl={identityProviderUrl}
+              identityManagementUrl={identityManagementUrl}
               redirectTo="/"
             />
           }
@@ -40,7 +40,7 @@ function AppRoutes() {
           element={
             <ProtectedRoute
               isAuthenticated={!!user}
-              redirectTo={identityProviderUrl}
+              redirectTo={identityManagementUrl}
               externalRedirect={true}
             >
               <IntegrationHubLayout />
@@ -48,21 +48,21 @@ function AppRoutes() {
           }
         >
           <Route index element={<Dashboard />} />
-          <Route path="integracoes" element={<Integracoes />} />
-          <Route path="integracoes/:id" element={<IntegracaoDetalhe />} />
-          <Route path="categorias" element={<CategoriasIntegracao />} />
-          <Route path="conectores" element={<Conectores />} />
-          <Route path="conectores/:id" element={<ConectorDetalhe />} />
-          <Route path="chamadas-api" element={<ChamadasApi />} />
-          <Route path="funcoes-javascript" element={<FuncoesJavaScript />} />
-          <Route path="scripts-banco-dados" element={<ScriptsBancoDados />} />
-          <Route path="conexoes-banco" element={<ConexoesBancoDados />} />
+          <Route path="integracoes" element={<Integrations />} />
+          <Route path="integracoes/:id" element={<IntegrationDetail />} />
+          <Route path="categorias" element={<IntegrationCategories />} />
+          <Route path="conectores" element={<Connectors />} />
+          <Route path="conectores/:id" element={<ConnectorDetail />} />
+          <Route path="chamadas-api" element={<ApiCalls />} />
+          <Route path="funcoes-javascript" element={<JavaScriptFunctions />} />
+          <Route path="scripts-banco-dados" element={<DatabaseScripts />} />
+          <Route path="conexoes-banco" element={<DatabaseConnections />} />
           <Route path="pipelines" element={<Pipelines />} />
-          <Route path="pipelines/:id" element={<PipelineDetalhe />} />
-          <Route path="execucoes" element={<Execucoes />} />
-          <Route path="fila" element={<FilaProcessamento />} />
-          <Route path="referencias" element={<Referencias />} />
-          <Route path="automacao" element={<Automacao />} />
+          <Route path="pipelines/:id" element={<PipelineDetail />} />
+          <Route path="execucoes" element={<Executions />} />
+          <Route path="fila" element={<ProcessingQueue />} />
+          <Route path="referencias" element={<References />} />
+          <Route path="automacao" element={<PipelineRoutines />} />
         </Route>
 
         <Route path="*" element={<div>Página não encontrada</div>} />

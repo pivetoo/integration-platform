@@ -1,4 +1,4 @@
-import type { Integration } from './integracao';
+import type { Integration } from './integration';
 
 export const PipelineStepType = {
   HttpRequest: 1,

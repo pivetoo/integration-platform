@@ -1,17 +1,10 @@
 import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import {
-  AppLayout,
-  useAuth,
-  useAppNavigation,
-  useNotifications,
-  AuthService,
-  useI18n
-} from 'archon-ui';
+import { AppLayout, useAuth, useAppNavigation, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
 import logoIntegrationHub from '../assets/logo-integration-hub.svg';
-import AboutIntegrationHubModal from '../components/modals/AboutIntegrationHubModal';
+import AboutIntegrationHubModal from '../components/modals/AboutIntegrationPlatformModal';
 
 export default function IntegrationHubLayout() {
   const { t } = useI18n();

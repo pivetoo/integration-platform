@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, Play, RefreshCcw, Filter, Bug } from 'lucide-react';
 import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi, useI18n } from 'archon-ui';
-import { conectorService } from '../../services/conectorService';
-import { execucaoService } from '../../services/execucaoService';
-import { execucaoLogService } from '../../services/execucaoLogService';
-import type { Conector } from '../../types/conector';
-import type { DebugPipelineResult, ExecuteNextDebugStepResult, StartDebugPipelineResult } from '../../types/execucao';
-import type { ExecutionLog } from '../../types/execucaoLog';
-import { LogLevel, LogLevelLabels } from '../../types/execucaoLog';
+import { connectorService } from '../../services/connectorService';
+import { executionService } from '../../services/executionService';
+import { executionLogService } from '../../services/executionLogService';
+import type { Conector } from '../../types/connector';
+import type { DebugPipelineResult, ExecuteNextDebugStepResult, StartDebugPipelineResult } from '../../types/execution';
+import type { ExecutionLog } from '../../types/executionLog';
+import { LogLevel, LogLevelLabels } from '../../types/executionLog';
 import type { PipelineStep } from '../../types/pipeline';
 
 interface PipelineDebuggerModalProps {
@@ -198,7 +198,7 @@ export default function PipelineDebuggerModal({
     setRemainingSteps(0);
 
     const loadConector = async () => {
-      const result = await fetchConectores(() => conectorService.getByIntegration(integrationId));
+      const result = await fetchConectores(() => connectorService.getByIntegration(integrationId));
       if (result && result.length > 0) {
         setConector(result[0]);
       }
@@ -307,7 +307,7 @@ export default function PipelineDebuggerModal({
   };
 
   const refreshRunLogs = async (executionId: number, output?: unknown) => {
-    const logs = await fetchLogs(() => execucaoLogService.getByExecution(executionId));
+    const logs = await fetchLogs(() => executionLogService.getByExecution(executionId));
     if (!logs) {
       return;
     }
@@ -325,7 +325,7 @@ export default function PipelineDebuggerModal({
     }
 
     const normalizedPayload = normalizePayload();
-      const debugResult = await executeDebug(() => execucaoService.debug({
+      const debugResult = await executeDebug(() => executionService.debug({
       connectorId: conector.id,
       pipelineId,
       inputData: normalizedPayload,
@@ -354,7 +354,7 @@ export default function PipelineDebuggerModal({
     }
 
     const normalizedPayload = normalizePayload();
-    const result = await startDebugSession(() => execucaoService.startDebug({
+    const result = await startDebugSession(() => executionService.startDebug({
       connectorId: conector.id,
       pipelineId,
       inputData: normalizedPayload,
@@ -388,7 +388,7 @@ export default function PipelineDebuggerModal({
       return;
     }
 
-    const result = await executeNextDebugStep(() => execucaoService.executeNextDebugStep({
+    const result = await executeNextDebugStep(() => executionService.executeNextDebugStep({
       debugSessionId,
     }));
 
@@ -413,7 +413,7 @@ export default function PipelineDebuggerModal({
     }
 
     const sessionId = debugSessionId;
-    const result = await finalizeDebugSession(() => execucaoService.finalizeDebug({
+    const result = await finalizeDebugSession(() => executionService.finalizeDebug({
       debugSessionId: sessionId,
     }));
 
