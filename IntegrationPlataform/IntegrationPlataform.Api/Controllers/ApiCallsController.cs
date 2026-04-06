@@ -24,7 +24,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as chamadas de API cadastradas na plataforma.")]
-        [GetEndpoint]
+        [GetEndpoint("[action]")]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<ApiCall> result = await apiCallService.GetApiCalls(request, cancellationToken);
@@ -44,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar uma nova chamada de API reutilizável.")]
-        [PostEndpoint]
+        [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateApiCallRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

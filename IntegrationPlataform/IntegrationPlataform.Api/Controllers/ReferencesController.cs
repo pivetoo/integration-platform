@@ -24,7 +24,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as referências internas e externas registradas na plataforma.")]
-        [GetEndpoint]
+        [GetEndpoint("[action]")]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<Reference> result = await referenceService.GetReferences(request, cancellationToken);
@@ -59,7 +59,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar uma nova referência entre identificadores internos e externos.")]
-        [PostEndpoint]
+        [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateReferenceRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

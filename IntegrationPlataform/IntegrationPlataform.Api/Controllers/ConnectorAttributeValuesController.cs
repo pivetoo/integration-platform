@@ -22,7 +22,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite listar os valores de atributos configurados nos conectores.")]
-        [GetEndpoint]
+        [GetEndpoint("[action]")]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<ConnectorAttributeValue> result = await connectorAttributeValueService.GetConnectorAttributeValues(request, cancellationToken);
@@ -56,7 +56,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar um novo valor de atributo para um conector.")]
-        [PostEndpoint]
+        [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

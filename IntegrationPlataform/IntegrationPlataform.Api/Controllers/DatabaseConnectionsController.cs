@@ -24,7 +24,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as conexões de banco de dados cadastradas na plataforma.")]
-        [GetEndpoint]
+        [GetEndpoint("[action]")]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<DatabaseConnection> result = await databaseConnectionService.GetDatabaseConnections(request, cancellationToken);
@@ -44,7 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar uma nova conexão de banco de dados externo.")]
-        [PostEndpoint]
+        [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateDatabaseConnectionRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);
