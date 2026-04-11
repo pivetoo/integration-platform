@@ -5,6 +5,7 @@ namespace IntegrationPlataform.Domain.Entities
     public class Pipeline : Entity
     {
         private readonly List<PipelineStep> steps = [];
+        private readonly List<PipelineExample> examples = [];
         private readonly List<Execution> executions = [];
         private readonly List<ProcessingQueue> processingQueues = [];
         private readonly List<PipelineRoutine> routines = [];
@@ -22,6 +23,8 @@ namespace IntegrationPlataform.Domain.Entities
         public bool IsActive { get; private set; } = true;
 
         public IReadOnlyCollection<PipelineStep> Steps => steps.AsReadOnly();
+
+        public IReadOnlyCollection<PipelineExample> Examples => examples.AsReadOnly();
 
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
 

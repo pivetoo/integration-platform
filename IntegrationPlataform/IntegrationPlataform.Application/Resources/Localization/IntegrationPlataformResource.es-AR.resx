@@ -312,6 +312,48 @@
   <data name="request.pipeline.id.required" xml:space="preserve">
     <value>El identificador del pipeline es obligatorio.</value>
   </data>
+  <data name="request.pipelineStep.id.required" xml:space="preserve">
+    <value>El identificador de la etapa del pipeline es obligatorio.</value>
+  </data>
+  <data name="pipelineExample.created" xml:space="preserve">
+    <value>Ejemplo de pipeline creado correctamente.</value>
+  </data>
+  <data name="pipelineExample.updated" xml:space="preserve">
+    <value>Ejemplo de pipeline actualizado correctamente.</value>
+  </data>
+  <data name="pipelineExample.deleted" xml:space="preserve">
+    <value>Ejemplo de pipeline eliminado correctamente.</value>
+  </data>
+  <data name="pipelineExample.notFound" xml:space="preserve">
+    <value>Ejemplo de pipeline no encontrado.</value>
+  </data>
+  <data name="pipelineExample.name.alreadyExistsForPipeline" xml:space="preserve">
+    <value>Ya existe un ejemplo con este nombre para el pipeline informado.</value>
+  </data>
+  <data name="pipelineStepExample.created" xml:space="preserve">
+    <value>Ejemplo de etapa del pipeline creado correctamente.</value>
+  </data>
+  <data name="pipelineStepExample.updated" xml:space="preserve">
+    <value>Ejemplo de etapa del pipeline actualizado correctamente.</value>
+  </data>
+  <data name="pipelineStepExample.deleted" xml:space="preserve">
+    <value>Ejemplo de etapa del pipeline eliminado correctamente.</value>
+  </data>
+  <data name="pipelineStepExample.notFound" xml:space="preserve">
+    <value>Ejemplo de etapa del pipeline no encontrado.</value>
+  </data>
+  <data name="pipelineStepValueMapping.created" xml:space="preserve">
+    <value>Mapeo visual de valores creado correctamente.</value>
+  </data>
+  <data name="pipelineStepValueMapping.updated" xml:space="preserve">
+    <value>Mapeo visual de valores actualizado correctamente.</value>
+  </data>
+  <data name="pipelineStepValueMapping.deleted" xml:space="preserve">
+    <value>Mapeo visual de valores eliminado correctamente.</value>
+  </data>
+  <data name="pipelineStepValueMapping.notFound" xml:space="preserve">
+    <value>Mapeo visual de valores no encontrado.</value>
+  </data>
   <data name="request.pipeline.identifier.required" xml:space="preserve">
     <value>El identificador del pipeline es obligatorio.</value>
   </data>

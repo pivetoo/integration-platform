@@ -312,6 +312,48 @@
   <data name="request.pipeline.id.required" xml:space="preserve">
     <value>Pipeline id is required.</value>
   </data>
+  <data name="request.pipelineStep.id.required" xml:space="preserve">
+    <value>Pipeline step identifier is required.</value>
+  </data>
+  <data name="pipelineExample.created" xml:space="preserve">
+    <value>Pipeline example created successfully.</value>
+  </data>
+  <data name="pipelineExample.updated" xml:space="preserve">
+    <value>Pipeline example updated successfully.</value>
+  </data>
+  <data name="pipelineExample.deleted" xml:space="preserve">
+    <value>Pipeline example deleted successfully.</value>
+  </data>
+  <data name="pipelineExample.notFound" xml:space="preserve">
+    <value>Pipeline example not found.</value>
+  </data>
+  <data name="pipelineExample.name.alreadyExistsForPipeline" xml:space="preserve">
+    <value>A pipeline example with this name already exists for the selected pipeline.</value>
+  </data>
+  <data name="pipelineStepExample.created" xml:space="preserve">
+    <value>Pipeline step example created successfully.</value>
+  </data>
+  <data name="pipelineStepExample.updated" xml:space="preserve">
+    <value>Pipeline step example updated successfully.</value>
+  </data>
+  <data name="pipelineStepExample.deleted" xml:space="preserve">
+    <value>Pipeline step example deleted successfully.</value>
+  </data>
+  <data name="pipelineStepExample.notFound" xml:space="preserve">
+    <value>Pipeline step example not found.</value>
+  </data>
+  <data name="pipelineStepValueMapping.created" xml:space="preserve">
+    <value>Visual value mapping created successfully.</value>
+  </data>
+  <data name="pipelineStepValueMapping.updated" xml:space="preserve">
+    <value>Visual value mapping updated successfully.</value>
+  </data>
+  <data name="pipelineStepValueMapping.deleted" xml:space="preserve">
+    <value>Visual value mapping deleted successfully.</value>
+  </data>
+  <data name="pipelineStepValueMapping.notFound" xml:space="preserve">
+    <value>Visual value mapping not found.</value>
+  </data>
   <data name="request.pipeline.identifier.required" xml:space="preserve">
     <value>Pipeline identifier is required.</value>
   </data>

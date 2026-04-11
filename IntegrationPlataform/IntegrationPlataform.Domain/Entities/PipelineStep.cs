@@ -6,6 +6,9 @@ namespace IntegrationPlataform.Domain.Entities
     public class PipelineStep : Entity
     {
         private readonly List<ExecutionLog> executionLogs = [];
+        private readonly List<PipelineStepExample> examples = [];
+        private readonly List<PipelineStepValueMapping> valueMappings = [];
+        private readonly List<PipelineStepValueMapping> sourceMappings = [];
 
         public long PipelineId { get; private set; }
 
@@ -36,6 +39,12 @@ namespace IntegrationPlataform.Domain.Entities
         public bool IgnoreOnResponse { get; private set; }
 
         public IReadOnlyCollection<ExecutionLog> ExecutionLogs => executionLogs.AsReadOnly();
+
+        public IReadOnlyCollection<PipelineStepExample> Examples => examples.AsReadOnly();
+
+        public IReadOnlyCollection<PipelineStepValueMapping> ValueMappings => valueMappings.AsReadOnly();
+
+        public IReadOnlyCollection<PipelineStepValueMapping> SourceMappings => sourceMappings.AsReadOnly();
 
         private PipelineStep()
         {
