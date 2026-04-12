@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { AppLayout, Button, useAuth, useAppNavigation, useNotifications, AuthService, useI18n } from 'archon-ui';
+import { AppLayout, useAuth, useAppNavigation, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
 import logoIntegrationHub from '../assets/logo-integration-hub.svg';
-import AboutIntegrationHubModal from '../components/modals/AboutIntegrationPlatformModal';
 
 export default function IntegrationHubLayout() {
   const { t } = useI18n();
@@ -13,7 +12,6 @@ export default function IntegrationHubLayout() {
   const navigate = useNavigate();
   const { createMenuGroup } = useAppNavigation({});
   const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications({ enabled: false });
-  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   const handleLogout = async () => {
     await AuthService.logoutFromServer();
@@ -105,21 +103,7 @@ export default function IntegrationHubLayout() {
       onMarkAllAsRead={markAllAsRead}
       onClearAllNotifications={clearAll}
     >
-      <div className="mb-4 flex justify-end">
-        <Button variant="outline" size="sm" onClick={() => setIsAboutModalOpen(true)}>
-          {t('about.title')}
-        </Button>
-      </div>
-
       <Outlet />
-
-      <AboutIntegrationHubModal
-        open={isAboutModalOpen}
-        onOpenChange={(open: boolean) => setIsAboutModalOpen(open)}
-        systemName={contract?.systemApplicationName ?? 'IntegrationHub'}
-        companyName={contract?.companyName ?? '-'}
-        userName={authUser?.name ?? '-'}
-      />
     </AppLayout>
   );
 }
