@@ -1,0 +1,136 @@
+name: Deploy IntegrationPlataform
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: integration-plataform-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: pivetoo
+  API_IMAGE: integration-plataform-api
+  WEB_IMAGE: integration-plataform-web
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout integration plataform
+        uses: actions/checkout@v4
+        with:
+          path: system/integration-plataform
+
+      - name: Checkout archon framework
+        uses: actions/checkout@v4
+        with:
+          repository: pivetoo/archon-framework
+          path: frameworks/archon-framework
+
+      - name: Checkout archon ui
+        uses: actions/checkout@v4
+        with:
+          repository: pivetoo/archon-ui
+          path: frameworks/archon-ui
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build backend
+        run: dotnet build "system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Api/IntegrationPlataform.Api.csproj" -c Release
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            frameworks/archon-ui/package-lock.json
+            system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web/package-lock.json
+
+      - name: Install Archon UI dependencies
+        run: npm --prefix "frameworks/archon-ui" ci
+
+      - name: Build Archon UI
+        run: npm --prefix "frameworks/archon-ui" run build
+
+      - name: Install frontend dependencies
+        run: npm --prefix "system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web" ci
+
+      - name: Build frontend
+        run: npm --prefix "system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web" run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: system/integration-plataform
+          file: system/integration-plataform/deploy/docker/api.Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.API_IMAGE }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.API_IMAGE }}:${{ github.sha }}
+          build-contexts: |
+            archon-framework=frameworks/archon-framework
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: system/integration-plataform
+          file: system/integration-plataform/deploy/docker/web.Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE }}:${{ github.sha }}
+          build-args: |
+            VITE_API_BASE_URL=http://69.62.96.209:8081/api
+            VITE_IDENTITY_PROVIDER_WEB=http://69.62.96.209/
+            VITE_IDENTITY_PROVIDER_API=http://69.62.96.209/api
+          build-contexts: |
+            archon-ui=frameworks/archon-ui
+
+      - name: Copy deploy assets to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "system/integration-plataform/deploy/docker-compose.prod.yml"
+          target: "/var/www/integration-plataform"
+          strip_components: 3
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            mkdir -p /var/www/integration-plataform/config
+            cd /var/www/integration-plataform
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f

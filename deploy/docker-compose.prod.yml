@@ -1,0 +1,18 @@
+services:
+  api:
+    image: ghcr.io/pivetoo/integration-plataform-api:latest
+    container_name: integration-plataform-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8110:8080"
+    volumes:
+      - ./config/appsettings.Production.json:/app/appsettings.Production.json:ro
+
+  web:
+    image: ghcr.io/pivetoo/integration-plataform-web:latest
+    container_name: integration-plataform-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:8111:80"
