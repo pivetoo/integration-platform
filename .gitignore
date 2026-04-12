@@ -242,6 +242,14 @@ ClientBin/
 # Application settings
 appsettings.json
 appsettings.Development.json
+IntegrationPlataform/IntegrationPlataform.Api/appsettings.json
+IntegrationPlataform/IntegrationPlataform.Api/appsettings.Development.json
+IntegrationPlataform/IntegrationPlataform.Web/.env
+IntegrationPlataform/IntegrationPlataform.Web/.env.*
+!IntegrationPlataform/IntegrationPlataform.Web/.env.example
+config/appsettings.Production.json
+deploy/.env
+deploy/.env.*
 orleans.codegen.cs
 
 # Including strong name files can present a security risk
