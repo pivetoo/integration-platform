@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { AppLayout, useAuth, useAppNavigation, useNotifications, AuthService, useI18n } from 'archon-ui';
+import { AppLayout, Button, useAuth, useAppNavigation, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
 import logoIntegrationHub from '../assets/logo-integration-hub.svg';
@@ -13,6 +13,7 @@ export default function IntegrationHubLayout() {
   const navigate = useNavigate();
   const { createMenuGroup } = useAppNavigation({});
   const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications({ enabled: false });
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   const handleLogout = async () => {
     await AuthService.logoutFromServer();
@@ -103,18 +104,22 @@ export default function IntegrationHubLayout() {
       onNotificationRead={markAsRead}
       onMarkAllAsRead={markAllAsRead}
       onClearAllNotifications={clearAll}
-      showAboutMenuItem
-      renderAboutModal={(close) => (
-        <AboutIntegrationHubModal
-          open
-          onOpenChange={(open) => { if (!open) { close(); } }}
-          systemName={contract?.systemApplicationName ?? 'IntegrationHub'}
-          companyName={contract?.companyName ?? '-'}
-          userName={authUser?.name ?? '-'}
-        />
-      )}
     >
+      <div className="mb-4 flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => setIsAboutModalOpen(true)}>
+          {t('about.title')}
+        </Button>
+      </div>
+
       <Outlet />
+
+      <AboutIntegrationHubModal
+        open={isAboutModalOpen}
+        onOpenChange={(open: boolean) => setIsAboutModalOpen(open)}
+        systemName={contract?.systemApplicationName ?? 'IntegrationHub'}
+        companyName={contract?.companyName ?? '-'}
+        userName={authUser?.name ?? '-'}
+      />
     </AppLayout>
   );
 }
