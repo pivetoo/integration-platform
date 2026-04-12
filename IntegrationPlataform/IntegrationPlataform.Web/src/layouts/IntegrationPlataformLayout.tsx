@@ -5,7 +5,7 @@ import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
 import logoIntegrationHub from '../assets/logo-integration-hub.svg';
 
-export default function IntegrationHubLayout() {
+export default function IntegrationPlataformLayout() {
   const { t } = useI18n();
   const { user: authUser, contract, logout } = useAuth();
   const location = useLocation();

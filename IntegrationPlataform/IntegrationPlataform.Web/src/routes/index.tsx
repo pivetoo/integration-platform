@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Callback, ProtectedRoute, useAuth } from 'archon-ui';
-import IntegrationHubLayout from '../layouts/IntegrationHubLayout';
+import IntegrationPlataformLayout from '../layouts/IntegrationPlataformLayout';
 import Dashboard from '../modules/Dashboard';
 import Integrations from '../modules/Configuration/Integrations';
 import IntegrationDetail from '../modules/Configuration/Integrations/Detail';
@@ -43,7 +43,7 @@ function AppRoutes() {
               redirectTo={identityManagementUrl}
               externalRedirect={true}
             >
-              <IntegrationHubLayout />
+              <IntegrationPlataformLayout />
             </ProtectedRoute>
           }
         >
