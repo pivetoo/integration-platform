@@ -87,7 +87,7 @@ export default function IntegrationHubLayout() {
 
   return (
     <AppLayout
-      title={contract?.systemApplicationName ?? 'IntegrationHub'}
+      title={contract?.systemApplicationName ?? 'IntegrationPlataform'}
       subtitle={contract?.companyName ?? ''}
       user={{
         name: authUser?.name ?? '',
