@@ -22,7 +22,7 @@ export const integrationService = {
     return response.data ?? [];
   },
 
-  getById: async (id: number) => httpClient.get<Integration>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<Integration>(`${BASE_URL}/GetById/${id}`),
 
   create: async (data: CreateIntegrationRequest) => {
     return httpClient.post<Integration>(`${BASE_URL}/Create`, {
