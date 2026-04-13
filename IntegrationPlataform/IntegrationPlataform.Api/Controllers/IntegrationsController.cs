@@ -41,7 +41,7 @@ namespace IntegrationPlataform.Api.Controllers
         {
             Integration? integration = await integrationService.GetIntegrationById(id, cancellationToken);
 
-            return integration is null ? Http404(Localizer["integration.notFound"]) : Http200(integration);
+            return integration is null ? Http404(Localizer["integration.notFound"]) : Http200(MapIntegration(integration));
         }
 
         [RequireAccess("Permite listar apenas as integrações ativas.")]
