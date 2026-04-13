@@ -20,8 +20,21 @@ import PipelineRoutines from '../modules/Automation/PipelineRoutines';
 
 const identityManagementUrl = import.meta.env.VITE_IDENTITY_PROVIDER_WEB;
 
+const buildIdentityManagementLoginUrl = () => {
+  if (!identityManagementUrl || typeof window === 'undefined') {
+    return identityManagementUrl;
+  }
+
+  const callbackUrl = new URL('/callback', window.location.origin);
+  const loginUrl = new URL(identityManagementUrl);
+  loginUrl.searchParams.set('returnUrl', callbackUrl.toString());
+
+  return loginUrl.toString();
+};
+
 function AppRoutes() {
   const { user } = useAuth();
+  const identityManagementLoginUrl = buildIdentityManagementLoginUrl();
 
   return (
     <BrowserRouter>
@@ -40,7 +53,7 @@ function AppRoutes() {
           element={
             <ProtectedRoute
               isAuthenticated={!!user}
-              redirectTo={identityManagementUrl}
+              redirectTo={identityManagementLoginUrl}
               externalRedirect={true}
             >
               <IntegrationPlataformLayout />
