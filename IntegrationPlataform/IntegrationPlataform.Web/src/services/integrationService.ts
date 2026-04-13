@@ -35,7 +35,7 @@ export const integrationService = {
   },
 
   update: async (id: number, data: UpdateIntegrationRequest) => {
-    return httpClient.put<Integration>(`${BASE_URL}/${id}`, {
+    return httpClient.put<Integration>(`${BASE_URL}/Update/${id}`, {
       id,
       identifier: data.identifier,
       name: data.name,
@@ -46,7 +46,7 @@ export const integrationService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<Integration>(`${BASE_URL}/${id}`),
+    httpClient.delete<Integration>(`${BASE_URL}/Delete/${id}`),
 
   export: (id: number) =>
     httpClient.get<IntegrationExportModel>(`${BASE_URL}/export/${id}`),

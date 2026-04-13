@@ -16,7 +16,7 @@ export const executionService = {
     };
   },
 
-  getById: async (id: number) => httpClient.get<Execution>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<Execution>(`${BASE_URL}/GetById/${id}`),
 
   getByConnector: async (connectorId: number) => {
     return httpClient.get<Execution[]>(`${BASE_URL}/connector/${connectorId}`);

@@ -28,7 +28,7 @@ export const connectorService = {
   },
 
   getById: async (id: number) => {
-    return httpClient.get<Conector>(`${BASE_URL}/${id}`);
+    return httpClient.get<Conector>(`${BASE_URL}/GetById/${id}`);
   },
 
   create: async (data: CreateConectorRequest) => {
@@ -41,7 +41,7 @@ export const connectorService = {
   },
 
   update: async (id: number, data: UpdateConectorRequest) => {
-    return httpClient.put<Conector>(`${BASE_URL}/${id}`, {
+    return httpClient.put<Conector>(`${BASE_URL}/Update/${id}`, {
       id,
       integrationId: data.integrationId,
       name: data.name,
@@ -51,5 +51,5 @@ export const connectorService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<{ message: string }>(`${BASE_URL}/Delete/${id}`),
 };

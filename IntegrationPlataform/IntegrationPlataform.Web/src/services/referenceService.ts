@@ -16,7 +16,7 @@ export const referenceService = {
     };
   },
 
-  getById: async (id: number) => httpClient.get<Reference>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<Reference>(`${BASE_URL}/GetById/${id}`),
 
   getByConnector: async (connectorId: number) => {
     return httpClient.get<Reference[]>(`${BASE_URL}/connector/${connectorId}`);
@@ -26,8 +26,8 @@ export const referenceService = {
     httpClient.post<Reference>(`${BASE_URL}/Create`, data),
 
   update: (id: number, data: UpdateReferenceRequest) =>
-    httpClient.put<Reference>(`${BASE_URL}/${id}`, data),
+    httpClient.put<Reference>(`${BASE_URL}/Update/${id}`, data),
 
   delete: (id: number) =>
-    httpClient.delete<Reference>(`${BASE_URL}/${id}`),
+    httpClient.delete<Reference>(`${BASE_URL}/Delete/${id}`),
 };

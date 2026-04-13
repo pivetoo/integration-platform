@@ -17,7 +17,7 @@ export const databaseScriptService = {
     };
   },
 
-  getById: async (id: number) => httpClient.get<DatabaseScript>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<DatabaseScript>(`${BASE_URL}/GetById/${id}`),
 
   create: async (data: CreateDatabaseScriptRequest) => {
     return httpClient.post<DatabaseScript>(`${BASE_URL}/Create`, {
@@ -29,7 +29,7 @@ export const databaseScriptService = {
   },
 
   update: async (id: number, data: UpdateDatabaseScriptRequest) => {
-    return httpClient.put<DatabaseScript>(`${BASE_URL}/${id}`, {
+    return httpClient.put<DatabaseScript>(`${BASE_URL}/Update/${id}`, {
       id,
       databaseConnectionId: data.databaseConnectionId,
       name: data.name,
@@ -39,5 +39,5 @@ export const databaseScriptService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<DatabaseScript>(`${BASE_URL}/${id}`),
+    httpClient.delete<DatabaseScript>(`${BASE_URL}/Delete/${id}`),
 };

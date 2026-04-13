@@ -18,7 +18,7 @@ export const apiCallService = {
   },
 
   getById: async (id: number) => {
-    return httpClient.get<ApiCall>(`${BASE_URL}/${id}`);
+    return httpClient.get<ApiCall>(`${BASE_URL}/GetById/${id}`);
   },
 
   create: async (data: CreateApiCallRequest) => {
@@ -33,7 +33,7 @@ export const apiCallService = {
   },
 
   update: async (id: number, data: UpdateApiCallRequest) => {
-    return httpClient.put<ApiCall>(`${BASE_URL}/${id}`, {
+    return httpClient.put<ApiCall>(`${BASE_URL}/Update/${id}`, {
       id,
       name: data.name,
       description: data.description || undefined,
@@ -45,5 +45,5 @@ export const apiCallService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<{ message: string }>(`${BASE_URL}/Delete/${id}`),
 };

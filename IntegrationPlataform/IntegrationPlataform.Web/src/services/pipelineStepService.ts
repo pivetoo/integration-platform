@@ -9,7 +9,7 @@ export const pipelineStepService = {
     return response.data ?? [];
   },
 
-  getById: async (id: number) => httpClient.get<PipelineStep>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<PipelineStep>(`${BASE_URL}/GetById/${id}`),
 
   create: async (data: CreatePipelineStepRequest) => {
     return httpClient.post<PipelineStep>(`${BASE_URL}/Create`, {
@@ -26,7 +26,7 @@ export const pipelineStepService = {
   },
 
   update: async (id: number, data: UpdatePipelineStepRequest) => {
-    return httpClient.put<PipelineStep>(`${BASE_URL}/${id}`, {
+    return httpClient.put<PipelineStep>(`${BASE_URL}/Update/${id}`, {
       id,
       order: data.order,
       name: data.name,
@@ -41,7 +41,7 @@ export const pipelineStepService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<PipelineStep>(`${BASE_URL}/${id}`),
+    httpClient.delete<PipelineStep>(`${BASE_URL}/Delete/${id}`),
 
   reorder: (steps: Array<{ id: number; order: number }>) =>
     httpClient.post<{ message: string }>(`${BASE_URL}/Reorder`, { steps: steps.map((step) => ({ id: step.id, order: step.order })) }),

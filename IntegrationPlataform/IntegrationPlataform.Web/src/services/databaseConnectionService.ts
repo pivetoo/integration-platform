@@ -18,7 +18,7 @@ export const databaseConnectionService = {
   },
 
   getById: async (id: number) => {
-    return httpClient.get<DatabaseConnection>(`${BASE_URL}/${id}`);
+    return httpClient.get<DatabaseConnection>(`${BASE_URL}/GetById/${id}`);
   },
 
   create: async (data: CreateDatabaseConnectionRequest) => {
@@ -34,7 +34,7 @@ export const databaseConnectionService = {
   },
 
   update: async (id: number, data: UpdateDatabaseConnectionRequest) => {
-    return httpClient.put<DatabaseConnection>(`${BASE_URL}/${id}`, {
+    return httpClient.put<DatabaseConnection>(`${BASE_URL}/Update/${id}`, {
       id,
       name: data.name,
       type: data.type,
@@ -47,7 +47,7 @@ export const databaseConnectionService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<{ message: string }>(`${BASE_URL}/Delete/${id}`),
 
   test: (data: CreateDatabaseConnectionRequest) =>
     httpClient.post<{ message: string }>(`${BASE_URL}/test`, {

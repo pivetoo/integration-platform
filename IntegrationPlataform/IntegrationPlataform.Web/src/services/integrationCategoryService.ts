@@ -23,7 +23,7 @@ export const integrationCategoryService = {
   },
 
   getById: async (id: number) => {
-    return httpClient.get<IntegrationCategory>(`${BASE_URL}/${id}`);
+    return httpClient.get<IntegrationCategory>(`${BASE_URL}/GetById/${id}`);
   },
 
   create: async (data: CreateIntegrationCategoryRequest) => {
@@ -34,7 +34,7 @@ export const integrationCategoryService = {
   },
 
   update: async (id: number, data: UpdateIntegrationCategoryRequest) => {
-    return httpClient.put<IntegrationCategory>(`${BASE_URL}/${id}`, {
+    return httpClient.put<IntegrationCategory>(`${BASE_URL}/Update/${id}`, {
       id,
       name: data.name,
       description: data.description || undefined,
@@ -43,5 +43,5 @@ export const integrationCategoryService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<{ message: string }>(`${BASE_URL}/Delete/${id}`),
 };

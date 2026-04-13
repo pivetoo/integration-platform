@@ -18,7 +18,7 @@ export const javaScriptFunctionService = {
   },
 
   getById: async (id: number) => {
-    return httpClient.get<JavaScriptFunction>(`${BASE_URL}/${id}`);
+    return httpClient.get<JavaScriptFunction>(`${BASE_URL}/GetById/${id}`);
   },
 
   create: async (data: CreateJavaScriptFunctionRequest) => {
@@ -30,7 +30,7 @@ export const javaScriptFunctionService = {
   },
 
   update: async (id: number, data: UpdateJavaScriptFunctionRequest) => {
-    return httpClient.put<JavaScriptFunction>(`${BASE_URL}/${id}`, {
+    return httpClient.put<JavaScriptFunction>(`${BASE_URL}/Update/${id}`, {
       id,
       name: data.name,
       description: data.description || undefined,
@@ -39,5 +39,5 @@ export const javaScriptFunctionService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<{ message: string }>(`${BASE_URL}/Delete/${id}`),
 };

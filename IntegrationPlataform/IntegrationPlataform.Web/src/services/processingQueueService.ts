@@ -16,7 +16,7 @@ export const processingQueueService = {
     };
   },
 
-  getById: async (id: number) => httpClient.get<ProcessingQueueItem>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<ProcessingQueueItem>(`${BASE_URL}/GetById/${id}`),
 
   getPending: async () => httpClient.get<ProcessingQueueItem[]>(`${BASE_URL}/pending`),
 
@@ -29,5 +29,5 @@ export const processingQueueService = {
     }),
 
   delete: (id: number) =>
-    httpClient.delete<ProcessingQueueItem>(`${BASE_URL}/${id}`),
+    httpClient.delete<ProcessingQueueItem>(`${BASE_URL}/Delete/${id}`),
 };

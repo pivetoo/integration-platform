@@ -8,7 +8,7 @@ export const integrationAttributeService = {
     httpClient.get<IntegracaoAtributo[]>(`${BASE_URL}/integration/${integrationId}`),
 
   getById: (id: number) =>
-    httpClient.get<IntegracaoAtributo>(`${BASE_URL}/${id}`),
+    httpClient.get<IntegracaoAtributo>(`${BASE_URL}/GetById/${id}`),
 
   create: (data: CreateIntegracaoAtributoRequest) =>
     httpClient.post<IntegracaoAtributo>(`${BASE_URL}/Create`, {
@@ -26,7 +26,7 @@ export const integrationAttributeService = {
     }),
 
   update: (id: number, data: UpdateIntegracaoAtributoRequest) =>
-    httpClient.put<IntegracaoAtributo>(`${BASE_URL}/${id}`, {
+    httpClient.put<IntegracaoAtributo>(`${BASE_URL}/Update/${id}`, {
       id,
       field: data.field,
       label: data.label,
@@ -41,5 +41,5 @@ export const integrationAttributeService = {
     }),
 
   delete: (id: number) =>
-    httpClient.delete<IntegracaoAtributo>(`${BASE_URL}/${id}`),
+    httpClient.delete<IntegracaoAtributo>(`${BASE_URL}/Delete/${id}`),
 };

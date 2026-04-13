@@ -27,7 +27,7 @@ export const pipelineService = {
     return response.data ?? [];
   },
 
-  getById: async (id: number) => httpClient.get<Pipeline>(`${BASE_URL}/${id}`),
+  getById: async (id: number) => httpClient.get<Pipeline>(`${BASE_URL}/GetById/${id}`),
 
   create: async (data: CreatePipelineRequest) => {
     return httpClient.post<Pipeline>(`${BASE_URL}/Create`, {
@@ -39,7 +39,7 @@ export const pipelineService = {
   },
 
   update: async (id: number, data: UpdatePipelineRequest) => {
-    return httpClient.put<Pipeline>(`${BASE_URL}/${id}`, {
+    return httpClient.put<Pipeline>(`${BASE_URL}/Update/${id}`, {
       id,
       integrationId: data.integrationId,
       identifier: data.identifier,
@@ -50,5 +50,5 @@ export const pipelineService = {
   },
 
   delete: (id: number) =>
-    httpClient.delete<Pipeline>(`${BASE_URL}/${id}`),
+    httpClient.delete<Pipeline>(`${BASE_URL}/Delete/${id}`),
 };

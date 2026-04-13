@@ -15,12 +15,12 @@ export const connectorAttributeValueService = {
     }),
 
   update: (id: number, data: UpdateConnectorAttributeValueRequest) =>
-    httpClient.put<{ message: string }>(`${BASE_URL}/${id}`, {
+    httpClient.put<{ message: string }>(`${BASE_URL}/Update/${id}`, {
       id,
       integrationAttributeId: data.integrationAttributeId,
       value: data.value,
     }),
 
   delete: (id: number) =>
-    httpClient.delete<{ message: string }>(`${BASE_URL}/${id}`),
+    httpClient.delete<{ message: string }>(`${BASE_URL}/Delete/${id}`),
 };

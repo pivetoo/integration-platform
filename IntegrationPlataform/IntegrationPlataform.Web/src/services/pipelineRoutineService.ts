@@ -20,8 +20,8 @@ export const pipelineRoutineService = {
     httpClient.post<PipelineRoutine>(`${BASE_URL}/Create`, data),
 
   update: (id: number, data: UpdatePipelineRoutineRequest) =>
-    httpClient.put<PipelineRoutine>(`${BASE_URL}/${id}`, data),
+    httpClient.put<PipelineRoutine>(`${BASE_URL}/Update/${id}`, data),
 
   delete: (id: number) =>
-    httpClient.delete<PipelineRoutine>(`${BASE_URL}/${id}`),
+    httpClient.delete<PipelineRoutine>(`${BASE_URL}/Delete/${id}`),
 };
