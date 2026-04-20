@@ -7,15 +7,18 @@ import logoIntegrationHub from '../assets/logo-integration-hub.svg';
 
 export default function IntegrationPlataformLayout() {
   const { t } = useI18n();
-  const { user: authUser, contract, logout } = useAuth();
+  const { user: authUser, contract } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { createMenuGroup } = useAppNavigation({});
   const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications({ enabled: false });
 
   const handleLogout = async () => {
-    await AuthService.logoutFromServer();
-    logout();
+    try {
+      await AuthService.logoutFromServer();
+    } finally {
+      window.location.href = new URL('logout', import.meta.env.VITE_IDENTITY_PROVIDER_WEB).toString();
+    }
   };
 
   const menuGroups = [
