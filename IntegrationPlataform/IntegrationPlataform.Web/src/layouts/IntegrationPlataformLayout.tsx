@@ -90,7 +90,7 @@ export default function IntegrationPlataformLayout() {
 
   return (
     <AppLayout
-      title={contract?.systemApplicationName ?? 'IntegrationPlataform'}
+      title={contract?.systemApplicationName ?? 'IntegrationPlatform'}
       subtitle={contract?.companyName ?? ''}
       user={{
         name: authUser?.name ?? '',
