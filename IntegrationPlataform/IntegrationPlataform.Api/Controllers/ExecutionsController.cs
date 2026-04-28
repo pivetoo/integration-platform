@@ -1,13 +1,11 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Api.Contracts.Execution;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
 using IntegrationPlataform.Domain.ValueObjects;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -87,8 +85,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(executions.Select(MapExecution).ToList());
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [PostEndpoint("execute")]
         public async Task<IActionResult> Execute([FromBody] ExecutePipelineRequest request, CancellationToken cancellationToken)
         {

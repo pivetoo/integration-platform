@@ -1,12 +1,10 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.ConnectorAttributeValues;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -44,8 +42,7 @@ namespace IntegrationPlataform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [GetEndpoint("connector/{connectorId:long}")]
         public async Task<IActionResult> GetByConnector(long connectorId, CancellationToken cancellationToken)
         {
@@ -58,8 +55,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(values);
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {
@@ -79,8 +75,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(value, Localizer["connector.attributeValue.created"]);
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {

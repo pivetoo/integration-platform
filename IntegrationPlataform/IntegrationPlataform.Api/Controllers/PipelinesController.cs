@@ -1,13 +1,11 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Api.Contracts.Pipelines;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Pipelines;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -46,8 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             return pipeline is null ? Http404(Localizer["pipeline.notFound"]) : Http200(MapPipeline(pipeline));
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [GetEndpoint("integration/{integrationId:long}")]
         public async Task<IActionResult> GetByIntegration(long integrationId, CancellationToken cancellationToken)
         {

@@ -1,13 +1,11 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
-using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Api.Contracts.Connectors;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Connectors;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -37,8 +35,7 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -47,8 +44,7 @@ namespace IntegrationPlataform.Api.Controllers
             return connector is null ? Http404(Localizer["connector.notFound"]) : Http200(MapConnector(connector));
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [GetEndpoint("integration/{integrationId:long}")]
         public async Task<IActionResult> GetByIntegration(long integrationId, CancellationToken cancellationToken)
         {
@@ -71,8 +67,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(connectors.Select(MapConnector).ToList());
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateConnectorRequest request, CancellationToken cancellationToken)
         {
@@ -86,8 +81,7 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapConnector(connector), Localizer["connector.created"]);
         }
 
-        [RequireIntegrationSecret]
-        [AllowAnonymous]
+        [RequireAccess]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorRequest request, CancellationToken cancellationToken)
         {
