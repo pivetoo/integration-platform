@@ -44,7 +44,8 @@ namespace IntegrationPlataform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess("Permite listar os valores de atributos configurados para um conector específico.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [GetEndpoint("connector/{connectorId:long}")]
         public async Task<IActionResult> GetByConnector(long connectorId, CancellationToken cancellationToken)
         {
