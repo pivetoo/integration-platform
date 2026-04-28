@@ -78,7 +78,8 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(value, Localizer["connector.attributeValue.created"]);
         }
 
-        [RequireAccess("Permite atualizar um valor de atributo configurado em um conector.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {

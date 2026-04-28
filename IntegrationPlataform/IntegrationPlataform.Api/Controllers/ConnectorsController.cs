@@ -37,7 +37,8 @@ namespace IntegrationPlataform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de um conector específico.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -85,7 +86,8 @@ namespace IntegrationPlataform.Api.Controllers
             return Http201(MapConnector(connector), Localizer["connector.created"]);
         }
 
-        [RequireAccess("Permite atualizar a configuração de um conector cadastrado.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateConnectorRequest request, CancellationToken cancellationToken)
         {
