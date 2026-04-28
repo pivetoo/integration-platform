@@ -1,10 +1,12 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Api.Contracts.ProcessingQueues;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -60,7 +62,8 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(items.Select(MapProcessingQueue).ToList());
         }
 
-        [RequireAccess("Permite enfileirar a execução de um pipeline para processamento posterior.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [PostEndpoint("enqueue")]
         public async Task<IActionResult> Enqueue([FromBody] EnqueuePipelineRequest request, CancellationToken cancellationToken)
         {

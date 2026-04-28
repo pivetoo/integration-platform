@@ -40,6 +40,14 @@ namespace IntegrationPlataform.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<Integration>> GetIntegrationsByCategory(long categoryId, CancellationToken cancellationToken = default)
+        {
+            return await QueryWithDetails()
+                .Where(item => item.IntegrationCategoryId == categoryId && item.IsActive)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Integration> CreateIntegration(CreateIntegrationRequest request, CancellationToken cancellationToken = default)
         {
             await EnsureUniqueIdentifier(request.Identifier, null, cancellationToken);

@@ -13,6 +13,8 @@ namespace IntegrationPlataform.Application.Services
 
         Task<List<Integration>> GetActiveIntegrations(CancellationToken cancellationToken = default);
 
+        Task<List<Integration>> GetIntegrationsByCategory(long categoryId, CancellationToken cancellationToken = default);
+
         Task<Integration> CreateIntegration(CreateIntegrationRequest request, CancellationToken cancellationToken = default);
 
         Task<Integration> UpdateIntegration(long id, UpdateIntegrationRequest request, CancellationToken cancellationToken = default);

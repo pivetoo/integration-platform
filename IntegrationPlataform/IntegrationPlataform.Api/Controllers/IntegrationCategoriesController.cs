@@ -1,10 +1,12 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.IntegrationCategories;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -70,7 +72,8 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(category, Localizer["integration.category.updated"]);
         }
 
-        [RequireAccess("Permite listar apenas as categorias de integração ativas.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {

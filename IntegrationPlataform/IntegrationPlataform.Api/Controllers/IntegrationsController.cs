@@ -1,11 +1,13 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Api.Contracts.Integrations;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.Integrations;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -44,7 +46,8 @@ namespace IntegrationPlataform.Api.Controllers
             return integration is null ? Http404(Localizer["integration.notFound"]) : Http200(MapIntegration(integration));
         }
 
-        [RequireAccess("Permite listar apenas as integrações ativas.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
@@ -52,7 +55,17 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(integrations.Select(MapIntegration).ToList());
         }
 
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
+        [GetEndpoint("category/{categoryId:long}")]
+        public async Task<IActionResult> GetByCategory(long categoryId, CancellationToken cancellationToken)
+        {
+            List<Integration> integrations = await integrationService.GetIntegrationsByCategory(categoryId, cancellationToken);
+            return Http200(integrations.Select(MapIntegration).ToList());
+        }
+
         [RequireAccess("Permite cadastrar uma nova integração na plataforma.")]
+
         [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationRequest request, CancellationToken cancellationToken)
         {

@@ -1,11 +1,13 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Api.Contracts.IntegrationAttributes;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.IntegrationAttributes;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -44,7 +46,8 @@ namespace IntegrationPlataform.Api.Controllers
             return attribute is null ? Http404(Localizer["integration.attribute.notFound"]) : Http200(MapIntegrationAttribute(attribute));
         }
 
-        [RequireAccess("Permite listar os atributos configuráveis de uma integração específica.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [GetEndpoint("integration/{integrationId:long}")]
         public async Task<IActionResult> GetByIntegration(long integrationId, CancellationToken cancellationToken)
         {

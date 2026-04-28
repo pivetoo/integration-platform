@@ -1,10 +1,12 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlataform.Api.Attributes;
 using IntegrationPlataform.Application.Localization;
 using IntegrationPlataform.Application.Requests.ConnectorAttributeValues;
 using IntegrationPlataform.Application.Services;
 using IntegrationPlataform.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -55,7 +57,8 @@ namespace IntegrationPlataform.Api.Controllers
             return Http200(values);
         }
 
-        [RequireAccess("Permite cadastrar um novo valor de atributo para um conector.")]
+        [RequireIntegrationSecret]
+        [AllowAnonymous]
         [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateConnectorAttributeValueRequest request, CancellationToken cancellationToken)
         {
