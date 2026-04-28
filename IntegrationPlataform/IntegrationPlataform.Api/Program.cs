@@ -63,6 +63,5 @@ app.Run();
 
 static bool HasIdentityManagementConfiguration(IConfiguration configuration)
 {
-    return !string.IsNullOrWhiteSpace(configuration["IdentityManagement:Authority"]) &&
-           !string.IsNullOrWhiteSpace(configuration["IdentityManagement:IntegrationSecret"]);
+    return !string.IsNullOrWhiteSpace(configuration["IdentityManagement:Authority"]);
 }
