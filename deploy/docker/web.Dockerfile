@@ -6,9 +6,9 @@ COPY --from=archon-ui . /src/frameworks/archon-ui
 
 WORKDIR /src/system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web
 
-ARG VITE_API_BASE_URL=http://69.62.96.209:8081/api
-ARG VITE_IDENTITY_PROVIDER_WEB=http://69.62.96.209/
-ARG VITE_IDENTITY_PROVIDER_API=http://69.62.96.209/api
+ARG VITE_API_BASE_URL=https://integrationplatform.mainstay.com.br/api
+ARG VITE_IDENTITY_PROVIDER_WEB=https://auth.mainstay.com.br
+ARG VITE_IDENTITY_PROVIDER_API=https://auth.mainstay.com.br/api
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ENV VITE_IDENTITY_PROVIDER_WEB=${VITE_IDENTITY_PROVIDER_WEB}
 ENV VITE_IDENTITY_PROVIDER_API=${VITE_IDENTITY_PROVIDER_API}
