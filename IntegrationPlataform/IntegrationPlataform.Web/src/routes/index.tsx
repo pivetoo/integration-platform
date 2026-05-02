@@ -18,7 +18,7 @@ import ProcessingQueue from '../modules/Operations/ProcessingQueue';
 import References from '../modules/Operations/References';
 import PipelineRoutines from '../modules/Automation/PipelineRoutines';
 
-const identityManagementUrl = import.meta.env.VITE_IDENTITY_PROVIDER_WEB;
+const identityManagementUrl = import.meta.env.VITE_IDENTITY_MANAGEMENT_URL;
 const oidcClientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'integration-plataform-web';
 
 function AppRoutes() {
