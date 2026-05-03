@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Archon/">
+    <Project Path="../../../frameworks/archon-framework/Archon/Archon.Api/Archon.Api.csproj" />
+    <Project Path="../../../frameworks/archon-framework/Archon/Archon.Application/Archon.Application.csproj" />
+    <Project Path="../../../frameworks/archon-framework/Archon/Archon.Core/Archon.Core.csproj" />
+    <Project Path="../../../frameworks/archon-framework/Archon/Archon.Infrastructure/Archon.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="IntegrationPlatform.Api/IntegrationPlatform.Api.csproj" />
+  <Project Path="IntegrationPlatform.Application/IntegrationPlatform.Application.csproj" />
+  <Project Path="IntegrationPlatform.Domain/IntegrationPlatform.Domain.csproj" />
+  <Project Path="IntegrationPlatform.Infrastructure/IntegrationPlatform.Infrastructure.csproj" />
+  <Project Path="IntegrationPlatform.Testing/IntegrationPlatform.Testing.csproj" />
+</Solution>

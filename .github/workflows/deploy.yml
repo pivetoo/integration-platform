@@ -1,4 +1,4 @@
-name: Deploy IntegrationPlataform
+name: Deploy IntegrationPlatform
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 concurrency:
-  group: integration-plataform-production
+  group: integration-platform-production
   cancel-in-progress: true
 
 permissions:
@@ -16,18 +16,18 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_OWNER: pivetoo
-  API_IMAGE: integration-plataform-api
-  WEB_IMAGE: integration-plataform-web
+  API_IMAGE: integration-platform-api
+  WEB_IMAGE: integration-platform-web
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout integration plataform
+      - name: Checkout integration platform
         uses: actions/checkout@v4
         with:
-          path: system/integration-plataform
+          path: system/integration-platform
 
       - name: Checkout archon framework
         uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Build backend
-        run: dotnet build "system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Api/IntegrationPlataform.Api.csproj" -c Release
+        run: dotnet build "system/integration-platform/IntegrationPlatform/IntegrationPlatform.Api/IntegrationPlatform.Api.csproj" -c Release
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -56,7 +56,7 @@ jobs:
           cache: npm
           cache-dependency-path: |
             frameworks/archon-ui/package-lock.json
-            system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web/package-lock.json
+            system/integration-platform/IntegrationPlatform/IntegrationPlatform.Web/package-lock.json
 
       - name: Install Archon UI dependencies
         run: npm --prefix "frameworks/archon-ui" ci
@@ -65,10 +65,10 @@ jobs:
         run: npm --prefix "frameworks/archon-ui" run build
 
       - name: Install frontend dependencies
-        run: npm --prefix "system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web" ci
+        run: npm --prefix "system/integration-platform/IntegrationPlatform/IntegrationPlatform.Web" ci
 
       - name: Build frontend
-        run: npm --prefix "system/integration-plataform/IntegrationPlataform/IntegrationPlataform.Web" run build
+        run: npm --prefix "system/integration-platform/IntegrationPlatform/IntegrationPlatform.Web" run build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -83,8 +83,8 @@ jobs:
       - name: Build and push API image
         uses: docker/build-push-action@v6
         with:
-          context: system/integration-plataform
-          file: system/integration-plataform/deploy/docker/api.Dockerfile
+          context: system/integration-platform
+          file: system/integration-platform/deploy/docker/api.Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.API_IMAGE }}:latest
@@ -95,16 +95,16 @@ jobs:
       - name: Build and push Web image
         uses: docker/build-push-action@v6
         with:
-          context: system/integration-plataform
-          file: system/integration-plataform/deploy/docker/web.Dockerfile
+          context: system/integration-platform
+          file: system/integration-platform/deploy/docker/web.Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE }}:${{ github.sha }}
           build-args: |
             VITE_API_BASE_URL=https://integrationplatform.mainstay.com.br/api
-            VITE_IDENTITY_PROVIDER_WEB=https://auth.mainstay.com.br
-            VITE_IDENTITY_PROVIDER_API=https://auth.mainstay.com.br/api
+            VITE_IDENTITY_MANAGEMENT_URL=https://auth.mainstay.com.br
+            VITE_OIDC_CLIENT_ID=integration-platform-prod
           build-contexts: |
             archon-ui=frameworks/archon-ui
 
@@ -115,8 +115,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          source: "system/integration-plataform/deploy/docker-compose.prod.yml"
-          target: "/var/www/integration-plataform"
+          source: "system/integration-platform/deploy/docker-compose.prod.yml"
+          target: "/var/www/integration-platform"
           strip_components: 3
 
       - name: Deploy on VPS
@@ -128,8 +128,8 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             set -e
-            mkdir -p /var/www/integration-plataform/config
-            cd /var/www/integration-plataform
+            mkdir -p /var/www/integration-platform/config
+            cd /var/www/integration-platform
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans

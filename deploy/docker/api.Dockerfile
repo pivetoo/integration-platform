@@ -1,12 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY . /src/system/integration-plataform
+COPY . /src/system/integration-platform
 COPY --from=archon-framework . /src/frameworks/archon-framework
 
-WORKDIR /src/system/integration-plataform/IntegrationPlataform
-RUN dotnet restore "IntegrationPlataform.Api/IntegrationPlataform.Api.csproj"
-RUN dotnet publish "IntegrationPlataform.Api/IntegrationPlataform.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+WORKDIR /src/system/integration-platform/IntegrationPlatform
+RUN dotnet restore "IntegrationPlatform.Api/IntegrationPlatform.Api.csproj"
+RUN dotnet publish "IntegrationPlatform.Api/IntegrationPlatform.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
@@ -18,4 +18,4 @@ COPY --from=build /app/publish .
 
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "IntegrationPlataform.Api.dll"]
+ENTRYPOINT ["dotnet", "IntegrationPlatform.Api.dll"]
