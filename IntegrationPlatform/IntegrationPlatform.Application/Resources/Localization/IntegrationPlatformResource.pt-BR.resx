@@ -48,6 +48,18 @@
   <data name="execution.unknownError" xml:space="preserve">
     <value>Erro de execução desconhecido.</value>
   </data>
+  <data name="webhook.token.required" xml:space="preserve">
+    <value>Token do webhook é obrigatório.</value>
+  </data>
+  <data name="webhook.token.notFound" xml:space="preserve">
+    <value>Nenhum conector ativo encontrado para o token de webhook informado.</value>
+  </data>
+  <data name="webhook.connector.inactive" xml:space="preserve">
+    <value>O conector vinculado ao webhook está inativo.</value>
+  </data>
+  <data name="webhook.pipeline.notFound" xml:space="preserve">
+    <value>Pipeline '{0}' não encontrada para esta integração. Cadastre uma pipeline com identificador '{0}' antes de receber webhooks.</value>
+  </data>
   <data name="execution.debug.initialStep.notFound" xml:space="preserve">
     <value>Etapa inicial do pipeline não encontrada.</value>
   </data>

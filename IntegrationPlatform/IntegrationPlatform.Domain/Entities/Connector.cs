@@ -20,6 +20,8 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsActive { get; private set; } = true;
 
+        public string? WebhookToken { get; private set; }
+
         public IReadOnlyCollection<ConnectorAttributeValue> AttributeValues => attributeValues.AsReadOnly();
 
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
@@ -46,6 +48,7 @@ namespace IntegrationPlatform.Domain.Entities
             IntegrationId = integrationId;
             Name = name.Trim();
             SystemApplicationId = systemApplicationId?.Trim();
+            WebhookToken = GenerateWebhookToken();
         }
 
         public void Update(long integrationId, string name, string? systemApplicationId, bool isActive)
@@ -61,6 +64,24 @@ namespace IntegrationPlatform.Domain.Entities
             Name = name.Trim();
             SystemApplicationId = systemApplicationId?.Trim();
             IsActive = isActive;
+        }
+
+        public void EnsureWebhookToken()
+        {
+            if (string.IsNullOrWhiteSpace(WebhookToken))
+            {
+                WebhookToken = GenerateWebhookToken();
+            }
+        }
+
+        public void RegenerateWebhookToken()
+        {
+            WebhookToken = GenerateWebhookToken();
+        }
+
+        private static string GenerateWebhookToken()
+        {
+            return Guid.NewGuid().ToString("N");
         }
     }
 }

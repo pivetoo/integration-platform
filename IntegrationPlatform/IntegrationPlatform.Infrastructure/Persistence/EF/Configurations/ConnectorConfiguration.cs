@@ -17,6 +17,13 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
+            builder.Property(entity => entity.WebhookToken)
+                .HasMaxLength(64);
+
+            builder.HasIndex(entity => entity.WebhookToken)
+                .IsUnique()
+                .HasDatabaseName("ix_connector_webhooktoken");
+
             builder.HasOne(entity => entity.Integration)
                 .WithMany(entity => entity.Connectors)
                 .HasForeignKey(entity => entity.IntegrationId);

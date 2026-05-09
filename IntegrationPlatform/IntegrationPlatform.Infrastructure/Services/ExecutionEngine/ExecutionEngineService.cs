@@ -326,6 +326,63 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return await ExecutePipeline(connector.Id, pipeline.Id, inputDataJson, type, null, null, cancellationToken);
         }
 
+        public async Task<Execution> ExecuteWebhook(string webhookToken, string rawBody, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(webhookToken);
+
+            Connector? connector = await dbContext.Set<Connector>()
+                .AsNoTracking()
+                .Include(item => item.Integration)
+                .FirstOrDefaultAsync(item => item.WebhookToken == webhookToken, cancellationToken);
+
+            if (connector is null)
+            {
+                throw new KeyNotFoundException(Localizer["webhook.token.notFound"]);
+            }
+
+            if (!connector.IsActive)
+            {
+                throw new InvalidOperationException(Localizer["webhook.connector.inactive"]);
+            }
+
+            string pipelineIdentifier = $"{connector.Integration.Identifier}-webhook";
+
+            Pipeline? pipeline = await dbContext.Set<Pipeline>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.IntegrationId == connector.IntegrationId && item.Identifier == pipelineIdentifier && item.IsActive, cancellationToken);
+
+            if (pipeline is null)
+            {
+                throw new KeyNotFoundException(Localizer["webhook.pipeline.notFound", pipelineIdentifier]);
+            }
+
+            string normalizedBody = WrapPayloadAsObject(rawBody);
+
+            return await ExecutePipeline(connector.Id, pipeline.Id, normalizedBody, ExecutionType.Webhook, null, null, cancellationToken);
+        }
+
+        private static string WrapPayloadAsObject(string rawBody)
+        {
+            if (string.IsNullOrWhiteSpace(rawBody))
+            {
+                return "{}";
+            }
+
+            try
+            {
+                using JsonDocument document = JsonDocument.Parse(rawBody);
+                if (document.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    return rawBody;
+                }
+                return JsonSerializer.Serialize(new { raw = JsonSerializer.Deserialize<object>(rawBody) });
+            }
+            catch
+            {
+                return JsonSerializer.Serialize(new { raw = rawBody });
+            }
+        }
+
         private async Task<Connector> GetConnector(long connectorId, CancellationToken cancellationToken)
         {
             Connector? connector = await dbContext.Set<Connector>()

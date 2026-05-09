@@ -81,6 +81,7 @@ namespace IntegrationPlatform.Infrastructure.Services
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);
 
             connector.Update(request.IntegrationId, request.Name, request.SystemApplicationId, request.IsActive);
+            connector.EnsureWebhookToken();
 
             Connector? result = await Update(connector, cancellationToken);
             if (result is null)

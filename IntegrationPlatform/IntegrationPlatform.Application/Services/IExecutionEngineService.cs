@@ -15,5 +15,7 @@ namespace IntegrationPlatform.Application.Services
         Task<Execution> FinishDebugPipeline(string debugSessionId, CancellationToken cancellationToken = default);
 
         Task<Execution> ExecutePipelineByIdentifier(string integrationIdentifier, string pipelineIdentifier, Dictionary<string, object> inputData, ExecutionType type, CancellationToken cancellationToken = default);
+
+        Task<Execution> ExecuteWebhook(string webhookToken, string rawBody, CancellationToken cancellationToken = default);
     }
 }
