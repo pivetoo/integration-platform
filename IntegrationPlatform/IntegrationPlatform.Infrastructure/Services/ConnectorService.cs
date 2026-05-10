@@ -151,6 +151,17 @@ namespace IntegrationPlatform.Infrastructure.Services
                 return null;
             }
 
+            List<ConnectorAttributeValue> attributeValues = await DbContext.Set<ConnectorAttributeValue>()
+                .AsTracking()
+                .Where(item => item.ConnectorId == id)
+                .ToListAsync(cancellationToken);
+
+            if (attributeValues.Count > 0)
+            {
+                DbContext.Set<ConnectorAttributeValue>().RemoveRange(attributeValues);
+                await DbContext.SaveChangesAsync(cancellationToken);
+            }
+
             return await Delete([connector], cancellationToken) ? connector : null;
         }
 
