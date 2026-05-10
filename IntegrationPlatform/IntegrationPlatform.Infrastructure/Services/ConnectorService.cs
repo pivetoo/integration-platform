@@ -76,13 +76,24 @@ namespace IntegrationPlatform.Infrastructure.Services
                 return;
             }
 
+            bool added = false;
             foreach (IntegrationAttribute attribute in hiddenAttributes)
             {
-                ConnectorAttributeValue value = new(connectorId, attribute.Id, attribute.DefaultValue ?? string.Empty);
+                if (string.IsNullOrWhiteSpace(attribute.DefaultValue))
+                {
+                    // sem defaultvalue cadastrado, admin do IntegrationPlatform precisa preencher depois
+                    continue;
+                }
+
+                ConnectorAttributeValue value = new(connectorId, attribute.Id, attribute.DefaultValue);
                 DbContext.Set<ConnectorAttributeValue>().Add(value);
+                added = true;
             }
 
-            await DbContext.SaveChangesAsync(cancellationToken);
+            if (added)
+            {
+                await DbContext.SaveChangesAsync(cancellationToken);
+            }
         }
 
         public async Task<Connector> UpdateConnector(long id, UpdateConnectorRequest request, CancellationToken cancellationToken = default)
