@@ -30,6 +30,8 @@ namespace IntegrationPlatform.Api.Contracts.IntegrationAttributes
 
         public bool IsSensitive { get; init; }
 
+        public bool IsHidden { get; init; }
+
         public DateTimeOffset CreatedAt { get; init; }
 
         public DateTimeOffset? UpdatedAt { get; init; }
@@ -48,6 +50,7 @@ namespace IntegrationPlatform.Api.Contracts.IntegrationAttributes
             Order = item.Order,
             Group = item.Group,
             IsSensitive = item.IsSensitive,
+            IsHidden = item.IsHidden,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt
         };

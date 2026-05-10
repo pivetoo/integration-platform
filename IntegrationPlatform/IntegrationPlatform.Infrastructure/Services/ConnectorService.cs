@@ -59,7 +59,30 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
+            await PopulateHiddenAttributeValues(connector.Id, request.IntegrationId, cancellationToken);
+
             return await GetConnectorById(connector.Id, cancellationToken) ?? connector;
+        }
+
+        private async Task PopulateHiddenAttributeValues(long connectorId, long integrationId, CancellationToken cancellationToken)
+        {
+            List<IntegrationAttribute> hiddenAttributes = await DbContext.Set<IntegrationAttribute>()
+                .AsNoTracking()
+                .Where(item => item.IntegrationId == integrationId && item.IsHidden)
+                .ToListAsync(cancellationToken);
+
+            if (hiddenAttributes.Count == 0)
+            {
+                return;
+            }
+
+            foreach (IntegrationAttribute attribute in hiddenAttributes)
+            {
+                ConnectorAttributeValue value = new(connectorId, attribute.Id, attribute.DefaultValue ?? string.Empty);
+                DbContext.Set<ConnectorAttributeValue>().Add(value);
+            }
+
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<Connector> UpdateConnector(long id, UpdateConnectorRequest request, CancellationToken cancellationToken = default)

@@ -46,14 +46,14 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess]
         [GetEndpoint("integration/{integrationId:long}")]
-        public async Task<IActionResult> GetByIntegration(long integrationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetByIntegration(long integrationId, [FromQuery] bool includeHidden, CancellationToken cancellationToken)
         {
             if (integrationId <= 0)
             {
                 return Http400(Localizer["request.integration.id.required"]);
             }
 
-            List<IntegrationAttribute> attributes = await integrationAttributeService.GetIntegrationAttributesByIntegration(integrationId, cancellationToken);
+            List<IntegrationAttribute> attributes = await integrationAttributeService.GetIntegrationAttributesByIntegration(integrationId, includeHidden, cancellationToken);
 
             return Http200(attributes.Select(MapIntegrationAttribute).ToList());
         }
@@ -79,7 +79,8 @@ namespace IntegrationPlatform.Api.Controllers
                 request.Placeholder,
                 request.DefaultValue,
                 request.Group,
-                request.IsSensitive);
+                request.IsSensitive,
+                request.IsHidden);
 
             bool success = await integrationAttributeService.Insert(cancellationToken, attribute);
             if (!success)
@@ -113,6 +114,7 @@ namespace IntegrationPlatform.Api.Controllers
                 request.DefaultValue,
                 request.Group,
                 request.IsSensitive,
+                request.IsHidden,
                 cancellationToken);
 
             return Http200(MapIntegrationAttribute(updatedAttribute), Localizer["integration.attribute.updated"]);

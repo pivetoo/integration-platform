@@ -32,5 +32,7 @@ namespace IntegrationPlatform.Application.Requests.IntegrationAttributes
         public string? Group { get; set; }
 
         public bool IsSensitive { get; set; }
+
+        public bool IsHidden { get; set; }
     }
 }

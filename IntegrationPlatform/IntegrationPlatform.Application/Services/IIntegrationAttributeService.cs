@@ -11,7 +11,7 @@ namespace IntegrationPlatform.Application.Services
 
         Task<IntegrationAttribute?> GetIntegrationAttributeById(long id, CancellationToken cancellationToken = default);
 
-        Task<List<IntegrationAttribute>> GetIntegrationAttributesByIntegration(long integrationId, CancellationToken cancellationToken = default);
+        Task<List<IntegrationAttribute>> GetIntegrationAttributesByIntegration(long integrationId, bool includeHidden = false, CancellationToken cancellationToken = default);
 
         Task<IntegrationAttribute> UpdateIntegrationAttribute(
             long id,
@@ -26,6 +26,7 @@ namespace IntegrationPlatform.Application.Services
             string? defaultValue,
             string? group,
             bool isSensitive,
+            bool isHidden,
             CancellationToken cancellationToken = default);
     }
 }

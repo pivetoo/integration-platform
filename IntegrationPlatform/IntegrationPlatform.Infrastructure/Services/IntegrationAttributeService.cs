@@ -34,11 +34,11 @@ namespace IntegrationPlatform.Infrastructure.Services
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
         }
 
-        public async Task<List<IntegrationAttribute>> GetIntegrationAttributesByIntegration(long integrationId, CancellationToken cancellationToken = default)
+        public async Task<List<IntegrationAttribute>> GetIntegrationAttributesByIntegration(long integrationId, bool includeHidden = false, CancellationToken cancellationToken = default)
         {
             return await DbContext.Set<IntegrationAttribute>()
                 .AsNoTracking()
-                .Where(item => item.IntegrationId == integrationId)
+                .Where(item => item.IntegrationId == integrationId && (includeHidden || !item.IsHidden))
                 .OrderBy(item => item.Order)
                 .ToListAsync(cancellationToken);
         }
@@ -56,6 +56,7 @@ namespace IntegrationPlatform.Infrastructure.Services
             string? defaultValue,
             string? group,
             bool isSensitive,
+            bool isHidden,
             CancellationToken cancellationToken = default)
         {
             if (id != requestId)
@@ -82,7 +83,8 @@ namespace IntegrationPlatform.Infrastructure.Services
                 placeholder,
                 defaultValue,
                 group,
-                isSensitive);
+                isSensitive,
+                isHidden);
 
             IntegrationAttribute? result = await Update(attribute, cancellationToken);
             if (result is null)

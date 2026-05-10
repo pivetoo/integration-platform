@@ -31,13 +31,15 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsSensitive { get; private set; }
 
+        public bool IsHidden { get; private set; }
+
         public IReadOnlyCollection<ConnectorAttributeValue> ConnectorAttributeValues => connectorAttributeValues.AsReadOnly();
 
         private IntegrationAttribute()
         {
         }
 
-        public IntegrationAttribute(long integrationId, string field, string label, FieldType type, bool isRequired, int order, string? description = null, string? placeholder = null, string? defaultValue = null, string? group = null, bool isSensitive = false)
+        public IntegrationAttribute(long integrationId, string field, string label, FieldType type, bool isRequired, int order, string? description = null, string? placeholder = null, string? defaultValue = null, string? group = null, bool isSensitive = false, bool isHidden = false)
         {
             if (integrationId <= 0)
             {
@@ -58,9 +60,10 @@ namespace IntegrationPlatform.Domain.Entities
             Order = order;
             Group = group?.Trim();
             IsSensitive = isSensitive;
+            IsHidden = isHidden;
         }
 
-        public void Update(string field, string label, FieldType type, bool isRequired, int order, string? description, string? placeholder, string? defaultValue, string? group, bool isSensitive)
+        public void Update(string field, string label, FieldType type, bool isRequired, int order, string? description, string? placeholder, string? defaultValue, string? group, bool isSensitive, bool isHidden)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(field);
             ArgumentException.ThrowIfNullOrWhiteSpace(label);
@@ -75,6 +78,7 @@ namespace IntegrationPlatform.Domain.Entities
             Order = order;
             Group = group?.Trim();
             IsSensitive = isSensitive;
+            IsHidden = isHidden;
         }
     }
 }
