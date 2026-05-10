@@ -5,7 +5,7 @@ const BASE_URL = '/IntegrationAttributes';
 
 export const integrationAttributeService = {
   getByIntegration: (integrationId: number) =>
-    httpClient.get<IntegracaoAtributo[]>(`${BASE_URL}/integration/${integrationId}`),
+    httpClient.get<IntegracaoAtributo[]>(`${BASE_URL}/integration/${integrationId}?includeHidden=true`),
 
   getById: (id: number) =>
     httpClient.get<IntegracaoAtributo>(`${BASE_URL}/GetById/${id}`),
@@ -23,6 +23,7 @@ export const integrationAttributeService = {
       order: data.order,
       group: data.group,
       isSensitive: data.isSensitive,
+      isHidden: data.isHidden,
     }),
 
   update: (id: number, data: UpdateIntegracaoAtributoRequest) =>
@@ -38,6 +39,7 @@ export const integrationAttributeService = {
       order: data.order,
       group: data.group,
       isSensitive: data.isSensitive,
+      isHidden: data.isHidden,
     }),
 
   delete: (id: number) =>

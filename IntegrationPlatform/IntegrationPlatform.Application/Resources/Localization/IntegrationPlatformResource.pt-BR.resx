@@ -501,6 +501,8 @@
   <data name="integration.detail.emptyDescription" xml:space="preserve"><value>Adicione atributos para definir os campos desta integração</value></data>
   <data name="integration.detail.required" xml:space="preserve"><value>Obrigatório</value></data>
   <data name="integration.detail.sensitive" xml:space="preserve"><value>Sensível</value></data>
+  <data name="integration.detail.hidden" xml:space="preserve"><value>Oculto</value></data>
+  <data name="integration.attribute.form.isHidden" xml:space="preserve"><value>Não aparecer no formulário (gerenciado pelo sistema)</value></data>
   <data name="integration.detail.fieldLabel" xml:space="preserve"><value>Campo</value></data>
   <data name="integration.detail.groupLabel" xml:space="preserve"><value>Grupo</value></data>
   <data name="integration.detail.defaultLabel" xml:space="preserve"><value>Padrão</value></data>

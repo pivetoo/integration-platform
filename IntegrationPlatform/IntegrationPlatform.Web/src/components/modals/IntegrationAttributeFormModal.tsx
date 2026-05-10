@@ -24,6 +24,7 @@ const initialFormData: Omit<CreateIntegracaoAtributoRequest, 'integrationId'> = 
   order: 1,
   group: '',
   isSensitive: false,
+  isHidden: false,
 };
 
 export default function IntegrationAttributeFormModal({ open, onOpenChange, integrationId, attribute, nextOrder, onSuccess }: IntegrationAttributeFormModalProps) {
@@ -49,6 +50,7 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
         order: attribute.order,
         group: attribute.group || '',
         isSensitive: attribute.isSensitive,
+        isHidden: attribute.isHidden,
       });
     } else {
       setFormData({ ...initialFormData, order: nextOrder });
@@ -74,6 +76,7 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
           order: formData.order,
           group: formData.group || undefined,
           isSensitive: formData.isSensitive,
+          isHidden: formData.isHidden,
         })
         : integrationAttributeService.create({
           integrationId,
@@ -87,6 +90,7 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
           order: formData.order,
           group: formData.group || undefined,
           isSensitive: formData.isSensitive,
+          isHidden: formData.isHidden,
         })
     );
 
@@ -206,7 +210,7 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="obrigatorio"
@@ -223,6 +227,15 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
                 onCheckedChange={(checked) => handleChange('isSensitive', !!checked)}
               />
               <label htmlFor="sensivel" className="text-sm font-medium">{t('integration.detail.sensitive')}</label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="oculto"
+                checked={formData.isHidden}
+                onCheckedChange={(checked) => handleChange('isHidden', !!checked)}
+              />
+              <label htmlFor="oculto" className="text-sm font-medium">{t('integration.attribute.form.isHidden')}</label>
             </div>
           </div>
 

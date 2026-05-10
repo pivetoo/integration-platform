@@ -175,6 +175,9 @@ export default function IntegracaoDetalhe() {
                       {atributo.isSensitive && (
                         <Badge variant="secondary">{t('integration.detail.sensitive')}</Badge>
                       )}
+                      {atributo.isHidden && (
+                        <Badge variant="outline">{t('integration.detail.hidden')}</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                       <span>{t('integration.detail.fieldLabel')}: {atributo.field}</span>

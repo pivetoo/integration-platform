@@ -35,6 +35,7 @@ export interface IntegracaoAtributo {
   order: number;
   group?: string;
   isSensitive: boolean;
+  isHidden: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -51,6 +52,7 @@ export interface CreateIntegracaoAtributoRequest {
   order: number;
   group?: string;
   isSensitive: boolean;
+  isHidden: boolean;
 }
 
 export interface UpdateIntegracaoAtributoRequest {
@@ -64,4 +66,5 @@ export interface UpdateIntegracaoAtributoRequest {
   order: number;
   group?: string;
   isSensitive: boolean;
+  isHidden: boolean;
 }
