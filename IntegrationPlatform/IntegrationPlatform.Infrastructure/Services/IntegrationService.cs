@@ -52,7 +52,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             await EnsureUniqueIdentifier(request.Identifier, null, cancellationToken);
 
-            Integration integration = new(request.Identifier, request.Name, request.Description, request.IntegrationCategoryId);
+            Integration integration = new(request.Identifier, request.Name, request.Description, request.IntegrationCategoryId, request.IconUrl);
             bool success = await Insert(cancellationToken, integration);
             if (!success)
             {
@@ -80,7 +80,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             await EnsureUniqueIdentifier(request.Identifier, id, cancellationToken);
 
-            integration.Update(request.Identifier, request.Name, request.Description, request.IntegrationCategoryId, request.IsActive);
+            integration.Update(request.Identifier, request.Name, request.Description, request.IntegrationCategoryId, request.IsActive, request.IconUrl);
 
             Integration? result = await Update(integration, cancellationToken);
             if (result is null)

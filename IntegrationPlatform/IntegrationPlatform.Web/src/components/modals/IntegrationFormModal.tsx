@@ -16,6 +16,7 @@ const initialFormData: CreateIntegrationRequest = {
   identifier: '',
   name: '',
   description: '',
+  iconUrl: '',
   integrationCategoryId: undefined,
   isActive: true,
 };
@@ -47,6 +48,7 @@ export default function IntegrationFormModal({ open, onOpenChange, integracao, o
         identifier: integracao.identifier,
         name: integracao.name,
         description: integracao.description || '',
+        iconUrl: integracao.iconUrl || '',
         integrationCategoryId: integracao.integrationCategoryId ?? integracao.integrationCategory?.id,
         isActive: integracao.isActive,
       });
@@ -115,6 +117,33 @@ export default function IntegrationFormModal({ open, onOpenChange, integracao, o
                 value={formData.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <label htmlFor="iconUrl" className="text-sm font-medium">URL do logo</label>
+              <div className="flex items-center gap-3">
+                {formData.iconUrl ? (
+                  <img
+                    src={formData.iconUrl}
+                    alt=""
+                    className="h-10 w-10 rounded-md border bg-card object-contain p-1"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3' }}
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-dashed bg-muted/40 text-xs text-muted-foreground">
+                    sem
+                  </div>
+                )}
+                <Input
+                  id="iconUrl"
+                  value={formData.iconUrl || ''}
+                  onChange={(e) => handleChange('iconUrl', e.target.value)}
+                  placeholder="https://cdn.simpleicons.org/sendgrid"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                URL pública do logo (PNG/SVG). Sugestões: <code>https://cdn.simpleicons.org/{'{slug}'}</code> ou <code>https://logo.clearbit.com/{'{dominio}'}</code>.
+              </p>
             </div>
 
             <div className="space-y-2">

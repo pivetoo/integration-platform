@@ -134,6 +134,22 @@ export default function Integracoes() {
   };
 
   const columns: DataTableColumn<Integration>[] = [
+    {
+      key: 'iconUrl',
+      title: '',
+      dataIndex: 'iconUrl',
+      width: 60,
+      render: (value: string | undefined) => value ? (
+        <img
+          src={value}
+          alt=""
+          className="h-7 w-7 rounded-md border bg-card object-contain p-0.5"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+        />
+      ) : (
+        <div className="h-7 w-7 rounded-md border border-dashed bg-muted/30" />
+      ),
+    },
     { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier' },
     { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
     {

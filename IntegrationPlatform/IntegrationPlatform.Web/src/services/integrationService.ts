@@ -29,6 +29,7 @@ export const integrationService = {
       identifier: data.identifier,
       name: data.name,
       description: data.description || undefined,
+      iconUrl: data.iconUrl || undefined,
       integrationCategoryId: data.integrationCategoryId,
       isActive: data.isActive,
     });
@@ -40,6 +41,7 @@ export const integrationService = {
       identifier: data.identifier,
       name: data.name,
       description: data.description || undefined,
+      iconUrl: data.iconUrl || undefined,
       integrationCategoryId: data.integrationCategoryId,
       isActive: data.isActive,
     });

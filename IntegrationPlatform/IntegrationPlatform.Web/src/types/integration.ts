@@ -5,6 +5,7 @@ export interface Integration {
   identifier: string;
   name: string;
   description?: string;
+  iconUrl?: string;
   integrationCategoryId?: number;
   integrationCategory?: IntegrationCategory;
   isActive: boolean;
@@ -16,6 +17,7 @@ export interface CreateIntegrationRequest {
   identifier: string;
   name: string;
   description?: string;
+  iconUrl?: string;
   integrationCategoryId?: number;
   isActive: boolean;
 }
@@ -24,6 +26,7 @@ export interface UpdateIntegrationRequest {
   identifier: string;
   name: string;
   description?: string;
+  iconUrl?: string;
   integrationCategoryId?: number;
   isActive: boolean;
 }

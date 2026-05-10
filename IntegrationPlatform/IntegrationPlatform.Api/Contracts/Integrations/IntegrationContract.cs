@@ -13,6 +13,8 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
 
         public string? Description { get; init; }
 
+        public string? IconUrl { get; init; }
+
         public long? IntegrationCategoryId { get; init; }
 
         public bool IsActive { get; init; }
@@ -29,6 +31,7 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
             Identifier = item.Identifier,
             Name = item.Name,
             Description = item.Description,
+            IconUrl = item.IconUrl,
             IntegrationCategoryId = item.IntegrationCategoryId,
             IsActive = item.IsActive,
             CreatedAt = item.CreatedAt,

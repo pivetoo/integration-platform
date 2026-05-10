@@ -18,6 +18,9 @@ namespace IntegrationPlatform.Application.Requests.Integrations
         [StringLength(500)]
         public string? Description { get; set; }
 
+        [StringLength(500)]
+        public string? IconUrl { get; set; }
+
         public long? IntegrationCategoryId { get; set; }
 
         public bool IsActive { get; set; } = true;

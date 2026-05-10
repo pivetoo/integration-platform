@@ -14,6 +14,8 @@ namespace IntegrationPlatform.Domain.Entities
 
         public string? Description { get; private set; }
 
+        public string? IconUrl { get; private set; }
+
         public long? IntegrationCategoryId { get; private set; }
 
         public IntegrationCategory? IntegrationCategory { get; private set; }
@@ -30,7 +32,7 @@ namespace IntegrationPlatform.Domain.Entities
         {
         }
 
-        public Integration(string identifier, string name, string? description = null, long? integrationCategoryId = null)
+        public Integration(string identifier, string name, string? description = null, long? integrationCategoryId = null, string? iconUrl = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -39,9 +41,10 @@ namespace IntegrationPlatform.Domain.Entities
             Name = name.Trim();
             Description = description?.Trim();
             IntegrationCategoryId = integrationCategoryId;
+            IconUrl = iconUrl?.Trim();
         }
 
-        public void Update(string identifier, string name, string? description, long? integrationCategoryId, bool isActive)
+        public void Update(string identifier, string name, string? description, long? integrationCategoryId, bool isActive, string? iconUrl)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -51,6 +54,7 @@ namespace IntegrationPlatform.Domain.Entities
             Description = description?.Trim();
             IntegrationCategoryId = integrationCategoryId;
             IsActive = isActive;
+            IconUrl = iconUrl?.Trim();
         }
     }
 }
