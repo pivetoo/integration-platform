@@ -23,6 +23,8 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsDefault { get; private set; }
 
+        public bool IsTestPipeline { get; private set; }
+
         public IReadOnlyCollection<PipelineStep> Steps => steps.AsReadOnly();
 
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
