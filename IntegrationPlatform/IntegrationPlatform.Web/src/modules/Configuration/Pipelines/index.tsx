@@ -31,7 +31,7 @@ export default function Pipelines() {
   });
 
   const loadPipelines = async () => {
-    const result = await fetchPipelines(() => pipelineService.getAll());
+    const result = await fetchPipelines(() => pipelineService.getAll({ pageSize: 500 }));
     if (result) {
       setPipelines(result.data);
     }

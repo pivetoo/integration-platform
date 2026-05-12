@@ -38,7 +38,7 @@ export default function ProcessingQueue() {
   });
 
   const loadItens = async () => {
-    const result = await fetchItens(() => processingQueueService.getAll());
+    const result = await fetchItens(() => processingQueueService.getAll({ pageSize: 500 }));
     if (result) {
       setItens(result.data);
     }

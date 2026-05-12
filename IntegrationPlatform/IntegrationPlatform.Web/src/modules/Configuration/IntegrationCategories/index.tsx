@@ -27,7 +27,7 @@ export default function CategoriasIntegracao() {
   });
 
   const loadCategorias = async () => {
-    const result = await fetchCategorias(() => integrationCategoryService.getAll());
+    const result = await fetchCategorias(() => integrationCategoryService.getAll({ pageSize: 500 }));
     if (result) {
       setCategorias(result.data);
     }

@@ -28,7 +28,7 @@ export default function ScriptsBancoDados() {
   });
 
   const loadScripts = async () => {
-    const result = await fetchScripts(() => databaseScriptService.getAll());
+    const result = await fetchScripts(() => databaseScriptService.getAll({ pageSize: 500 }));
     if (result) {
       setScripts(result.data);
     }

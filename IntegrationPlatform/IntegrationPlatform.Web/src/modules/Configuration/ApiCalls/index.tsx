@@ -39,7 +39,7 @@ export default function ChamadasApi() {
   });
 
   const loadChamadas = async () => {
-    const result = await fetchChamadas(() => apiCallService.getAll());
+    const result = await fetchChamadas(() => apiCallService.getAll({ pageSize: 500 }));
     if (result) {
       setChamadas(result.data);
     }

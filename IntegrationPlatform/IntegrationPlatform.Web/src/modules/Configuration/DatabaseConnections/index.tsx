@@ -35,7 +35,7 @@ export default function ConexoesBancoDados() {
   });
 
   const loadConexoes = async () => {
-    const result = await fetchConexoes(() => databaseConnectionService.getAll());
+    const result = await fetchConexoes(() => databaseConnectionService.getAll({ pageSize: 500 }));
     if (result) {
       setConexoes(result.data);
     }

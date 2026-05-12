@@ -28,7 +28,7 @@ export default function Executions() {
   });
 
   const loadExecutions = async () => {
-    const result = await fetchExecutions(() => executionService.getAll());
+    const result = await fetchExecutions(() => executionService.getAll({ pageSize: 500 }));
     if (result) {
       setExecutions(result.data);
     }

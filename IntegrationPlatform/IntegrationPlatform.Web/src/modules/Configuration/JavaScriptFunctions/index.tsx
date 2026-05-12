@@ -27,7 +27,7 @@ export default function FuncoesJavaScript() {
   });
 
   const loadFuncoes = async () => {
-    const result = await fetchFuncoes(() => javaScriptFunctionService.getAll());
+    const result = await fetchFuncoes(() => javaScriptFunctionService.getAll({ pageSize: 500 }));
     if (result) {
       setFuncoes(result.data);
     }

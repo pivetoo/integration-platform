@@ -43,7 +43,7 @@ export default function Integracoes() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadIntegracoes = async () => {
-    const result = await fetchIntegracoes(() => integrationService.getAll());
+    const result = await fetchIntegracoes(() => integrationService.getAll({ pageSize: 500 }));
     if (result) {
       setIntegracoes(result.data);
     }

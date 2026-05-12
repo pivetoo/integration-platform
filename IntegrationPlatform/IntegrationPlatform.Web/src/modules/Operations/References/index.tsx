@@ -29,7 +29,7 @@ export default function References() {
   });
 
   const loadReferencias = async () => {
-    const result = await fetchReferencias(() => referenceService.getAll());
+    const result = await fetchReferencias(() => referenceService.getAll({ pageSize: 500 }));
     if (result) {
       setReferencias(result.data);
     }

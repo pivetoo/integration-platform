@@ -30,7 +30,7 @@ export default function PipelineRoutines() {
   });
 
   const loadRotinas = async () => {
-    const result = await fetchRotinas(() => pipelineRoutineService.getAll());
+    const result = await fetchRotinas(() => pipelineRoutineService.getAll({ pageSize: 500 }));
     if (result) {
       setRotinas(result.data);
     }

@@ -30,7 +30,7 @@ export default function Conectores() {
   });
 
   const loadConectores = async () => {
-    const result = await fetchConectores(() => connectorService.getAll());
+    const result = await fetchConectores(() => connectorService.getAll({ pageSize: 500 }));
     if (result) {
       setConectores(result.data);
     }
