@@ -18,6 +18,8 @@ namespace IntegrationPlatform.Api.Contracts.Pipelines
 
         public bool IsActive { get; init; }
 
+        public bool IsDefault { get; init; }
+
         public DateTimeOffset CreatedAt { get; init; }
 
         public DateTimeOffset? UpdatedAt { get; init; }
@@ -32,6 +34,7 @@ namespace IntegrationPlatform.Api.Contracts.Pipelines
             Name = item.Name,
             Description = item.Description,
             IsActive = item.IsActive,
+            IsDefault = item.IsDefault,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
             Integration = item.Integration == null

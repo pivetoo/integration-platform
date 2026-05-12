@@ -93,6 +93,33 @@ namespace IntegrationPlatform.Infrastructure.Services
             return await GetPipelineById(result.Id, cancellationToken) ?? result;
         }
 
+        public async Task<Pipeline> SetDefaultPipeline(long id, CancellationToken cancellationToken = default)
+        {
+            Pipeline? pipeline = await DbContext.Set<Pipeline>()
+                .AsTracking()
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            if (pipeline is null)
+            {
+                throw new InvalidOperationException(Localizer["pipeline.notFound"]);
+            }
+
+            List<Pipeline> siblings = await DbContext.Set<Pipeline>()
+                .AsTracking()
+                .Where(item => item.IntegrationId == pipeline.IntegrationId && item.IsDefault)
+                .ToListAsync(cancellationToken);
+
+            foreach (Pipeline sibling in siblings)
+            {
+                sibling.UnsetDefault();
+            }
+
+            pipeline.SetDefault();
+            await DbContext.SaveChangesAsync(cancellationToken);
+
+            return await GetPipelineById(id, cancellationToken) ?? pipeline;
+        }
+
         private async Task EnsureIntegrationExists(long integrationId, CancellationToken cancellationToken)
         {
             bool exists = await DbContext.Set<Integration>()

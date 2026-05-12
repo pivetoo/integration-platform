@@ -21,6 +21,8 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsActive { get; private set; } = true;
 
+        public bool IsDefault { get; private set; }
+
         public IReadOnlyCollection<PipelineStep> Steps => steps.AsReadOnly();
 
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
@@ -47,6 +49,16 @@ namespace IntegrationPlatform.Domain.Entities
             Identifier = identifier.Trim();
             Name = name.Trim();
             Description = description?.Trim();
+        }
+
+        public void SetDefault()
+        {
+            IsDefault = true;
+        }
+
+        public void UnsetDefault()
+        {
+            IsDefault = false;
         }
 
         public void Update(long integrationId, string identifier, string name, string? description, bool isActive)

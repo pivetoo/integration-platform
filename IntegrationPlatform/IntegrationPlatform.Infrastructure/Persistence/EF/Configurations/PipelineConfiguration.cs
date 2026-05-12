@@ -25,6 +25,8 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
                 .WithMany(entity => entity.Pipelines)
                 .HasForeignKey(entity => entity.IntegrationId);
 
+            builder.Property(entity => entity.IsDefault).IsRequired();
+
             builder.HasIndex(entity => new { entity.IntegrationId, entity.Identifier })
                 .IsUnique();
         }

@@ -95,6 +95,14 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapPipeline(pipeline), Localizer["pipeline.updated"]);
         }
 
+        [RequireAccess("Permite definir um pipeline como padrão para sua integração.")]
+        [PutEndpoint("{id:long}/[action]")]
+        public async Task<IActionResult> SetDefault(long id, CancellationToken cancellationToken)
+        {
+            Pipeline pipeline = await pipelineService.SetDefaultPipeline(id, cancellationToken);
+            return Http200(MapPipeline(pipeline), Localizer["pipeline.updated"]);
+        }
+
         [RequireAccess("Permite excluir um pipeline cadastrado na plataforma.")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)

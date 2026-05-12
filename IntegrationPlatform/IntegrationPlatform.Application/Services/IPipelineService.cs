@@ -18,5 +18,7 @@ namespace IntegrationPlatform.Application.Services
         Task<Pipeline> CreatePipeline(CreatePipelineRequest request, CancellationToken cancellationToken = default);
 
         Task<Pipeline> UpdatePipeline(long id, UpdatePipelineRequest request, CancellationToken cancellationToken = default);
+
+        Task<Pipeline> SetDefaultPipeline(long id, CancellationToken cancellationToken = default);
     }
 }
