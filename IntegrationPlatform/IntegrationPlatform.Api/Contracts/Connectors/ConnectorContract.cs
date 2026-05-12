@@ -44,6 +44,7 @@ namespace IntegrationPlatform.Api.Contracts.Connectors
                     Description = item.Integration.Description,
                     IntegrationCategoryId = item.Integration.IntegrationCategoryId,
                     IsActive = item.Integration.IsActive,
+                    SupportsWebhook = item.Integration.SupportsWebhook,
                     CreatedAt = item.Integration.CreatedAt,
                     UpdatedAt = item.Integration.UpdatedAt,
                     IntegrationCategory = item.Integration.IntegrationCategory == null

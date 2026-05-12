@@ -24,5 +24,7 @@ namespace IntegrationPlatform.Application.Requests.Integrations
         public long? IntegrationCategoryId { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        public bool SupportsWebhook { get; set; }
     }
 }

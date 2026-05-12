@@ -22,6 +22,8 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsActive { get; private set; } = true;
 
+        public bool SupportsWebhook { get; private set; }
+
         public IReadOnlyCollection<IntegrationAttribute> Attributes => attributes.AsReadOnly();
 
         public IReadOnlyCollection<Pipeline> Pipelines => pipelines.AsReadOnly();
@@ -44,7 +46,7 @@ namespace IntegrationPlatform.Domain.Entities
             IconUrl = iconUrl?.Trim();
         }
 
-        public void Update(string identifier, string name, string? description, long? integrationCategoryId, bool isActive, string? iconUrl)
+        public void Update(string identifier, string name, string? description, long? integrationCategoryId, bool isActive, string? iconUrl, bool supportsWebhook = false)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -55,6 +57,7 @@ namespace IntegrationPlatform.Domain.Entities
             IntegrationCategoryId = integrationCategoryId;
             IsActive = isActive;
             IconUrl = iconUrl?.Trim();
+            SupportsWebhook = supportsWebhook;
         }
     }
 }

@@ -80,7 +80,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             await EnsureUniqueIdentifier(request.Identifier, id, cancellationToken);
 
-            integration.Update(request.Identifier, request.Name, request.Description, request.IntegrationCategoryId, request.IsActive, request.IconUrl);
+            integration.Update(request.Identifier, request.Name, request.Description, request.IntegrationCategoryId, request.IsActive, request.IconUrl, request.SupportsWebhook);
 
             Integration? result = await Update(integration, cancellationToken);
             if (result is null)

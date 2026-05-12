@@ -19,6 +19,8 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
 
         public bool IsActive { get; init; }
 
+        public bool SupportsWebhook { get; init; }
+
         public DateTimeOffset CreatedAt { get; init; }
 
         public DateTimeOffset? UpdatedAt { get; init; }
@@ -34,6 +36,7 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
             IconUrl = item.IconUrl,
             IntegrationCategoryId = item.IntegrationCategoryId,
             IsActive = item.IsActive,
+            SupportsWebhook = item.SupportsWebhook,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
             IntegrationCategory = item.IntegrationCategory == null
