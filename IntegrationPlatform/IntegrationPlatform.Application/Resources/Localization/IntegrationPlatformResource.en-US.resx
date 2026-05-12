@@ -246,6 +246,12 @@
   <data name="step.type.unknown" xml:space="preserve">
     <value>Unknown pipeline step type: {0}</value>
   </data>
+  <data name="step.smtp.host.required" xml:space="preserve">
+    <value>SMTP host not provided in connector attributes.</value>
+  </data>
+  <data name="step.smtp.recipient.required" xml:space="preserve">
+    <value>Recipient (to) not provided.</value>
+  </data>
   <data name="pipeline.created" xml:space="preserve">
     <value>Pipeline created successfully.</value>
   </data>

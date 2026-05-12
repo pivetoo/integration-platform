@@ -246,6 +246,12 @@
   <data name="step.type.unknown" xml:space="preserve">
     <value>Tipo de etapa do pipeline desconhecido: {0}</value>
   </data>
+  <data name="step.smtp.host.required" xml:space="preserve">
+    <value>O host SMTP não foi informado nos atributos do conector.</value>
+  </data>
+  <data name="step.smtp.recipient.required" xml:space="preserve">
+    <value>O destinatário (to) não foi informado.</value>
+  </data>
   <data name="pipeline.created" xml:space="preserve">
     <value>Pipeline criado com sucesso.</value>
   </data>

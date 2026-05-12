@@ -4,6 +4,7 @@ namespace IntegrationPlatform.Domain.ValueObjects
     {
         HttpRequest = 1,
         JavaScriptFunction = 2,
-        ExecuteScript = 3
+        ExecuteScript = 3,
+        SmtpSend = 4
     }
 }

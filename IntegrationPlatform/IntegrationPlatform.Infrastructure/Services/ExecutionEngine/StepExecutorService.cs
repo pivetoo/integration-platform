@@ -6,7 +6,10 @@ using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
 using Jint;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Localization;
+using MimeKit;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -31,6 +34,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 PipelineStepType.HttpRequest => ExecuteHttpRequest(step, context, cancellationToken),
                 PipelineStepType.JavaScriptFunction => Task.FromResult(ExecuteJavaScript(step, context)),
                 PipelineStepType.ExecuteScript => ExecuteScript(step, context, cancellationToken),
+                PipelineStepType.SmtpSend => ExecuteSmtpSend(step, context, cancellationToken),
                 _ => Task.FromResult(new PipelineStepExecutionResult
                 {
                     Success = false,
@@ -169,6 +173,99 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
                     ExtractedResult = resultValue,
                     ResponseBody = resultValue is not null ? JsonSerializer.Serialize(resultValue) : null
+                };
+            }
+            catch (Exception exception)
+            {
+                stopwatch.Stop();
+
+                return new PipelineStepExecutionResult
+                {
+                    Success = false,
+                    DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
+                    Error = exception.Message
+                };
+            }
+        }
+
+        private async Task<PipelineStepExecutionResult> ExecuteSmtpSend(PipelineStep step, PipelineExecutionContext context, CancellationToken cancellationToken)
+        {
+            string host = context.ConnectorAttributes.GetValueOrDefault("host") ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                return new PipelineStepExecutionResult
+                {
+                    Success = false,
+                    Error = Localizer["step.smtp.host.required"]
+                };
+            }
+
+            string to = TemplateInterpolator.Interpolate("{{ to }}", context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+            if (string.IsNullOrWhiteSpace(to))
+            {
+                return new PipelineStepExecutionResult
+                {
+                    Success = false,
+                    Error = Localizer["step.smtp.recipient.required"]
+                };
+            }
+
+            string portRaw    = context.ConnectorAttributes.GetValueOrDefault("port")       ?? "587";
+            string username   = context.ConnectorAttributes.GetValueOrDefault("username")   ?? string.Empty;
+            string password   = context.ConnectorAttributes.GetValueOrDefault("password")   ?? string.Empty;
+            string fromEmail  = context.ConnectorAttributes.GetValueOrDefault("from_email") ?? string.Empty;
+            string fromName   = context.ConnectorAttributes.GetValueOrDefault("from_name")  ?? string.Empty;
+            string enableSslRaw = context.ConnectorAttributes.GetValueOrDefault("enable_ssl") ?? "true";
+
+            int port = int.TryParse(portRaw, out int p) ? p : 587;
+            bool enableSsl = !string.Equals(enableSslRaw, "false", StringComparison.OrdinalIgnoreCase) && enableSslRaw != "0";
+
+            string subject  = TemplateInterpolator.Interpolate("{{ subject }}",   context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+            string htmlBody = TemplateInterpolator.Interpolate("{{ html_body }}", context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+            string textBody = TemplateInterpolator.Interpolate("{{ text_body }}", context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                MimeMessage message = new();
+                message.From.Add(string.IsNullOrWhiteSpace(fromName)
+                    ? new MailboxAddress(fromEmail, fromEmail)
+                    : new MailboxAddress(fromName, fromEmail));
+                message.To.Add(new MailboxAddress(to, to));
+                message.Subject = subject;
+
+                BodyBuilder bodyBuilder = new();
+                if (!string.IsNullOrWhiteSpace(htmlBody))
+                {
+                    bodyBuilder.HtmlBody = htmlBody;
+                }
+                if (!string.IsNullOrWhiteSpace(textBody))
+                {
+                    bodyBuilder.TextBody = textBody;
+                }
+                message.Body = bodyBuilder.ToMessageBody();
+
+                SecureSocketOptions socketOptions = enableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None;
+
+                using SmtpClient client = new();
+                await client.ConnectAsync(host, port, socketOptions, cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(username))
+                {
+                    await client.AuthenticateAsync(username, password, cancellationToken);
+                }
+
+                await client.SendAsync(message, cancellationToken);
+                await client.DisconnectAsync(true, cancellationToken);
+
+                stopwatch.Stop();
+
+                return new PipelineStepExecutionResult
+                {
+                    Success = true,
+                    RequestInfo = $"SMTP {host}:{port} | From: {fromEmail} | To: {to} | Subject: {subject}",
+                    DurationInMilliseconds = stopwatch.ElapsedMilliseconds
                 };
             }
             catch (Exception exception)
