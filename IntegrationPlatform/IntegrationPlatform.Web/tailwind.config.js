@@ -3,11 +3,12 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/archon-ui/dist/**/*.{js,mjs}",
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Outfit"', 'sans-serif'],
+        sans: ['"Inter"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
