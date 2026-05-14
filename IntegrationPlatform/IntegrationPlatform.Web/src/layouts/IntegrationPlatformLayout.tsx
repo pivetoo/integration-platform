@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout, useAuth, useAppNavigation, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem } from 'archon-ui';
 import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, LayoutDashboard, Play, ListOrdered, ExternalLink, Clock3 } from 'lucide-react';
-import logoIntegrationHub from '../assets/logo-integration-hub.svg';
+import logoEmpresa from '../assets/logo-empresa.png';
 
 export default function IntegrationPlatformLayout() {
   const { t } = useI18n();
@@ -90,15 +90,16 @@ export default function IntegrationPlatformLayout() {
 
   return (
     <AppLayout
-      title={contract?.systemApplicationName ?? 'IntegrationPlatform'}
-      subtitle={contract?.companyName ?? ''}
+      title="Integrations"
+      subtitle="by Mainstay"
+      navbarCompanyName={contract?.companyName}
       user={{
         name: authUser?.name ?? '',
         email: authUser?.email ?? '',
         role: contract?.roleName,
       }}
       onLogout={handleLogout}
-      logo={<img src={logoIntegrationHub} alt="Logo" className="ih-sidebar-logo h-6 w-6 object-contain" />}
+      logo={<img src={logoEmpresa} alt="Mainstay" style={{ width: 28, height: 28, objectFit: 'contain' }} />}
       menuGroups={menuGroups}
       breadcrumbs={breadcrumbs}
       notifications={notifications}
