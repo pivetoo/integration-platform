@@ -60,8 +60,8 @@ export default function Dashboard() {
 
   const chartMensais = (data?.execucoesMensais || []).map(e => ({
     name: e.mes,
-    sucesso: e.sucesso,
-    erro: e.erro,
+    sucesso: e.sucesso ?? 0,
+    erro: e.erro ?? 0,
   }));
 
   const execucoesRecentes = data?.execucoesRecentes || [];
