@@ -23,9 +23,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar as funções JavaScript cadastradas na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<JavaScriptFunction> result = await javaScriptFunctionService.GetJavaScriptFunctions(request, cancellationToken);
+            PagedResult<JavaScriptFunction> result = await javaScriptFunctionService.GetJavaScriptFunctions(request, search, cancellationToken);
             return Http200(result);
         }
 

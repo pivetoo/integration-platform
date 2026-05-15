@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar os conectores cadastrados na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<Connector> result = await connectorService.GetConnectors(request, cancellationToken);
+            PagedResult<Connector> result = await connectorService.GetConnectors(request, search, cancellationToken);
             return Http200(new PagedResult<ConnectorContract>
             {
                 Items = result.Items.Select(MapConnector).ToArray(),

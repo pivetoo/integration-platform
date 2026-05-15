@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar as integrações cadastradas na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<Integration> result = await integrationService.GetIntegrations(request, cancellationToken);
+            PagedResult<Integration> result = await integrationService.GetIntegrations(request, search, cancellationToken);
             return Http200(new PagedResult<IntegrationContract>
             {
                 Items = result.Items.Select(MapIntegration).ToArray(),

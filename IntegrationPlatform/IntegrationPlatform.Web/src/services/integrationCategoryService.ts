@@ -7,7 +7,8 @@ const BASE_URL = '/IntegrationCategories';
 export const integrationCategoryService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<IntegrationCategory>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<IntegrationCategory[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<IntegrationCategory[]>(`${BASE_URL}/Get${query}${searchParam}`);
 
     return {
       data: response.data ?? [],

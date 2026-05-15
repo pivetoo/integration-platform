@@ -20,10 +20,15 @@ namespace IntegrationPlatform.Infrastructure.Services
             Localizer = localizer;
         }
 
-        public async Task<PagedResult<ApiCall>> GetApiCalls(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<ApiCall>> GetApiCalls(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await DbContext.Set<ApiCall>()
-                .AsNoTracking()
+            var query = DbContext.Set<ApiCall>().AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item => item.Name.ToLower().Contains(lower) || (item.Url != null && item.Url.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderBy(item => item.Name)
                 .ToPagedResultAsync(request, cancellationToken);
         }

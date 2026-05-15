@@ -7,7 +7,8 @@ const BASE_URL = '/JavaScriptFunctions';
 export const javaScriptFunctionService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<JavaScriptFunction>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<JavaScriptFunction[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<JavaScriptFunction[]>(`${BASE_URL}/Get${query}${searchParam}`);
 
     return {
       data: response.data ?? [],

@@ -7,7 +7,8 @@ const BASE_URL = '/ApiCalls';
 export const apiCallService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<ApiCall>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<ApiCall[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<ApiCall[]>(`${BASE_URL}/Get${query}${searchParam}`);
 
     return {
       data: response.data ?? [],

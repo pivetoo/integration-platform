@@ -19,9 +19,18 @@ namespace IntegrationPlatform.Infrastructure.Services
             Localizer = localizer;
         }
 
-        public async Task<PagedResult<Reference>> GetReferences(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<Reference>> GetReferences(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await QueryWithDetails()
+            var query = QueryWithDetails();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item =>
+                    (item.EntityName != null && item.EntityName.ToLower().Contains(lower)) ||
+                    (item.InternalId != null && item.InternalId.ToLower().Contains(lower)) ||
+                    (item.ExternalId != null && item.ExternalId.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderByDescending(item => item.CreatedAt)
                 .ToPagedResultAsync(request, cancellationToken);
         }

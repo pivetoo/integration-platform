@@ -7,7 +7,8 @@ const BASE_URL = '/Executions';
 export const executionService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Execution>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<Execution[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<Execution[]>(`${BASE_URL}/Get${query}${searchParam}`);
     return {
       data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,

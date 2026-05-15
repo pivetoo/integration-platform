@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IIntegrationCategoryService : ICrudService<IntegrationCategory>
     {
-        Task<PagedResult<IntegrationCategory>> GetIntegrationCategories(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<IntegrationCategory>> GetIntegrationCategories(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<IntegrationCategory?> GetIntegrationCategoryById(long id, CancellationToken cancellationToken = default);
 

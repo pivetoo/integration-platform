@@ -7,7 +7,8 @@ const BASE_URL = '/ProcessingQueues';
 export const processingQueueService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<ProcessingQueueItem>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<ProcessingQueueItem[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<ProcessingQueueItem[]>(`${BASE_URL}/Get${query}${searchParam}`);
     return {
       data: response.data ?? [],
       total: response.pagination?.totalCount ?? 0,

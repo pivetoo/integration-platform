@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IIntegrationService : ICrudService<Integration>
     {
-        Task<PagedResult<Integration>> GetIntegrations(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<Integration>> GetIntegrations(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<Integration?> GetIntegrationById(long id, CancellationToken cancellationToken = default);
 

@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IPipelineRoutineService : ICrudService<PipelineRoutine>
     {
-        Task<PagedResult<PipelineRoutine>> GetPipelineRoutines(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<PipelineRoutine>> GetPipelineRoutines(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<PipelineRoutine?> GetPipelineRoutineById(long id, CancellationToken cancellationToken = default);
 

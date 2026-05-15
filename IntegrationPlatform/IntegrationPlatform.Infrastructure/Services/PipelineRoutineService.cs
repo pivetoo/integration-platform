@@ -14,10 +14,17 @@ namespace IntegrationPlatform.Infrastructure.Services
     {
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
 
-        public async Task<PagedResult<PipelineRoutine>> GetPipelineRoutines(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<PipelineRoutine>> GetPipelineRoutines(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await DbContext.Set<PipelineRoutine>()
-                .AsNoTracking()
+            var query = DbContext.Set<PipelineRoutine>().AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item =>
+                    (item.Connector != null && item.Connector.Name.ToLower().Contains(lower)) ||
+                    (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderByDescending(item => item.CreatedAt)
                 .ToPagedResultAsync(request, cancellationToken);
         }

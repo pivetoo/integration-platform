@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IDatabaseScriptService : ICrudService<DatabaseScript>
     {
-        Task<PagedResult<DatabaseScript>> GetDatabaseScripts(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<DatabaseScript>> GetDatabaseScripts(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<DatabaseScript?> GetDatabaseScriptById(long id, CancellationToken cancellationToken = default);
 

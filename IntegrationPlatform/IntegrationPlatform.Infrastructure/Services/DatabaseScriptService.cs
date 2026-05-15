@@ -19,9 +19,15 @@ namespace IntegrationPlatform.Infrastructure.Services
             Localizer = localizer;
         }
 
-        public async Task<PagedResult<DatabaseScript>> GetDatabaseScripts(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<DatabaseScript>> GetDatabaseScripts(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await QueryWithDetails()
+            var query = QueryWithDetails();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item => item.Name.ToLower().Contains(lower) || (item.Description != null && item.Description.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderBy(item => item.Name)
                 .ToPagedResultAsync(request, cancellationToken);
         }

@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IExecutionService : ICrudService<Execution>
     {
-        Task<PagedResult<Execution>> GetExecutions(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<Execution>> GetExecutions(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<Execution?> GetExecutionById(long id, CancellationToken cancellationToken = default);
 

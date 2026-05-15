@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar as referências internas e externas registradas na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<Reference> result = await referenceService.GetReferences(request, cancellationToken);
+            PagedResult<Reference> result = await referenceService.GetReferences(request, search, cancellationToken);
             return Http200(new PagedResult<ReferenceContract>
             {
                 Items = result.Items.Select(MapReference).ToArray(),

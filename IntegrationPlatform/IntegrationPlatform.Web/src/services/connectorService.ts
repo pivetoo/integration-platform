@@ -7,7 +7,8 @@ const BASE_URL = '/Connectors';
 export const connectorService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Conector>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<Conector[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<Conector[]>(`${BASE_URL}/Get${query}${searchParam}`);
 
     return {
       data: response.data ?? [],

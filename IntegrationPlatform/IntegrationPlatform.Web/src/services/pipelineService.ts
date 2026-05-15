@@ -7,7 +7,8 @@ const BASE_URL = '/Pipelines';
 export const pipelineService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Pipeline>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<Pipeline[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<Pipeline[]>(`${BASE_URL}/Get${query}${searchParam}`);
 
     return {
       data: response.data ?? [],

@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IApiCallService : ICrudService<ApiCall>
     {
-        Task<PagedResult<ApiCall>> GetApiCalls(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<ApiCall>> GetApiCalls(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<ApiCall?> GetApiCallById(long id, CancellationToken cancellationToken = default);
 

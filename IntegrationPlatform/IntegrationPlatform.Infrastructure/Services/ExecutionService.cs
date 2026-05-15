@@ -14,9 +14,17 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
         }
 
-        public async Task<PagedResult<Execution>> GetExecutions(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<Execution>> GetExecutions(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await QueryWithDetails()
+            var query = QueryWithDetails();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item =>
+                    (item.Connector != null && item.Connector.Name.ToLower().Contains(lower)) ||
+                    (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderByDescending(item => item.StartedAt)
                 .ToPagedResultAsync(request, cancellationToken);
         }

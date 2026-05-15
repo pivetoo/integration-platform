@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IConnectorService : ICrudService<Connector>
     {
-        Task<PagedResult<Connector>> GetConnectors(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<Connector>> GetConnectors(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<Connector?> GetConnectorById(long id, CancellationToken cancellationToken = default);
 

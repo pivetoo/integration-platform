@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IDatabaseConnectionService : ICrudService<DatabaseConnection>
     {
-        Task<PagedResult<DatabaseConnection>> GetDatabaseConnections(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<DatabaseConnection>> GetDatabaseConnections(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<DatabaseConnection?> GetDatabaseConnectionById(long id, CancellationToken cancellationToken = default);
 

@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar os pipelines cadastrados na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<Pipeline> result = await pipelineService.GetPipelines(request, cancellationToken);
+            PagedResult<Pipeline> result = await pipelineService.GetPipelines(request, search, cancellationToken);
             return Http200(new PagedResult<PipelineContract>
             {
                 Items = result.Items.Select(MapPipeline).ToArray(),

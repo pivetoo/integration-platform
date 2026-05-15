@@ -19,10 +19,15 @@ namespace IntegrationPlatform.Infrastructure.Services
             Localizer = localizer;
         }
 
-        public async Task<PagedResult<JavaScriptFunction>> GetJavaScriptFunctions(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<JavaScriptFunction>> GetJavaScriptFunctions(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await DbContext.Set<JavaScriptFunction>()
-                .AsNoTracking()
+            var query = DbContext.Set<JavaScriptFunction>().AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item => item.Name.ToLower().Contains(lower) || (item.Description != null && item.Description.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderByDescending(item => item.Id)
                 .ToPagedResultAsync(request, cancellationToken);
         }

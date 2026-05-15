@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar as conexões de banco de dados cadastradas na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<DatabaseConnection> result = await databaseConnectionService.GetDatabaseConnections(request, cancellationToken);
+            PagedResult<DatabaseConnection> result = await databaseConnectionService.GetDatabaseConnections(request, search, cancellationToken);
             return Http200(new PagedResult<DatabaseConnectionContract>
             {
                 Items = result.Items.Select(MapDatabaseConnection).ToArray(),

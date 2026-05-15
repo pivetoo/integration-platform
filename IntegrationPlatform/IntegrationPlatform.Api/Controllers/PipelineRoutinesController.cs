@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar as rotinas agendadas de pipelines.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<PipelineRoutine> result = await pipelineRoutineService.GetPipelineRoutines(request, cancellationToken);
+            PagedResult<PipelineRoutine> result = await pipelineRoutineService.GetPipelineRoutines(request, search, cancellationToken);
             return Http200(new PagedResult<PipelineRoutineContract>
             {
                 Items = result.Items.Select(MapPipelineRoutine).ToArray(),

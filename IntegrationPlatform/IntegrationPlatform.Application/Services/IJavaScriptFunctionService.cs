@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IJavaScriptFunctionService : ICrudService<JavaScriptFunction>
     {
-        Task<PagedResult<JavaScriptFunction>> GetJavaScriptFunctions(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<JavaScriptFunction>> GetJavaScriptFunctions(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<JavaScriptFunction?> GetJavaScriptFunctionById(long id, CancellationToken cancellationToken = default);
 

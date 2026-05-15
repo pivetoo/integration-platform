@@ -18,9 +18,17 @@ namespace IntegrationPlatform.Infrastructure.Services
             Localizer = localizer;
         }
 
-        public async Task<PagedResult<ProcessingQueue>> GetProcessingQueues(PagedRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<ProcessingQueue>> GetProcessingQueues(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            return await QueryWithDetails()
+            var query = QueryWithDetails();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(item =>
+                    (item.Connector != null && item.Connector.Name.ToLower().Contains(lower)) ||
+                    (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)));
+            }
+            return await query
                 .OrderByDescending(item => item.CreatedAt)
                 .ToPagedResultAsync(request, cancellationToken);
         }

@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar os scripts SQL cadastrados na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<DatabaseScript> result = await databaseScriptService.GetDatabaseScripts(request, cancellationToken);
+            PagedResult<DatabaseScript> result = await databaseScriptService.GetDatabaseScripts(request, search, cancellationToken);
             return Http200(new PagedResult<DatabaseScriptContract>
             {
                 Items = result.Items.Select(MapDatabaseScript).ToArray(),

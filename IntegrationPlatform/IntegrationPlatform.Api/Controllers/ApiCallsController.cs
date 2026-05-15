@@ -25,9 +25,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite listar as chamadas de API cadastradas na plataforma.")]
         [GetEndpoint("[action]")]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
-            PagedResult<ApiCall> result = await apiCallService.GetApiCalls(request, cancellationToken);
+            PagedResult<ApiCall> result = await apiCallService.GetApiCalls(request, search, cancellationToken);
             return Http200(new PagedResult<ApiCallContract>
             {
                 Items = result.Items.Select(MapApiCall).ToArray(),

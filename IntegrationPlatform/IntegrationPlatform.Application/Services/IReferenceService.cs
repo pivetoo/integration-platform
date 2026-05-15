@@ -7,7 +7,7 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IReferenceService : ICrudService<Reference>
     {
-        Task<PagedResult<Reference>> GetReferences(PagedRequest request, CancellationToken cancellationToken = default);
+        Task<PagedResult<Reference>> GetReferences(PagedRequest request, string? search, CancellationToken cancellationToken = default);
 
         Task<Reference?> GetReferenceById(long id, CancellationToken cancellationToken = default);
 

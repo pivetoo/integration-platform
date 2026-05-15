@@ -7,7 +7,8 @@ const BASE_URL = '/DatabaseConnections';
 export const databaseConnectionService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<DatabaseConnection>> => {
     const query = buildPaginationQuery(params);
-    const response = await httpClient.get<DatabaseConnection[]>(`${BASE_URL}/Get${query}`);
+    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
+    const response = await httpClient.get<DatabaseConnection[]>(`${BASE_URL}/Get${query}${searchParam}`);
 
     return {
       data: response.data ?? [],
