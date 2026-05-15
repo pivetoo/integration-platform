@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
+import { useEffect, useState } from 'react';
+import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { javaScriptFunctionService } from '../../../services/javaScriptFunctionService';
@@ -9,6 +9,11 @@ import FuncaoJavaScriptFormModal from '../../../components/modals/JavaScriptFunc
 export default function FuncoesJavaScript() {
   const { t } = useI18n();
   const [funcoes, setFuncoes] = useState<JavaScriptFunction[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedFuncoes, setSelectedFuncoes] = useState<JavaScriptFunction[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -27,15 +32,32 @@ export default function FuncoesJavaScript() {
   });
 
   const loadFuncoes = async () => {
-    const result = await fetchFuncoes(() => javaScriptFunctionService.getAll({ pageSize: 500 }));
+    const result = await fetchFuncoes(() =>
+      javaScriptFunctionService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
       setFuncoes(result.data);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadFuncoes();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    void loadFuncoes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch]);
 
   const handleAdd = () => {
     setEditingFuncao(null);
@@ -59,19 +81,19 @@ export default function FuncoesJavaScript() {
     }
     setIsConfirmOpen(false);
     setSelectedFuncoes([]);
-    loadFuncoes();
+    void loadFuncoes();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingFuncao(null);
     setSelectedFuncoes([]);
-    loadFuncoes();
+    void loadFuncoes();
   };
 
   const columns: DataTableColumn<JavaScriptFunction>[] = [
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
-    { key: 'description', title: t('common.column.description'), dataIndex: 'description' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
+    { key: 'description', title: t('common.column.description'), dataIndex: 'description', hiddenBelow: 'md' },
   ];
 
   return (
@@ -80,17 +102,34 @@ export default function FuncoesJavaScript() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadFuncoes}
+      onRefresh={() => void loadFuncoes()}
       selectedRowsCount={selectedFuncoes.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={funcoes}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedFuncoes}
         onSelectionChange={setSelectedFuncoes}
-        emptyText={t('javaScriptFunction.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

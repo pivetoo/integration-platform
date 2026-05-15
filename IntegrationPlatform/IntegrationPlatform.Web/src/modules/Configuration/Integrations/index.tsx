@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Upload } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
+import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { integrationService } from '../../../services/integrationService';
 import type { Integration, IntegrationExportModel } from '../../../types/integration';
@@ -14,6 +14,12 @@ export default function Integracoes() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [integracoes, setIntegracoes] = useState<Integration[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integration[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -43,15 +49,56 @@ export default function Integracoes() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadIntegracoes = async () => {
-    const result = await fetchIntegracoes(() => integrationService.getAll({ pageSize: 500 }));
+    const result = await fetchIntegracoes(() =>
+      integrationService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
-      setIntegracoes(result.data);
+      const filtered = result.data.filter((i: Integration) => {
+        if (statusFilter === 'active') return i.isActive;
+        if (statusFilter === 'inactive') return !i.isActive;
+        return true;
+      });
+      setIntegracoes(filtered);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadIntegracoes();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    void loadIntegracoes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: t('common.column.status'),
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { value: 'active', label: t('common.filter.activeOnly') },
+          { value: 'inactive', label: t('common.filter.inactiveOnly') },
+        ],
+        allLabel: t('common.filter.all'),
+      },
+    ],
+    [statusFilter, t],
+  );
+
+  const clearFilters = () => setStatusFilter('');
 
   const handleAdd = () => {
     setEditingIntegracao(null);
@@ -79,14 +126,14 @@ export default function Integracoes() {
     }
     setIsConfirmOpen(false);
     setSelectedIntegracoes([]);
-    loadIntegracoes();
+    void loadIntegracoes();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingIntegracao(null);
     setSelectedIntegracoes([]);
-    loadIntegracoes();
+    void loadIntegracoes();
   };
 
   const handleExport = async () => {
@@ -125,7 +172,7 @@ export default function Integracoes() {
       toast({ title: 'Erro', description: 'Arquivo JSON inválido', variant: 'destructive' });
     } else {
       await importarIntegracao(() => integrationService.import(data));
-      loadIntegracoes();
+      void loadIntegracoes();
     }
 
     if (fileInputRef.current) {
@@ -150,21 +197,23 @@ export default function Integracoes() {
         <div className="h-7 w-7 rounded-md border border-dashed bg-muted/30" />
       ),
     },
-    { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier' },
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier', hiddenBelow: 'md' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
     {
       key: 'integrationCategory',
       title: t('common.column.category'),
       dataIndex: 'integrationCategory',
+      hiddenBelow: 'sm',
       render: (value: IntegrationCategory) => value?.name || '-',
     },
     {
       key: 'isActive',
-      title: t('common.column.active'),
+      title: t('common.column.status'),
       dataIndex: 'isActive',
+      width: 110,
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? t('common.boolean.yes') : t('common.boolean.no')}
+          {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
     },
@@ -176,7 +225,7 @@ export default function Integracoes() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadIntegracoes}
+      onRefresh={() => void loadIntegracoes()}
       selectedRowsCount={selectedIntegracoes.length}
       actions={[
         {
@@ -203,15 +252,34 @@ export default function Integracoes() {
         onChange={handleImportFile}
         style={{ display: 'none' }}
       />
+
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        rightSlot={<FilterPanel sections={filterSections} onClearAll={clearFilters} />}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={integracoes}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedIntegracoes}
         onSelectionChange={setSelectedIntegracoes}
         onRowDoubleClick={handleRowDoubleClick}
-        emptyText={t("integration.integrations.empty")}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

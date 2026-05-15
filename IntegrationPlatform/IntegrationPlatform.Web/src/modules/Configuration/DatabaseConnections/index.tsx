@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
+import { useEffect, useState } from 'react';
+import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { databaseConnectionService } from '../../../services/databaseConnectionService';
@@ -17,6 +17,11 @@ const tipoBancoVariantMap: Record<number, string> = {
 export default function ConexoesBancoDados() {
   const { t } = useI18n();
   const [conexoes, setConexoes] = useState<DatabaseConnection[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedConexoes, setSelectedConexoes] = useState<DatabaseConnection[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -35,15 +40,32 @@ export default function ConexoesBancoDados() {
   });
 
   const loadConexoes = async () => {
-    const result = await fetchConexoes(() => databaseConnectionService.getAll({ pageSize: 500 }));
+    const result = await fetchConexoes(() =>
+      databaseConnectionService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
       setConexoes(result.data);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadConexoes();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    void loadConexoes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch]);
 
   const handleAdd = () => {
     setEditingConexao(null);
@@ -67,31 +89,32 @@ export default function ConexoesBancoDados() {
     }
     setIsConfirmOpen(false);
     setSelectedConexoes([]);
-    loadConexoes();
+    void loadConexoes();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingConexao(null);
     setSelectedConexoes([]);
-    loadConexoes();
+    void loadConexoes();
   };
 
   const columns: DataTableColumn<DatabaseConnection>[] = [
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
     {
       key: 'type',
       title: t('common.column.type'),
       dataIndex: 'type',
+      width: 130,
       render: (value: DatabaseType) => (
         <Badge variant={(tipoBancoVariantMap[value] || 'outline') as 'default' | 'secondary' | 'warning' | 'success'}>
           {DatabaseTypeLabels[value] || '-'}
         </Badge>
       ),
     },
-    { key: 'host', title: t('common.column.host'), dataIndex: 'host' },
-    { key: 'database', title: t('common.column.database'), dataIndex: 'database' },
-    { key: 'username', title: t('common.column.username'), dataIndex: 'username' },
+    { key: 'host', title: t('common.column.host'), dataIndex: 'host', hiddenBelow: 'sm' },
+    { key: 'database', title: t('common.column.database'), dataIndex: 'database', hiddenBelow: 'md' },
+    { key: 'username', title: t('common.column.username'), dataIndex: 'username', hiddenBelow: 'lg' },
   ];
 
   return (
@@ -100,9 +123,16 @@ export default function ConexoesBancoDados() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadConexoes}
+      onRefresh={() => void loadConexoes()}
       selectedRowsCount={selectedConexoes.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        className="mb-3"
+      />
+
       <DataTable
         data={conexoes}
         columns={columns}
@@ -111,7 +141,16 @@ export default function ConexoesBancoDados() {
         selectable
         selectedRows={selectedConexoes}
         onSelectionChange={setSelectedConexoes}
-        emptyText={t('database.connection.list.empty')}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConexaoBancoDadosFormModal

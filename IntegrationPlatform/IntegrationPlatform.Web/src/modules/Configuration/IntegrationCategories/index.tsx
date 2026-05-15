@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, Badge, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { useEffect, useMemo, useState } from 'react';
+import { PageLayout, DataTable, ConfirmModal, Badge, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
+import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { integrationCategoryService } from '../../../services/integrationCategoryService';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
@@ -9,6 +9,12 @@ import CategoriaIntegracaoFormModal from '../../../components/modals/Integration
 export default function CategoriasIntegracao() {
   const { t } = useI18n();
   const [categorias, setCategorias] = useState<IntegrationCategory[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedCategorias, setSelectedCategorias] = useState<IntegrationCategory[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -27,15 +33,56 @@ export default function CategoriasIntegracao() {
   });
 
   const loadCategorias = async () => {
-    const result = await fetchCategorias(() => integrationCategoryService.getAll({ pageSize: 500 }));
+    const result = await fetchCategorias(() =>
+      integrationCategoryService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
-      setCategorias(result.data);
+      const filtered = result.data.filter((c: IntegrationCategory) => {
+        if (statusFilter === 'active') return c.isActive;
+        if (statusFilter === 'inactive') return !c.isActive;
+        return true;
+      });
+      setCategorias(filtered);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadCategorias();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    void loadCategorias();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: t('common.column.status'),
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { value: 'active', label: t('common.filter.activeOnly') },
+          { value: 'inactive', label: t('common.filter.inactiveOnly') },
+        ],
+        allLabel: t('common.filter.all'),
+      },
+    ],
+    [statusFilter, t],
+  );
+
+  const clearFilters = () => setStatusFilter('');
 
   const handleAdd = () => {
     setEditingCategoria(null);
@@ -59,19 +106,19 @@ export default function CategoriasIntegracao() {
     }
     setIsConfirmOpen(false);
     setSelectedCategorias([]);
-    loadCategorias();
+    void loadCategorias();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingCategoria(null);
     setSelectedCategorias([]);
-    loadCategorias();
+    void loadCategorias();
   };
 
   const columns: DataTableColumn<IntegrationCategory>[] = [
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
-    { key: 'description', title: t('common.column.description'), dataIndex: 'description' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
+    { key: 'description', title: t('common.column.description'), dataIndex: 'description', hiddenBelow: 'md' },
     {
       key: 'isActive',
       title: t('common.column.status'),
@@ -91,20 +138,36 @@ export default function CategoriasIntegracao() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadCategorias}
+      onRefresh={() => void loadCategorias()}
       selectedRowsCount={selectedCategorias.length}
     >
-      <div className="space-y-4">
-        <DataTable
-          columns={columns}
-          data={categorias}
-          rowKey="id"
-          selectedRows={selectedCategorias}
-          onSelectionChange={setSelectedCategorias}
-          emptyText={t('integration.category.list.empty')}
-          loading={loading}
-        />
-      </div>
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        rightSlot={<FilterPanel sections={filterSections} onClearAll={clearFilters} />}
+        className="mb-3"
+      />
+
+      <DataTable
+        columns={columns}
+        data={categorias}
+        rowKey="id"
+        loading={loading}
+        selectable
+        selectedRows={selectedCategorias}
+        onSelectionChange={setSelectedCategorias}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
+      />
 
       <ConfirmModal
         open={isConfirmOpen}

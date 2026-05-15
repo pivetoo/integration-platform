@@ -673,4 +673,8 @@
   <data name="pipeline.debugger.diffWithPrevious" xml:space="preserve"><value>Diff com execução anterior</value></data>
   <data name="pipeline.debugger.copyDiff" xml:space="preserve"><value>Copiar Diff</value></data>
   <data name="pipeline.debugger.emptyLogs" xml:space="preserve"><value>Nenhum log para os filtros selecionados.</value></data>
+  <data name="common.filter.all" xml:space="preserve"><value>Todos</value></data>
+  <data name="common.filter.activeOnly" xml:space="preserve"><value>Somente ativos</value></data>
+  <data name="common.filter.inactiveOnly" xml:space="preserve"><value>Somente inativos</value></data>
+  <data name="common.state.empty" xml:space="preserve"><value>Nenhum registro encontrado</value></data>
 </root>

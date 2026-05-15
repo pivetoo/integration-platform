@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { useEffect, useMemo, useState } from 'react';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
+import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { pipelineRoutineService } from '../../../services/pipelineRoutineService';
 import type { PipelineRoutine } from '../../../types/pipelineRoutine';
@@ -12,6 +12,12 @@ import { formatDateTime } from '../../../utils/formatters';
 export default function PipelineRoutines() {
   const { t } = useI18n();
   const [rotinas, setRotinas] = useState<PipelineRoutine[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedRotinas, setSelectedRotinas] = useState<PipelineRoutine[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -30,15 +36,56 @@ export default function PipelineRoutines() {
   });
 
   const loadRotinas = async () => {
-    const result = await fetchRotinas(() => pipelineRoutineService.getAll({ pageSize: 500 }));
+    const result = await fetchRotinas(() =>
+      pipelineRoutineService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
-      setRotinas(result.data);
+      const filtered = result.data.filter((r: PipelineRoutine) => {
+        if (statusFilter === 'active') return r.isActive;
+        if (statusFilter === 'inactive') return !r.isActive;
+        return true;
+      });
+      setRotinas(filtered);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadRotinas();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    void loadRotinas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: t('common.column.status'),
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { value: 'active', label: t('common.filter.activeOnly') },
+          { value: 'inactive', label: t('common.filter.inactiveOnly') },
+        ],
+        allLabel: t('common.filter.all'),
+      },
+    ],
+    [statusFilter, t],
+  );
+
+  const clearFilters = () => setStatusFilter('');
 
   const handleAdd = () => {
     setEditingRotina(null);
@@ -63,14 +110,14 @@ export default function PipelineRoutines() {
 
     setIsConfirmOpen(false);
     setSelectedRotinas([]);
-    loadRotinas();
+    void loadRotinas();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingRotina(null);
     setSelectedRotinas([]);
-    loadRotinas();
+    void loadRotinas();
   };
 
   const columns: DataTableColumn<PipelineRoutine>[] = [
@@ -84,20 +131,24 @@ export default function PipelineRoutines() {
       key: 'pipeline',
       title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
+      hiddenBelow: 'sm',
       render: (value: Pipeline) => value?.name || '-',
     },
     {
       key: 'intervalMinutes',
       title: t('automation.list.intervalMinutes'),
       dataIndex: 'intervalMinutes',
+      width: 100,
+      hiddenBelow: 'md',
     },
     {
       key: 'isActive',
-      title: t('common.column.active'),
+      title: t('common.column.status'),
       dataIndex: 'isActive',
+      width: 110,
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? t('common.boolean.yes') : t('common.boolean.no')}
+          {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
     },
@@ -105,12 +156,14 @@ export default function PipelineRoutines() {
       key: 'nextExecution',
       title: t('automation.list.nextExecution'),
       dataIndex: 'nextExecution',
+      hiddenBelow: 'lg',
       render: (value: string) => formatDateTime(value),
     },
     {
       key: 'lastExecution',
       title: t('automation.list.lastExecution'),
       dataIndex: 'lastExecution',
+      hiddenBelow: 'lg',
       render: (value: string) => formatDateTime(value),
     },
   ];
@@ -121,17 +174,35 @@ export default function PipelineRoutines() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadRotinas}
+      onRefresh={() => void loadRotinas()}
       selectedRowsCount={selectedRotinas.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        rightSlot={<FilterPanel sections={filterSections} onClearAll={clearFilters} />}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={rotinas}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedRotinas}
         onSelectionChange={setSelectedRotinas}
-        emptyText={t('automation.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

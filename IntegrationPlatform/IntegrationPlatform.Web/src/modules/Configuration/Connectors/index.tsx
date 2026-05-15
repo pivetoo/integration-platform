@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
+import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { connectorService } from '../../../services/connectorService';
 import type { Conector } from '../../../types/connector';
@@ -12,6 +12,12 @@ export default function Conectores() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [conectores, setConectores] = useState<Conector[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedConectores, setSelectedConectores] = useState<Conector[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -30,15 +36,56 @@ export default function Conectores() {
   });
 
   const loadConectores = async () => {
-    const result = await fetchConectores(() => connectorService.getAll({ pageSize: 500 }));
+    const result = await fetchConectores(() =>
+      connectorService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
-      setConectores(result.data);
+      const filtered = result.data.filter((c: Conector) => {
+        if (statusFilter === 'active') return c.isActive;
+        if (statusFilter === 'inactive') return !c.isActive;
+        return true;
+      });
+      setConectores(filtered);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadConectores();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    void loadConectores();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: t('common.column.status'),
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { value: 'active', label: t('common.filter.activeOnly') },
+          { value: 'inactive', label: t('common.filter.inactiveOnly') },
+        ],
+        allLabel: t('common.filter.all'),
+      },
+    ],
+    [statusFilter, t],
+  );
+
+  const clearFilters = () => setStatusFilter('');
 
   const handleAdd = () => {
     setEditingConector(null);
@@ -66,18 +113,18 @@ export default function Conectores() {
     }
     setIsConfirmOpen(false);
     setSelectedConectores([]);
-    loadConectores();
+    void loadConectores();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingConector(null);
     setSelectedConectores([]);
-    loadConectores();
+    void loadConectores();
   };
 
   const columns: DataTableColumn<Conector>[] = [
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
     {
       key: 'integration',
       title: t('common.column.integration'),
@@ -86,7 +133,7 @@ export default function Conectores() {
     },
     {
       key: 'isActive',
-      title: t('common.column.active'),
+      title: t('common.column.status'),
       dataIndex: 'isActive',
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
@@ -102,18 +149,36 @@ export default function Conectores() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadConectores}
+      onRefresh={() => void loadConectores()}
       selectedRowsCount={selectedConectores.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        rightSlot={<FilterPanel sections={filterSections} onClearAll={clearFilters} />}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={conectores}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedConectores}
         onSelectionChange={setSelectedConectores}
         onRowDoubleClick={handleRowDoubleClick}
-        emptyText={t('connector.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

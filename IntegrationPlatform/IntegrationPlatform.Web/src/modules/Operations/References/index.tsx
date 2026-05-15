@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
+import { useEffect, useState } from 'react';
+import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { referenceService } from '../../../services/referenceService';
@@ -11,6 +11,11 @@ import { formatDateTime } from '../../../utils/formatters';
 export default function References() {
   const { t } = useI18n();
   const [referencias, setReferencias] = useState<Reference[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedReferencias, setSelectedReferencias] = useState<Reference[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -29,15 +34,32 @@ export default function References() {
   });
 
   const loadReferencias = async () => {
-    const result = await fetchReferencias(() => referenceService.getAll({ pageSize: 500 }));
+    const result = await fetchReferencias(() =>
+      referenceService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
       setReferencias(result.data);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadReferencias();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    void loadReferencias();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch]);
 
   const handleAdd = () => {
     setEditingReferencia(null);
@@ -61,14 +83,14 @@ export default function References() {
     }
     setIsConfirmOpen(false);
     setSelectedReferencias([]);
-    loadReferencias();
+    void loadReferencias();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingReferencia(null);
     setSelectedReferencias([]);
-    loadReferencias();
+    void loadReferencias();
   };
 
   const columns: DataTableColumn<Reference>[] = [
@@ -82,21 +104,25 @@ export default function References() {
       key: 'entity',
       title: t('common.column.entity'),
       dataIndex: 'entity',
+      hiddenBelow: 'sm',
     },
     {
       key: 'internalId',
       title: t('common.column.internalId'),
       dataIndex: 'internalId',
+      hiddenBelow: 'md',
     },
     {
       key: 'externalId',
       title: t('common.column.externalId'),
       dataIndex: 'externalId',
+      hiddenBelow: 'md',
     },
     {
       key: 'createdAt',
       title: t('common.column.createdAt'),
       dataIndex: 'createdAt',
+      hiddenBelow: 'lg',
       render: (value: string) => formatDateTime(value),
     },
   ];
@@ -107,17 +133,34 @@ export default function References() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadReferencias}
+      onRefresh={() => void loadReferencias()}
       selectedRowsCount={selectedReferencias.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={referencias}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedReferencias}
         onSelectionChange={setSelectedReferencias}
-        emptyText={t('reference.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

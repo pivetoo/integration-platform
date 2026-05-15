@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
+import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { pipelineService } from '../../../services/pipelineService';
 import type { Pipeline } from '../../../types/pipeline';
@@ -13,6 +13,12 @@ export default function Pipelines() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedPipelines, setSelectedPipelines] = useState<Pipeline[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -31,15 +37,56 @@ export default function Pipelines() {
   });
 
   const loadPipelines = async () => {
-    const result = await fetchPipelines(() => pipelineService.getAll({ pageSize: 500 }));
+    const result = await fetchPipelines(() =>
+      pipelineService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
-      setPipelines(result.data);
+      const filtered = result.data.filter((p: Pipeline) => {
+        if (statusFilter === 'active') return p.isActive;
+        if (statusFilter === 'inactive') return !p.isActive;
+        return true;
+      });
+      setPipelines(filtered);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadPipelines();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    void loadPipelines();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: t('common.column.status'),
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { value: 'active', label: t('common.filter.activeOnly') },
+          { value: 'inactive', label: t('common.filter.inactiveOnly') },
+        ],
+        allLabel: t('common.filter.all'),
+      },
+    ],
+    [statusFilter, t],
+  );
+
+  const clearFilters = () => setStatusFilter('');
 
   const handleAdd = () => {
     setEditingPipeline(null);
@@ -67,32 +114,34 @@ export default function Pipelines() {
     }
     setIsConfirmOpen(false);
     setSelectedPipelines([]);
-    loadPipelines();
+    void loadPipelines();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingPipeline(null);
     setSelectedPipelines([]);
-    loadPipelines();
+    void loadPipelines();
   };
 
   const columns: DataTableColumn<Pipeline>[] = [
-    { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier' },
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier', hiddenBelow: 'md' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
     {
       key: 'integration',
       title: t('common.column.integration'),
       dataIndex: 'integration',
+      hiddenBelow: 'sm',
       render: (value: Integration) => value?.name || '-',
     },
     {
       key: 'isActive',
-      title: t('common.column.active'),
+      title: t('common.column.status'),
       dataIndex: 'isActive',
+      width: 110,
       render: (value: boolean) => (
         <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? t('common.boolean.yes') : t('common.boolean.no')}
+          {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
     },
@@ -119,18 +168,36 @@ export default function Pipelines() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadPipelines}
+      onRefresh={() => void loadPipelines()}
       selectedRowsCount={selectedPipelines.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        rightSlot={<FilterPanel sections={filterSections} onClearAll={clearFilters} />}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={pipelines}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedPipelines}
         onSelectionChange={setSelectedPipelines}
         onRowDoubleClick={handleRowDoubleClick}
-        emptyText={t('pipeline.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { useEffect, useMemo, useState } from 'react';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
+import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { processingQueueService } from '../../../services/processingQueueService';
 import { ProcessingStatusLabels } from '../../../types/processingQueue';
@@ -21,6 +21,12 @@ const statusVariantMap: Record<number, string> = {
 export default function ProcessingQueue() {
   const { t } = useI18n();
   const [itens, setItens] = useState<ProcessingQueueItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedItens, setSelectedItens] = useState<ProcessingQueueItem[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -38,15 +44,55 @@ export default function ProcessingQueue() {
   });
 
   const loadItens = async () => {
-    const result = await fetchItens(() => processingQueueService.getAll({ pageSize: 500 }));
+    const result = await fetchItens(() =>
+      processingQueueService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
-      setItens(result.data);
+      const filtered = result.data.filter((i: ProcessingQueueItem) => {
+        if (statusFilter === '') return true;
+        return String(i.status) === statusFilter;
+      });
+      setItens(filtered);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadItens();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    void loadItens();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: t('common.column.status'),
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: Object.entries(ProcessingStatusLabels).map(([value, label]) => ({
+          value: String(value),
+          label: String(label),
+        })),
+        allLabel: t('common.filter.all'),
+      },
+    ],
+    [statusFilter, t],
+  );
+
+  const clearFilters = () => setStatusFilter('');
 
   const handleAdd = () => {
     setIsFormOpen(true);
@@ -62,13 +108,13 @@ export default function ProcessingQueue() {
     }
     setIsConfirmOpen(false);
     setSelectedItens([]);
-    loadItens();
+    void loadItens();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedItens([]);
-    loadItens();
+    void loadItens();
   };
 
   const columns: DataTableColumn<ProcessingQueueItem>[] = [
@@ -82,17 +128,21 @@ export default function ProcessingQueue() {
       key: 'pipeline',
       title: t('common.column.pipeline'),
       dataIndex: 'pipeline',
+      hiddenBelow: 'sm',
       render: (value: Pipeline) => value?.name || '-',
     },
     {
       key: 'priority',
       title: t('common.column.priority'),
       dataIndex: 'priority',
+      width: 100,
+      hiddenBelow: 'md',
     },
     {
       key: 'status',
       title: t('common.column.status'),
       dataIndex: 'status',
+      width: 130,
       render: (value: ProcessingStatus) => (
         <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'info' | 'success' | 'destructive' | 'secondary'}>
           {ProcessingStatusLabels[value] || '-'}
@@ -103,12 +153,14 @@ export default function ProcessingQueue() {
       key: 'scheduledAt',
       title: t('common.column.scheduledAt'),
       dataIndex: 'scheduledAt',
+      hiddenBelow: 'lg',
       render: (value: string) => formatDateTime(value),
     },
     {
       key: 'createdAt',
       title: t('common.column.createdAt'),
       dataIndex: 'createdAt',
+      hiddenBelow: 'lg',
       render: (value: string) => formatDateTime(value),
     },
   ];
@@ -118,17 +170,35 @@ export default function ProcessingQueue() {
       title={t('processingQueue.list.title')}
       onAdd={handleAdd}
       onDelete={handleDelete}
-      onRefresh={loadItens}
+      onRefresh={() => void loadItens()}
       selectedRowsCount={selectedItens.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        rightSlot={<FilterPanel sections={filterSections} onClearAll={clearFilters} />}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={itens}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedItens}
         onSelectionChange={setSelectedItens}
-        emptyText={t('processingQueue.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal

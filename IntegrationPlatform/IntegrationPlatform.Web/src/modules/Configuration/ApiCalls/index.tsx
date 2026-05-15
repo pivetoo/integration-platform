@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, useApi, useI18n, toast } from 'archon-ui';
+import { useEffect, useState } from 'react';
+import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { apiCallService } from '../../../services/apiCallService';
@@ -18,6 +18,11 @@ const metodoVariantMap: Record<number, string> = {
 export default function ChamadasApi() {
   const { t } = useI18n();
   const [chamadas, setChamadas] = useState<ApiCall[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedChamadas, setSelectedChamadas] = useState<ApiCall[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -39,15 +44,32 @@ export default function ChamadasApi() {
   });
 
   const loadChamadas = async () => {
-    const result = await fetchChamadas(() => apiCallService.getAll({ pageSize: 500 }));
+    const result = await fetchChamadas(() =>
+      apiCallService.getAll({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+      }),
+    );
     if (result) {
       setChamadas(result.data);
+      setTotalCount(result.total ?? 0);
     }
   };
 
   useEffect(() => {
-    loadChamadas();
-  }, []);
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    void loadChamadas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, debouncedSearch]);
 
   const handleAdd = () => {
     setEditingChamada(null);
@@ -72,29 +94,30 @@ export default function ChamadasApi() {
     }
     setIsConfirmOpen(false);
     setSelectedChamadas([]);
-    loadChamadas();
+    void loadChamadas();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingChamada(null);
     setSelectedChamadas([]);
-    loadChamadas();
+    void loadChamadas();
   };
 
   const columns: DataTableColumn<ApiCall>[] = [
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name' },
+    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
     {
       key: 'method',
       title: t('common.column.method'),
       dataIndex: 'method',
+      width: 120,
       render: (value: HttpMethod) => (
         <Badge variant={(metodoVariantMap[value] || 'outline') as 'success' | 'default' | 'warning' | 'secondary' | 'destructive'}>
           {HttpMethodLabels[value] || '-'}
         </Badge>
       ),
     },
-    { key: 'url', title: t('common.column.url'), dataIndex: 'url' },
+    { key: 'url', title: t('common.column.url'), dataIndex: 'url', hiddenBelow: 'md' },
   ];
 
   return (
@@ -103,17 +126,34 @@ export default function ChamadasApi() {
       onAdd={handleAdd}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      onRefresh={loadChamadas}
+      onRefresh={() => void loadChamadas()}
       selectedRowsCount={selectedChamadas.length}
     >
+      <TableToolbar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('common.action.search')}
+        className="mb-3"
+      />
+
       <DataTable
         columns={columns}
         data={chamadas}
         rowKey="id"
+        loading={loading}
+        selectable
         selectedRows={selectedChamadas}
         onSelectionChange={setSelectedChamadas}
-        emptyText={t('apiCall.list.empty')}
-        loading={loading}
+        emptyText={t('common.state.empty')}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        totalCount={totalCount}
+        page={page}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s);
+          setPage(1);
+        }}
       />
 
       <ConfirmModal
