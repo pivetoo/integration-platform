@@ -33,7 +33,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             Connector connector = await GetConnector(connectorId, cancellationToken);
             Pipeline pipeline = await GetPipeline(pipelineId, cancellationToken);
             ProcessingQueue? trackedQueueItem = queueItem is not null
-                ? await dbContext.Set<ProcessingQueue>().FirstOrDefaultAsync(item => item.Id == queueItem.Id, cancellationToken)
+                ? await dbContext.Set<ProcessingQueue>().AsTracking().FirstOrDefaultAsync(item => item.Id == queueItem.Id, cancellationToken)
                 : null;
 
             Execution execution = new(type, connector.Id, ExecutionStatus.Running, DateTimeOffset.UtcNow, pipeline.Id, trackedQueueItem?.Id, inputData);
