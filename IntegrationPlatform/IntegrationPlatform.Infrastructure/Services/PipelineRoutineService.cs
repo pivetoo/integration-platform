@@ -70,7 +70,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (routine is null)
             {
-                throw new InvalidOperationException(Localizer["pipeline.routine.notFound"]);
+                throw new InvalidOperationException("pipeline.routine.notFound");
             }
 
             routine.Update(intervalMinutes, isActive, defaultPayload, nextExecution);

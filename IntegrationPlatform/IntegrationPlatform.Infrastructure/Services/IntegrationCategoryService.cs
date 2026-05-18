@@ -64,7 +64,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             IntegrationCategory? category = await DbContext.Set<IntegrationCategory>()
@@ -73,7 +73,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (category is null)
             {
-                throw new InvalidOperationException(Localizer["integration.category.notFound"]);
+                throw new InvalidOperationException("integration.category.notFound");
             }
 
             category.Update(request.Name, request.Description, request.IsActive);

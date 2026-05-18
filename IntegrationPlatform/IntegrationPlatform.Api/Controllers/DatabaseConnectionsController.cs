@@ -88,7 +88,7 @@ namespace IntegrationPlatform.Api.Controllers
             }
             catch (InvalidOperationException exception)
             {
-                return Http400(exception.Message);
+                return Http400(Localizer[exception.Message]);
             }
         }
 

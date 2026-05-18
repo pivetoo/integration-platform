@@ -69,7 +69,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (reference is null)
             {
-                throw new InvalidOperationException(Localizer["reference.notFound"]);
+                throw new InvalidOperationException("reference.notFound");
             }
 
             reference.Update(request.Entity, request.InternalId, request.ExternalId);

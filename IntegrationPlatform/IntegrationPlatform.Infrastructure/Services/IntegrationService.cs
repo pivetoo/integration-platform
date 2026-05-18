@@ -72,7 +72,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             Integration? integration = await DbContext.Set<Integration>()
@@ -81,7 +81,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (integration is null)
             {
-                throw new InvalidOperationException(Localizer["integration.notFound"]);
+                throw new InvalidOperationException("integration.notFound");
             }
 
             await EnsureUniqueIdentifier(request.Identifier, id, cancellationToken);
@@ -108,7 +108,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (identifierExists)
             {
-                throw new InvalidOperationException(Localizer["integration.identifier.alreadyExists"]);
+                throw new InvalidOperationException("integration.identifier.alreadyExists");
             }
         }
 

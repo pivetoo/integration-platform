@@ -342,7 +342,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             if (!connector.IsActive)
             {
-                throw new InvalidOperationException(Localizer["webhook.connector.inactive"]);
+                throw new InvalidOperationException("webhook.connector.inactive");
             }
 
             string pipelineIdentifier = $"{connector.Integration.Identifier}-webhook";

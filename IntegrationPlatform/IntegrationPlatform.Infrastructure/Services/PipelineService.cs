@@ -73,7 +73,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             Pipeline? pipeline = await DbContext.Set<Pipeline>()
@@ -82,7 +82,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (pipeline is null)
             {
-                throw new InvalidOperationException(Localizer["pipeline.notFound"]);
+                throw new InvalidOperationException("pipeline.notFound");
             }
 
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);
@@ -107,7 +107,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (pipeline is null)
             {
-                throw new InvalidOperationException(Localizer["pipeline.notFound"]);
+                throw new InvalidOperationException("pipeline.notFound");
             }
 
             List<Pipeline> siblings = await DbContext.Set<Pipeline>()
@@ -134,7 +134,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException(Localizer["integration.notFound"]);
+                throw new InvalidOperationException("integration.notFound");
             }
         }
 
@@ -150,7 +150,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (exists)
             {
-                throw new InvalidOperationException(Localizer["pipeline.identifier.alreadyExistsForIntegration"]);
+                throw new InvalidOperationException("pipeline.identifier.alreadyExistsForIntegration");
             }
         }
 

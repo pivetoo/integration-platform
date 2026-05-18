@@ -74,7 +74,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             PipelineStep? step = await DbContext.Set<PipelineStep>()
@@ -83,7 +83,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (step is null)
             {
-                throw new InvalidOperationException(Localizer["pipeline.step.notFound"]);
+                throw new InvalidOperationException("pipeline.step.notFound");
             }
 
             await ValidateLinkedResource(request.Type, request.ApiCallId, request.JavaScriptFunctionId, request.DatabaseScriptId, cancellationToken);
@@ -117,7 +117,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException(Localizer["pipeline.notFound"]);
+                throw new InvalidOperationException("pipeline.notFound");
             }
         }
 
@@ -133,7 +133,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (exists)
             {
-                throw new InvalidOperationException(Localizer["pipeline.step.order.alreadyExists"]);
+                throw new InvalidOperationException("pipeline.step.order.alreadyExists");
             }
         }
 
@@ -149,7 +149,7 @@ namespace IntegrationPlatform.Infrastructure.Services
                 case PipelineStepType.HttpRequest:
                     if (!apiCallId.HasValue)
                     {
-                        throw new InvalidOperationException(Localizer["pipeline.step.apiCallId.required"]);
+                        throw new InvalidOperationException("pipeline.step.apiCallId.required");
                     }
 
                     await EnsureEntityExists<ApiCall>(apiCallId.Value, Localizer["apiCall.notFound"], cancellationToken);
@@ -158,7 +158,7 @@ namespace IntegrationPlatform.Infrastructure.Services
                 case PipelineStepType.JavaScriptFunction:
                     if (!javaScriptFunctionId.HasValue)
                     {
-                        throw new InvalidOperationException(Localizer["pipeline.step.javaScriptFunctionId.required"]);
+                        throw new InvalidOperationException("pipeline.step.javaScriptFunctionId.required");
                     }
 
                     await EnsureEntityExists<JavaScriptFunction>(javaScriptFunctionId.Value, Localizer["javaScriptFunction.notFound"], cancellationToken);
@@ -167,7 +167,7 @@ namespace IntegrationPlatform.Infrastructure.Services
                 case PipelineStepType.ExecuteScript:
                     if (!databaseScriptId.HasValue)
                     {
-                        throw new InvalidOperationException(Localizer["pipeline.step.databaseScriptId.required"]);
+                        throw new InvalidOperationException("pipeline.step.databaseScriptId.required");
                     }
 
                     await EnsureEntityExists<DatabaseScript>(databaseScriptId.Value, Localizer["database.script.notFound"], cancellationToken);

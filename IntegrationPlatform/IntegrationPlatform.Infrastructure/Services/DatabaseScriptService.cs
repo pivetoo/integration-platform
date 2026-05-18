@@ -56,7 +56,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             DatabaseScript? script = await DbContext.Set<DatabaseScript>()
@@ -65,7 +65,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (script is null)
             {
-                throw new InvalidOperationException(Localizer["database.script.notFound"]);
+                throw new InvalidOperationException("database.script.notFound");
             }
 
             await EnsureDatabaseConnectionExists(request.DatabaseConnectionId, cancellationToken);
@@ -89,7 +89,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException(Localizer["database.connection.notFound"]);
+                throw new InvalidOperationException("database.connection.notFound");
             }
         }
 

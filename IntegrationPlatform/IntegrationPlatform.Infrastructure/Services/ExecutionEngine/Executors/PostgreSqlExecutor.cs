@@ -61,12 +61,12 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             if (normalized.StartsWith("UPDATE ", StringComparison.Ordinal) && !normalized.Contains(" WHERE ", StringComparison.Ordinal))
             {
-                throw new InvalidOperationException(Localizer["database.query.updateWithoutWhereNotAllowed"]);
+                throw new InvalidOperationException("database.query.updateWithoutWhereNotAllowed");
             }
 
             if (normalized.StartsWith("DELETE ", StringComparison.Ordinal) && !normalized.Contains(" WHERE ", StringComparison.Ordinal))
             {
-                throw new InvalidOperationException(Localizer["database.query.deleteWithoutWhereNotAllowed"]);
+                throw new InvalidOperationException("database.query.deleteWithoutWhereNotAllowed");
             }
         }
     }

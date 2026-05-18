@@ -106,7 +106,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             Connector? connector = await DbContext.Set<Connector>()
@@ -115,7 +115,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (connector is null)
             {
-                throw new InvalidOperationException(Localizer["connector.notFound"]);
+                throw new InvalidOperationException("connector.notFound");
             }
 
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);
@@ -140,7 +140,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (!exists)
             {
-                throw new InvalidOperationException(Localizer["integration.notFound"]);
+                throw new InvalidOperationException("integration.notFound");
             }
         }
 

@@ -55,7 +55,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             JavaScriptFunction? function = await DbContext.Set<JavaScriptFunction>()
@@ -64,7 +64,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (function is null)
             {
-                throw new InvalidOperationException(Localizer["javaScriptFunction.notFound"]);
+                throw new InvalidOperationException("javaScriptFunction.notFound");
             }
 
             function.Update(request.Name, request.Code, request.Description);

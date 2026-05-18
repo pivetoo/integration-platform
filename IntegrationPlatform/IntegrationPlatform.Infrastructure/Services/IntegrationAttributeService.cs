@@ -61,7 +61,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != requestId)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             IntegrationAttribute? attribute = await DbContext.Set<IntegrationAttribute>()
@@ -70,7 +70,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (attribute is null)
             {
-                throw new InvalidOperationException(Localizer["integration.attribute.notFound"]);
+                throw new InvalidOperationException("integration.attribute.notFound");
             }
 
             attribute.Update(

@@ -46,7 +46,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != requestId)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             ConnectorAttributeValue? attributeValue = await DbContext.Set<ConnectorAttributeValue>()
@@ -55,7 +55,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (attributeValue is null)
             {
-                throw new InvalidOperationException(Localizer["connector.attributeValue.notFound"]);
+                throw new InvalidOperationException("connector.attributeValue.notFound");
             }
 
             attributeValue.Update(integrationAttributeId, value);

@@ -1,3 +1,4 @@
+using Archon.Core.Exceptions;
 using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
@@ -66,7 +67,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             DatabaseConnection? connection = await DbContext.Set<DatabaseConnection>()
@@ -75,7 +76,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (connection is null)
             {
-                throw new InvalidOperationException(Localizer["database.connection.notFound"]);
+                throw new InvalidOperationException("database.connection.notFound");
             }
 
             connection.Update(
@@ -118,16 +119,16 @@ namespace IntegrationPlatform.Infrastructure.Services
                         break;
                     }
                     default:
-                        throw new InvalidOperationException(Localizer["database.connection.test.unsupportedType", databaseType]);
+                        throw new BusinessRuleException("database.connection.test.unsupportedType", databaseType);
                 }
             }
-            catch (InvalidOperationException)
+            catch (BusinessRuleException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(Localizer["database.connection.test.failed", ex.Message]);
+                throw new BusinessRuleException("database.connection.test.failed", ex.Message);
             }
         }
 
@@ -139,7 +140,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (!Enum.IsDefined(typeof(DatabaseType), normalizedValue))
             {
-                throw new InvalidOperationException(Localizer["database.connection.type.invalid"]);
+                throw new InvalidOperationException("database.connection.type.invalid");
             }
 
             return (DatabaseType)normalizedValue;
@@ -153,7 +154,7 @@ namespace IntegrationPlatform.Infrastructure.Services
                     $"Host={request.Host};Port={request.Port};Database={request.Database};Username={request.Username};Password={request.Password}",
                 DatabaseType.SqlServer =>
                     $"Server={request.Host},{request.Port};Database={request.Database};User Id={request.Username};Password={request.Password};TrustServerCertificate=true;Encrypt=false",
-                _ => throw new InvalidOperationException(Localizer["database.connection.type.unsupported"])
+                _ => throw new InvalidOperationException("database.connection.type.unsupported")
             };
         }
 

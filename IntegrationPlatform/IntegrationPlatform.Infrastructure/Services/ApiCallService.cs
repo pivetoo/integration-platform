@@ -63,7 +63,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             if (id != request.Id)
             {
-                throw new InvalidOperationException(Localizer["request.route.idMismatch"]);
+                throw new InvalidOperationException("request.route.idMismatch");
             }
 
             ApiCall? apiCall = await DbContext.Set<ApiCall>()
@@ -72,7 +72,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (apiCall is null)
             {
-                throw new InvalidOperationException(Localizer["apiCall.notFound"]);
+                throw new InvalidOperationException("apiCall.notFound");
             }
 
             apiCall.Update(
@@ -100,7 +100,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             if (!Enum.IsDefined(typeof(HttpMethodType), normalizedValue))
             {
-                throw new InvalidOperationException(Localizer["apiCall.method.invalid"]);
+                throw new InvalidOperationException("apiCall.method.invalid");
             }
 
             return (HttpMethodType)normalizedValue;

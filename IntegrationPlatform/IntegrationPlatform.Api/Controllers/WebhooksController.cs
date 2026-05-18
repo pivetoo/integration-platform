@@ -47,11 +47,11 @@ namespace IntegrationPlatform.Api.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return Http404(ex.Message);
+                return Http404(Localizer[ex.Message]);
             }
             catch (InvalidOperationException ex)
             {
-                return Http400(ex.Message);
+                return Http400(Localizer[ex.Message]);
             }
         }
     }
