@@ -39,6 +39,19 @@ namespace IntegrationPlatform.Infrastructure.Services
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
         }
 
+        public async Task<IntegrationCategory?> GetIntegrationCategoryByIdentifier(string identifier, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                return null;
+            }
+
+            string normalized = identifier.Trim().ToLower();
+            return await DbContext.Set<IntegrationCategory>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Identifier == normalized, cancellationToken);
+        }
+
         public async Task<List<IntegrationCategory>> GetActiveIntegrationCategories(CancellationToken cancellationToken = default)
         {
             return await DbContext.Set<IntegrationCategory>()
@@ -50,7 +63,9 @@ namespace IntegrationPlatform.Infrastructure.Services
 
         public async Task<IntegrationCategory> CreateIntegrationCategory(CreateIntegrationCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            IntegrationCategory category = new(request.Name, request.Description);
+            await EnsureIdentifierIsUnique(request.Identifier, ignoreId: null, cancellationToken);
+
+            IntegrationCategory category = new(request.Identifier, request.Name, request.Description);
             bool success = await Insert(cancellationToken, category);
             if (!success)
             {
@@ -76,7 +91,9 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException("integration.category.notFound");
             }
 
-            category.Update(request.Name, request.Description, request.IsActive);
+            await EnsureIdentifierIsUnique(request.Identifier, ignoreId: id, cancellationToken);
+
+            category.Update(request.Identifier, request.Name, request.Description, request.IsActive);
 
             IntegrationCategory? result = await Update(category, cancellationToken);
             if (result is null)
@@ -85,6 +102,20 @@ namespace IntegrationPlatform.Infrastructure.Services
             }
 
             return result;
+        }
+
+        private async Task EnsureIdentifierIsUnique(string identifier, long? ignoreId, CancellationToken cancellationToken)
+        {
+            string normalized = identifier.Trim().ToLower();
+
+            bool exists = await DbContext.Set<IntegrationCategory>()
+                .AsNoTracking()
+                .AnyAsync(item => item.Identifier == normalized && (ignoreId == null || item.Id != ignoreId), cancellationToken);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("integrationCategory.identifier.duplicated");
+            }
         }
 
         public override async Task<IntegrationCategory?> Delete(long id, CancellationToken cancellationToken = default)
@@ -98,6 +129,12 @@ namespace IntegrationPlatform.Infrastructure.Services
             if (category is null)
             {
                 MutableMessages.Add(new KeyNotFoundException(Localizer["integration.category.notFound"]));
+                return null;
+            }
+
+            if (category.IsSystem)
+            {
+                MutableMessages.Add(new InvalidOperationException(Localizer["integrationCategory.system.cannotDelete"]));
                 return null;
             }
 

@@ -42,6 +42,19 @@ namespace IntegrationPlatform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
+        [RequireAccess("Permite consultar uma categoria de integração pelo identifier semântico.")]
+        [GetEndpoint("by-identifier/{identifier}")]
+        public async Task<IActionResult> GetByIdentifier(string identifier, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                return Http400(Localizer["request.id.required"]);
+            }
+
+            IntegrationCategory? entity = await integrationCategoryService.GetIntegrationCategoryByIdentifier(identifier, cancellationToken);
+            return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
+        }
+
         [RequireAccess("Permite cadastrar uma nova categoria de integração.")]
         [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationCategoryRequest request, CancellationToken cancellationToken)

@@ -54,6 +54,24 @@ namespace IntegrationPlatform.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<Connector>> GetConnectorsByCategoryIdentifier(string identifier, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                return new List<Connector>();
+            }
+
+            string normalized = identifier.Trim().ToLower();
+            return await QueryWithDetails()
+                .Where(item => item.IsActive
+                    && item.Integration != null
+                    && item.Integration.IsActive
+                    && item.Integration.IntegrationCategory != null
+                    && item.Integration.IntegrationCategory.Identifier == normalized)
+                .OrderBy(item => item.Name)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Connector> CreateConnector(CreateConnectorRequest request, CancellationToken cancellationToken = default)
         {
             await EnsureIntegrationExists(request.IntegrationId, cancellationToken);

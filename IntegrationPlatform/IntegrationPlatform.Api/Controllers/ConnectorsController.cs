@@ -67,6 +67,15 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(connectors.Select(MapConnector).ToList());
         }
 
+        [RequireAccess("Permite listar conectores ativos filtrados pelo identifier semântico da categoria.")]
+        [GetEndpoint("by-category-identifier/{identifier}")]
+        public async Task<IActionResult> GetByCategoryIdentifier(string identifier, CancellationToken cancellationToken)
+        {
+            List<Connector> connectors = await connectorService.GetConnectorsByCategoryIdentifier(identifier, cancellationToken);
+
+            return Http200(connectors.Select(MapConnector).ToList());
+        }
+
         [RequireAccess]
         [PostEndpoint("[action]")]
         public async Task<IActionResult> Create([FromBody] CreateConnectorRequest request, CancellationToken cancellationToken)

@@ -10,12 +10,22 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
         {
             builder.ToTable("integrationcategory");
 
+            builder.Property(entity => entity.Identifier)
+                .IsRequired()
+                .HasMaxLength(80);
+
             builder.Property(entity => entity.Name)
                 .IsRequired()
                 .HasMaxLength(100);
 
             builder.Property(entity => entity.Description)
                 .HasMaxLength(500);
+
+            builder.Property(entity => entity.IsSystem)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            builder.HasIndex(entity => entity.Identifier).IsUnique();
         }
     }
 }

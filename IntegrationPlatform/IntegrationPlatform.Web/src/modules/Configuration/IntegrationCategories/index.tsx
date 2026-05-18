@@ -96,7 +96,17 @@ export default function CategoriasIntegracao() {
     }
   };
 
+  const hasSystemSelected = selectedCategorias.some((item) => item.isSystem);
+
   const handleDelete = () => {
+    if (hasSystemSelected) {
+      toast({
+        title: t('integration.category.list.deleteSystemBlockedTitle'),
+        description: t('integration.category.list.deleteSystemBlocked'),
+        variant: 'destructive',
+      });
+      return;
+    }
     setIsConfirmOpen(true);
   };
 
@@ -117,7 +127,29 @@ export default function CategoriasIntegracao() {
   };
 
   const columns: DataTableColumn<IntegrationCategory>[] = [
-    { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
+    {
+      key: 'name',
+      title: t('common.column.name'),
+      dataIndex: 'name',
+      sortable: true,
+      render: (value: string, record) => (
+        <span className="inline-flex items-center gap-2">
+          <span className="font-medium">{value}</span>
+          {record.isSystem && (
+            <Badge variant="outline" className="text-xs">{t('integration.category.list.systemBadge')}</Badge>
+          )}
+        </span>
+      ),
+    },
+    {
+      key: 'identifier',
+      title: t('integration.category.column.identifier'),
+      dataIndex: 'identifier',
+      width: 200,
+      render: (value: string) => (
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{value}</code>
+      ),
+    },
     { key: 'description', title: t('common.column.description'), dataIndex: 'description', hiddenBelow: 'md' },
     {
       key: 'isActive',

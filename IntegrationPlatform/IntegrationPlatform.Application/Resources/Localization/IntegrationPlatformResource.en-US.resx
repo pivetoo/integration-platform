@@ -204,6 +204,27 @@
   <data name="integration.category.updated" xml:space="preserve">
     <value>Integration category updated successfully.</value>
   </data>
+  <data name="integrationCategory.identifier.duplicated" xml:space="preserve">
+    <value>A category with this identifier already exists.</value>
+  </data>
+  <data name="integrationCategory.identifier.systemReadonly" xml:space="preserve">
+    <value>System categories do not allow changing the identifier.</value>
+  </data>
+  <data name="integrationCategory.system.cannotDelete" xml:space="preserve">
+    <value>System categories cannot be deleted.</value>
+  </data>
+  <data name="validation.integrationCategory.identifier.invalidFormat" xml:space="preserve">
+    <value>Invalid identifier. Use only lowercase letters, numbers and hyphens (e.g., payment, digital-signature).</value>
+  </data>
+  <data name="integration.category.form.identifier" xml:space="preserve"><value>Identifier</value></data>
+  <data name="integration.category.form.identifierPlaceholder" xml:space="preserve"><value>e.g.: payment, digital-signature</value></data>
+  <data name="integration.category.form.identifierHint" xml:space="preserve"><value>Unique slug used by integrated systems to reference this category. Use lowercase, numbers and hyphens.</value></data>
+  <data name="integration.category.form.identifierSystemHint" xml:space="preserve"><value>System category. Identifier is fixed; you can still rename the display via "Name".</value></data>
+  <data name="integration.category.form.systemBadge" xml:space="preserve"><value>System</value></data>
+  <data name="integration.category.column.identifier" xml:space="preserve"><value>Identifier</value></data>
+  <data name="integration.category.list.systemBadge" xml:space="preserve"><value>System</value></data>
+  <data name="integration.category.list.deleteSystemBlocked" xml:space="preserve"><value>System categories cannot be deleted.</value></data>
+  <data name="integration.category.list.deleteSystemBlockedTitle" xml:space="preserve"><value>Protected category</value></data>
   <data name="integration.attribute.created" xml:space="preserve">
     <value>Integration attribute created successfully.</value>
   </data>

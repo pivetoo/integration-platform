@@ -15,6 +15,8 @@ namespace IntegrationPlatform.Application.Services
 
         Task<List<Connector>> GetActiveConnectors(CancellationToken cancellationToken = default);
 
+        Task<List<Connector>> GetConnectorsByCategoryIdentifier(string identifier, CancellationToken cancellationToken = default);
+
         Task<Connector> CreateConnector(CreateConnectorRequest request, CancellationToken cancellationToken = default);
 
         Task<Connector> UpdateConnector(long id, UpdateConnectorRequest request, CancellationToken cancellationToken = default);

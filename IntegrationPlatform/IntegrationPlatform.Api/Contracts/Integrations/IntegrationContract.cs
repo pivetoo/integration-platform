@@ -44,9 +44,11 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
                 : new IntegrationCategoryContract
                 {
                     Id = item.IntegrationCategory.Id,
+                    Identifier = item.IntegrationCategory.Identifier,
                     Name = item.IntegrationCategory.Name,
                     Description = item.IntegrationCategory.Description,
                     IsActive = item.IntegrationCategory.IsActive,
+                    IsSystem = item.IntegrationCategory.IsSystem,
                     CreatedAt = item.IntegrationCategory.CreatedAt,
                     UpdatedAt = item.IntegrationCategory.UpdatedAt
                 }
