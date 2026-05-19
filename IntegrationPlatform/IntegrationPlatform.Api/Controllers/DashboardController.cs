@@ -15,7 +15,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite visualizar os indicadores consolidados do dashboard da plataforma de integrações.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> GetDashboardData(CancellationToken cancellationToken)
         {
             var data = await dashboardService.GetDashboardData(cancellationToken);

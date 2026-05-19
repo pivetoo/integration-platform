@@ -24,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar os scripts SQL cadastrados na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
             PagedResult<DatabaseScript> result = await databaseScriptService.GetDatabaseScripts(request, search, cancellationToken);
@@ -45,7 +45,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar um novo script SQL reutilizável.")]
-        [PostEndpoint("[action]")]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateDatabaseScriptRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

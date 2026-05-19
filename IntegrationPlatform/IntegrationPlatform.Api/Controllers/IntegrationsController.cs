@@ -24,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as integrações cadastradas na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
             PagedResult<Integration> result = await integrationService.GetIntegrations(request, search, cancellationToken);
@@ -62,7 +62,7 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("Permite cadastrar uma nova integração na plataforma.")]
 
-        [PostEndpoint("[action]")]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

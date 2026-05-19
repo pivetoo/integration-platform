@@ -24,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as etapas de pipeline cadastradas na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<PipelineStep> result = await pipelineStepService.GetPipelineSteps(request, cancellationToken);
@@ -59,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar uma nova etapa em um pipeline.")]
-        [PostEndpoint("[action]")]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreatePipelineStepRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

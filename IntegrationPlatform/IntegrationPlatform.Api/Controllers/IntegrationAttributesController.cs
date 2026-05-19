@@ -24,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar os atributos configuráveis das integrações.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<IntegrationAttribute> result = await integrationAttributeService.GetIntegrationAttributes(request, cancellationToken);
@@ -59,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar um novo atributo configurável para uma integração.")]
-        [PostEndpoint("[action]")]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationAttributeRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

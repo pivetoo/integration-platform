@@ -23,7 +23,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar os logs de execução registrados na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
             PagedResult<ExecutionLog> result = await executionLogService.GetExecutionLogs(request, cancellationToken);

@@ -26,7 +26,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as execuções registradas na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
             PagedResult<Execution> result = await executionService.GetExecutions(request, search, cancellationToken);

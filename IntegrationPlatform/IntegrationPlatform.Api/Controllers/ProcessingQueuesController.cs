@@ -31,7 +31,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar os itens da fila de processamento da plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
             PagedResult<ProcessingQueue> result = await processingQueueService.GetProcessingQueues(request, search, cancellationToken);

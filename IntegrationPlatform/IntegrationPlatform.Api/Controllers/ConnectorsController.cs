@@ -24,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar os conectores cadastrados na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
             PagedResult<Connector> result = await connectorService.GetConnectors(request, search, cancellationToken);
@@ -77,7 +77,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess]
-        [PostEndpoint("[action]")]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateConnectorRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);

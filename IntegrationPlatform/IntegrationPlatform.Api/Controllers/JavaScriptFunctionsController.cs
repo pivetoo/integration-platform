@@ -22,7 +22,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite listar as funções JavaScript cadastradas na plataforma.")]
-        [GetEndpoint("[action]")]
+        [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
             PagedResult<JavaScriptFunction> result = await javaScriptFunctionService.GetJavaScriptFunctions(request, search, cancellationToken);
@@ -43,7 +43,7 @@ namespace IntegrationPlatform.Api.Controllers
         }
 
         [RequireAccess("Permite cadastrar uma nova função JavaScript reutilizável.")]
-        [PostEndpoint("[action]")]
+        [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateJavaScriptFunctionRequest request, CancellationToken cancellationToken)
         {
             IActionResult? validationResult = ValidateBody(request);
