@@ -698,4 +698,109 @@
   <data name="common.filter.activeOnly" xml:space="preserve"><value>Active only</value></data>
   <data name="common.filter.inactiveOnly" xml:space="preserve"><value>Inactive only</value></data>
   <data name="common.state.empty" xml:space="preserve"><value>No records found</value></data>
+  <data name="apiCalls.area" xml:space="preserve"><value>Api calls</value></data>
+  <data name="apiCalls.create.description" xml:space="preserve"><value>Permite cadastrar uma nova chamada de API reutilizável.</value></data>
+  <data name="apiCalls.delete.description" xml:space="preserve"><value>Permite excluir uma chamada de API cadastrada na plataforma.</value></data>
+  <data name="apiCalls.get.description" xml:space="preserve"><value>Permite listar as chamadas de API cadastradas na plataforma.</value></data>
+  <data name="apiCalls.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma chamada de API específica.</value></data>
+  <data name="apiCalls.update.description" xml:space="preserve"><value>Permite atualizar a configuração de uma chamada de API cadastrada.</value></data>
+  <data name="connectorAttributeValues.area" xml:space="preserve"><value>Connector attribute values</value></data>
+  <data name="connectorAttributeValues.delete.description" xml:space="preserve"><value>Permite excluir um valor de atributo configurado em um conector.</value></data>
+  <data name="connectorAttributeValues.get.description" xml:space="preserve"><value>Permite listar os valores de atributos configurados nos conectores.</value></data>
+  <data name="connectorAttributeValues.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um valor de atributo de conector.</value></data>
+  <data name="connectors.area" xml:space="preserve"><value>Connectors</value></data>
+  <data name="connectors.delete.description" xml:space="preserve"><value>Permite excluir um conector cadastrado na plataforma.</value></data>
+  <data name="connectors.get.description" xml:space="preserve"><value>Permite listar os conectores cadastrados na plataforma.</value></data>
+  <data name="connectors.getActive.description" xml:space="preserve"><value>Permite listar apenas os conectores ativos.</value></data>
+  <data name="connectors.getByCategoryIdentifier.description" xml:space="preserve"><value>Permite listar conectores ativos filtrados pelo identifier semântico da categoria.</value></data>
+  <data name="dashboard.area" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="dashboard.getDashboardData.description" xml:space="preserve"><value>Permite visualizar os indicadores consolidados do dashboard da plataforma de integrações.</value></data>
+  <data name="databaseConnections.area" xml:space="preserve"><value>Database connections</value></data>
+  <data name="databaseConnections.create.description" xml:space="preserve"><value>Permite cadastrar uma nova conexão de banco de dados externo.</value></data>
+  <data name="databaseConnections.delete.description" xml:space="preserve"><value>Permite excluir uma conexão de banco de dados cadastrada.</value></data>
+  <data name="databaseConnections.get.description" xml:space="preserve"><value>Permite listar as conexões de banco de dados cadastradas na plataforma.</value></data>
+  <data name="databaseConnections.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma conexão de banco de dados específica.</value></data>
+  <data name="databaseConnections.test.description" xml:space="preserve"><value>Permite testar a conexão com um banco de dados externo antes do uso.</value></data>
+  <data name="databaseConnections.update.description" xml:space="preserve"><value>Permite atualizar a configuração de uma conexão de banco de dados.</value></data>
+  <data name="databaseScripts.area" xml:space="preserve"><value>Database scripts</value></data>
+  <data name="databaseScripts.create.description" xml:space="preserve"><value>Permite cadastrar um novo script SQL reutilizável.</value></data>
+  <data name="databaseScripts.delete.description" xml:space="preserve"><value>Permite excluir um script SQL cadastrado.</value></data>
+  <data name="databaseScripts.get.description" xml:space="preserve"><value>Permite listar os scripts SQL cadastrados na plataforma.</value></data>
+  <data name="databaseScripts.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um script SQL específico.</value></data>
+  <data name="databaseScripts.update.description" xml:space="preserve"><value>Permite atualizar um script SQL cadastrado na plataforma.</value></data>
+  <data name="executionLogs.area" xml:space="preserve"><value>Execution logs</value></data>
+  <data name="executionLogs.delete.description" xml:space="preserve"><value>Permite excluir um log de execução registrado.</value></data>
+  <data name="executionLogs.get.description" xml:space="preserve"><value>Permite listar os logs de execução registrados na plataforma.</value></data>
+  <data name="executionLogs.getByExecution.description" xml:space="preserve"><value>Permite listar os logs vinculados a uma execução específica.</value></data>
+  <data name="executionLogs.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um log de execução específico.</value></data>
+  <data name="executions.area" xml:space="preserve"><value>Executions</value></data>
+  <data name="executions.debug.description" xml:space="preserve"><value>Permite executar um pipeline em modo debug a partir de uma etapa inicial opcional.</value></data>
+  <data name="executions.executeByIdentifier.description" xml:space="preserve"><value>Permite executar um pipeline pelos identificadores lógicos da integração e do pipeline.</value></data>
+  <data name="executions.executeNextDebugStep.description" xml:space="preserve"><value>Permite avançar para a próxima etapa de uma sessão de debug de pipeline.</value></data>
+  <data name="executions.finishDebug.description" xml:space="preserve"><value>Permite finalizar uma sessão de debug de pipeline.</value></data>
+  <data name="executions.get.description" xml:space="preserve"><value>Permite listar as execuções registradas na plataforma.</value></data>
+  <data name="executions.getByConnector.description" xml:space="preserve"><value>Permite listar as execuções vinculadas a um conector específico.</value></data>
+  <data name="executions.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma execução específica.</value></data>
+  <data name="executions.getByStatus.description" xml:space="preserve"><value>Permite listar as execuções filtradas por status.</value></data>
+  <data name="executions.getRecent.description" xml:space="preserve"><value>Permite listar as execuções mais recentes da plataforma.</value></data>
+  <data name="executions.startDebug.description" xml:space="preserve"><value>Permite iniciar uma sessão de debug passo a passo para um pipeline.</value></data>
+  <data name="integrationAttributes.area" xml:space="preserve"><value>Integration attributes</value></data>
+  <data name="integrationAttributes.create.description" xml:space="preserve"><value>Permite cadastrar um novo atributo configurável para uma integração.</value></data>
+  <data name="integrationAttributes.delete.description" xml:space="preserve"><value>Permite excluir um atributo configurável de integração.</value></data>
+  <data name="integrationAttributes.get.description" xml:space="preserve"><value>Permite listar os atributos configuráveis das integrações.</value></data>
+  <data name="integrationAttributes.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um atributo de integração específico.</value></data>
+  <data name="integrationAttributes.update.description" xml:space="preserve"><value>Permite atualizar um atributo configurável de integração.</value></data>
+  <data name="integrationCategories.area" xml:space="preserve"><value>Integration categories</value></data>
+  <data name="integrationCategories.create.description" xml:space="preserve"><value>Permite cadastrar uma nova categoria de integração.</value></data>
+  <data name="integrationCategories.delete.description" xml:space="preserve"><value>Permite excluir uma categoria de integração cadastrada.</value></data>
+  <data name="integrationCategories.get.description" xml:space="preserve"><value>Permite listar as categorias de integração cadastradas na plataforma.</value></data>
+  <data name="integrationCategories.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma categoria de integração específica.</value></data>
+  <data name="integrationCategories.getByIdentifier.description" xml:space="preserve"><value>Permite consultar uma categoria de integração pelo identifier semântico.</value></data>
+  <data name="integrationCategories.update.description" xml:space="preserve"><value>Permite atualizar os dados de uma categoria de integração cadastrada.</value></data>
+  <data name="integrations.area" xml:space="preserve"><value>Integrations</value></data>
+  <data name="integrations.create.description" xml:space="preserve"><value>Permite cadastrar uma nova integração na plataforma.</value></data>
+  <data name="integrations.delete.description" xml:space="preserve"><value>Permite excluir uma integração cadastrada na plataforma.</value></data>
+  <data name="integrations.get.description" xml:space="preserve"><value>Permite listar as integrações cadastradas na plataforma.</value></data>
+  <data name="integrations.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma integração específica.</value></data>
+  <data name="integrations.update.description" xml:space="preserve"><value>Permite atualizar os dados de uma integração cadastrada.</value></data>
+  <data name="javaScriptFunctions.area" xml:space="preserve"><value>Java script functions</value></data>
+  <data name="javaScriptFunctions.create.description" xml:space="preserve"><value>Permite cadastrar uma nova função JavaScript reutilizável.</value></data>
+  <data name="javaScriptFunctions.delete.description" xml:space="preserve"><value>Permite excluir uma função JavaScript cadastrada.</value></data>
+  <data name="javaScriptFunctions.get.description" xml:space="preserve"><value>Permite listar as funções JavaScript cadastradas na plataforma.</value></data>
+  <data name="javaScriptFunctions.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma função JavaScript específica.</value></data>
+  <data name="javaScriptFunctions.update.description" xml:space="preserve"><value>Permite atualizar uma função JavaScript cadastrada na plataforma.</value></data>
+  <data name="pipelineRoutines.area" xml:space="preserve"><value>Pipeline routines</value></data>
+  <data name="pipelineRoutines.create.description" xml:space="preserve"><value>Permite cadastrar uma nova rotina agendada para um pipeline.</value></data>
+  <data name="pipelineRoutines.delete.description" xml:space="preserve"><value>Permite excluir uma rotina agendada de pipeline.</value></data>
+  <data name="pipelineRoutines.get.description" xml:space="preserve"><value>Permite listar as rotinas agendadas de pipelines.</value></data>
+  <data name="pipelineRoutines.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma rotina agendada de pipeline.</value></data>
+  <data name="pipelineRoutines.update.description" xml:space="preserve"><value>Permite atualizar uma rotina agendada de pipeline.</value></data>
+  <data name="pipelineSteps.area" xml:space="preserve"><value>Pipeline steps</value></data>
+  <data name="pipelineSteps.create.description" xml:space="preserve"><value>Permite cadastrar uma nova etapa em um pipeline.</value></data>
+  <data name="pipelineSteps.delete.description" xml:space="preserve"><value>Permite excluir uma etapa cadastrada em um pipeline.</value></data>
+  <data name="pipelineSteps.get.description" xml:space="preserve"><value>Permite listar as etapas de pipeline cadastradas na plataforma.</value></data>
+  <data name="pipelineSteps.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma etapa de pipeline específica.</value></data>
+  <data name="pipelineSteps.getByPipeline.description" xml:space="preserve"><value>Permite listar as etapas vinculadas a um pipeline específico.</value></data>
+  <data name="pipelineSteps.update.description" xml:space="preserve"><value>Permite atualizar a configuração de uma etapa de pipeline.</value></data>
+  <data name="pipelines.area" xml:space="preserve"><value>Pipelines</value></data>
+  <data name="pipelines.create.description" xml:space="preserve"><value>Permite cadastrar um novo pipeline para uma integração.</value></data>
+  <data name="pipelines.delete.description" xml:space="preserve"><value>Permite excluir um pipeline cadastrado na plataforma.</value></data>
+  <data name="pipelines.get.description" xml:space="preserve"><value>Permite listar os pipelines cadastrados na plataforma.</value></data>
+  <data name="pipelines.getActive.description" xml:space="preserve"><value>Permite listar apenas os pipelines ativos.</value></data>
+  <data name="pipelines.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um pipeline específico.</value></data>
+  <data name="pipelines.setDefault.description" xml:space="preserve"><value>Permite definir um pipeline como padrão para sua integração.</value></data>
+  <data name="pipelines.update.description" xml:space="preserve"><value>Permite atualizar a configuração de um pipeline cadastrado.</value></data>
+  <data name="processingQueues.area" xml:space="preserve"><value>Processing queues</value></data>
+  <data name="processingQueues.delete.description" xml:space="preserve"><value>Permite excluir um item da fila de processamento.</value></data>
+  <data name="processingQueues.get.description" xml:space="preserve"><value>Permite listar os itens da fila de processamento da plataforma.</value></data>
+  <data name="processingQueues.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um item da fila de processamento.</value></data>
+  <data name="processingQueues.getPending.description" xml:space="preserve"><value>Permite listar os itens pendentes da fila de processamento.</value></data>
+  <data name="processingQueues.process.description" xml:space="preserve"><value>Permite processar manualmente um item específico da fila.</value></data>
+  <data name="references.area" xml:space="preserve"><value>References</value></data>
+  <data name="references.create.description" xml:space="preserve"><value>Permite cadastrar uma nova referência entre identificadores internos e externos.</value></data>
+  <data name="references.delete.description" xml:space="preserve"><value>Permite excluir uma referência cadastrada na plataforma.</value></data>
+  <data name="references.get.description" xml:space="preserve"><value>Permite listar as referências internas e externas registradas na plataforma.</value></data>
+  <data name="references.getByConnector.description" xml:space="preserve"><value>Permite listar as referências vinculadas a um conector específico.</value></data>
+  <data name="references.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma referência específica.</value></data>
+  <data name="references.update.description" xml:space="preserve"><value>Permite atualizar uma referência entre identificadores internos e externos.</value></data>
 </root>

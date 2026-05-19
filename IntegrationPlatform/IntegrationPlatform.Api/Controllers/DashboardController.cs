@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("dashboard.area")]
     public sealed class DashboardController : ApiControllerBase
     {
         private readonly IDashboardService dashboardService;
@@ -14,7 +15,7 @@ namespace IntegrationPlatform.Api.Controllers
             this.dashboardService = dashboardService;
         }
 
-        [RequireAccess("Permite visualizar os indicadores consolidados do dashboard da plataforma de integrações.")]
+        [RequireAccess("dashboard.getDashboardData.description")]
         [GetEndpoint]
         public async Task<IActionResult> GetDashboardData(CancellationToken cancellationToken)
         {

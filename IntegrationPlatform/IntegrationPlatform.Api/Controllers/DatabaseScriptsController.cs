@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("databaseScripts.area")]
     public sealed class DatabaseScriptsController : ApiControllerBase
     {
         private readonly IDatabaseScriptService databaseScriptService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar os scripts SQL cadastrados na plataforma.")]
+        [RequireAccess("databaseScripts.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de um script SQL específico.")]
+        [RequireAccess("databaseScripts.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +45,7 @@ namespace IntegrationPlatform.Api.Controllers
             return script is null ? Http404(Localizer["database.script.notFound"]) : Http200(MapDatabaseScript(script));
         }
 
-        [RequireAccess("Permite cadastrar um novo script SQL reutilizável.")]
+        [RequireAccess("databaseScripts.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateDatabaseScriptRequest request, CancellationToken cancellationToken)
         {
@@ -58,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapDatabaseScript(script), Localizer["database.script.created"]);
         }
 
-        [RequireAccess("Permite atualizar um script SQL cadastrado na plataforma.")]
+        [RequireAccess("databaseScripts.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateDatabaseScriptRequest request, CancellationToken cancellationToken)
         {
@@ -72,7 +73,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapDatabaseScript(script), Localizer["database.script.updated"]);
         }
 
-        [RequireAccess("Permite excluir um script SQL cadastrado.")]
+        [RequireAccess("databaseScripts.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

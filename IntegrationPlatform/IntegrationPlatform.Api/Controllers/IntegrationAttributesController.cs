@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("integrationAttributes.area")]
     public sealed class IntegrationAttributesController : ApiControllerBase
     {
         private readonly IIntegrationAttributeService integrationAttributeService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar os atributos configuráveis das integrações.")]
+        [RequireAccess("integrationAttributes.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de um atributo de integração específico.")]
+        [RequireAccess("integrationAttributes.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -58,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(attributes.Select(MapIntegrationAttribute).ToList());
         }
 
-        [RequireAccess("Permite cadastrar um novo atributo configurável para uma integração.")]
+        [RequireAccess("integrationAttributes.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationAttributeRequest request, CancellationToken cancellationToken)
         {
@@ -91,7 +92,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapIntegrationAttribute(attribute), Localizer["integration.attribute.created"]);
         }
 
-        [RequireAccess("Permite atualizar um atributo configurável de integração.")]
+        [RequireAccess("integrationAttributes.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateIntegrationAttributeRequest request, CancellationToken cancellationToken)
         {
@@ -120,7 +121,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapIntegrationAttribute(updatedAttribute), Localizer["integration.attribute.updated"]);
         }
 
-        [RequireAccess("Permite excluir um atributo configurável de integração.")]
+        [RequireAccess("integrationAttributes.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

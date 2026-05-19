@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("executions.area")]
     public sealed class ExecutionsController : ApiControllerBase
     {
         private readonly IExecutionService executionService;
@@ -25,7 +26,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as execuções registradas na plataforma.")]
+        [RequireAccess("executions.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -37,7 +38,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma execução específica.")]
+        [RequireAccess("executions.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -51,7 +52,7 @@ namespace IntegrationPlatform.Api.Controllers
             return execution is null ? Http404(Localizer["execution.notFound"]) : Http200(MapExecution(execution));
         }
 
-        [RequireAccess("Permite listar as execuções vinculadas a um conector específico.")]
+        [RequireAccess("executions.getByConnector.description")]
         [GetEndpoint("connector/{connectorId:long}")]
         public async Task<IActionResult> GetByConnector(long connectorId, CancellationToken cancellationToken)
         {
@@ -65,7 +66,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(executions.Select(MapExecution).ToList());
         }
 
-        [RequireAccess("Permite listar as execuções filtradas por status.")]
+        [RequireAccess("executions.getByStatus.description")]
         [GetEndpoint("status/{status}")]
         public async Task<IActionResult> GetByStatus(ExecutionStatus status, CancellationToken cancellationToken)
         {
@@ -74,7 +75,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(executions.Select(MapExecution).ToList());
         }
 
-        [RequireAccess("Permite listar as execuções mais recentes da plataforma.")]
+        [RequireAccess("executions.getRecent.description")]
         [GetEndpoint("recent")]
         public async Task<IActionResult> GetRecent([FromQuery] int take = 10, CancellationToken cancellationToken = default)
         {
@@ -105,7 +106,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
-        [RequireAccess("Permite executar um pipeline em modo debug a partir de uma etapa inicial opcional.")]
+        [RequireAccess("executions.debug.description")]
         [PostEndpoint("debug")]
         public async Task<IActionResult> Debug([FromBody] DebugPipelineRequest request, CancellationToken cancellationToken)
         {
@@ -126,7 +127,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
-        [RequireAccess("Permite iniciar uma sessão de debug passo a passo para um pipeline.")]
+        [RequireAccess("executions.startDebug.description")]
         [PostEndpoint("debug/start")]
         public async Task<IActionResult> StartDebug([FromBody] DebugPipelineRequest request, CancellationToken cancellationToken)
         {
@@ -158,7 +159,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite avançar para a próxima etapa de uma sessão de debug de pipeline.")]
+        [RequireAccess("executions.executeNextDebugStep.description")]
         [PostEndpoint("debug/next-step")]
         public async Task<IActionResult> ExecuteNextDebugStep([FromBody] NextDebugStepRequest request, CancellationToken cancellationToken)
         {
@@ -172,7 +173,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(ExecuteNextDebugStepResultContract.FromModel(result));
         }
 
-        [RequireAccess("Permite finalizar uma sessão de debug de pipeline.")]
+        [RequireAccess("executions.finishDebug.description")]
         [PostEndpoint("debug/finish")]
         public async Task<IActionResult> FinishDebug([FromBody] FinishDebugPipelineRequest request, CancellationToken cancellationToken)
         {
@@ -186,7 +187,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
-        [RequireAccess("Permite executar um pipeline pelos identificadores lógicos da integração e do pipeline.")]
+        [RequireAccess("executions.executeByIdentifier.description")]
         [PostEndpoint("execute-by-identifier/{integrationIdentifier}/{pipelineIdentifier}")]
         public async Task<IActionResult> ExecuteByIdentifier(
             string integrationIdentifier,

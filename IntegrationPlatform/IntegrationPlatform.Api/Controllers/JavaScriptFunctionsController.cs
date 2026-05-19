@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("javaScriptFunctions.area")]
     public sealed class JavaScriptFunctionsController : ApiControllerBase
     {
         private readonly IJavaScriptFunctionService javaScriptFunctionService;
@@ -21,7 +22,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as funções JavaScript cadastradas na plataforma.")]
+        [RequireAccess("javaScriptFunctions.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -29,7 +30,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(result);
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma função JavaScript específica.")]
+        [RequireAccess("javaScriptFunctions.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -42,7 +43,7 @@ namespace IntegrationPlatform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess("Permite cadastrar uma nova função JavaScript reutilizável.")]
+        [RequireAccess("javaScriptFunctions.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateJavaScriptFunctionRequest request, CancellationToken cancellationToken)
         {
@@ -56,7 +57,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(function, Localizer["javaScriptFunction.created"]);
         }
 
-        [RequireAccess("Permite atualizar uma função JavaScript cadastrada na plataforma.")]
+        [RequireAccess("javaScriptFunctions.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateJavaScriptFunctionRequest request, CancellationToken cancellationToken)
         {
@@ -70,7 +71,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(function, Localizer["javaScriptFunction.updated"]);
         }
 
-        [RequireAccess("Permite excluir uma função JavaScript cadastrada.")]
+        [RequireAccess("javaScriptFunctions.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

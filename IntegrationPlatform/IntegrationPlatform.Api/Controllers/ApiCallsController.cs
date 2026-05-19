@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("apiCalls.area")]
     public sealed class ApiCallsController : ApiControllerBase
     {
         private readonly IApiCallService apiCallService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as chamadas de API cadastradas na plataforma.")]
+        [RequireAccess("apiCalls.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma chamada de API específica.")]
+        [RequireAccess("apiCalls.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -43,7 +44,7 @@ namespace IntegrationPlatform.Api.Controllers
             return apiCall is null ? Http404(Localizer["apiCall.notFound"]) : Http200(MapApiCall(apiCall));
         }
 
-        [RequireAccess("Permite cadastrar uma nova chamada de API reutilizável.")]
+        [RequireAccess("apiCalls.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateApiCallRequest request, CancellationToken cancellationToken)
         {
@@ -57,7 +58,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapApiCall(apiCall), Localizer["apiCall.created"]);
         }
 
-        [RequireAccess("Permite atualizar a configuração de uma chamada de API cadastrada.")]
+        [RequireAccess("apiCalls.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateApiCallRequest request, CancellationToken cancellationToken)
         {
@@ -71,7 +72,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapApiCall(apiCall), Localizer["apiCall.updated"]);
         }
 
-        [RequireAccess("Permite excluir uma chamada de API cadastrada na plataforma.")]
+        [RequireAccess("apiCalls.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

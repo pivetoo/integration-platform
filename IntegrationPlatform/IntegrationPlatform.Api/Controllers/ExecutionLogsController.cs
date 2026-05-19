@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("executionLogs.area")]
     public sealed class ExecutionLogsController : ApiControllerBase
     {
         private readonly IExecutionLogService executionLogService;
@@ -22,7 +23,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar os logs de execução registrados na plataforma.")]
+        [RequireAccess("executionLogs.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -34,7 +35,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de um log de execução específico.")]
+        [RequireAccess("executionLogs.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -43,7 +44,7 @@ namespace IntegrationPlatform.Api.Controllers
             return log is null ? Http404(Localizer["execution.log.notFound"]) : Http200(MapExecutionLog(log));
         }
 
-        [RequireAccess("Permite listar os logs vinculados a uma execução específica.")]
+        [RequireAccess("executionLogs.getByExecution.description")]
         [GetEndpoint("execution/{executionId:long}")]
         public async Task<IActionResult> GetByExecution(long executionId, CancellationToken cancellationToken)
         {
@@ -57,7 +58,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(logs.Select(MapExecutionLog).ToList());
         }
 
-        [RequireAccess("Permite excluir um log de execução registrado.")]
+        [RequireAccess("executionLogs.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

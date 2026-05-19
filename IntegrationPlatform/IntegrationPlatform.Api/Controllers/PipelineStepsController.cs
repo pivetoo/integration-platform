@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("pipelineSteps.area")]
     public sealed class PipelineStepsController : ApiControllerBase
     {
         private readonly IPipelineStepService pipelineStepService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as etapas de pipeline cadastradas na plataforma.")]
+        [RequireAccess("pipelineSteps.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma etapa de pipeline específica.")]
+        [RequireAccess("pipelineSteps.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +45,7 @@ namespace IntegrationPlatform.Api.Controllers
             return step is null ? Http404(Localizer["pipeline.step.notFound"]) : Http200(MapPipelineStep(step));
         }
 
-        [RequireAccess("Permite listar as etapas vinculadas a um pipeline específico.")]
+        [RequireAccess("pipelineSteps.getByPipeline.description")]
         [GetEndpoint("pipeline/{pipelineId:long}")]
         public async Task<IActionResult> GetByPipeline(long pipelineId, CancellationToken cancellationToken)
         {
@@ -58,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(steps.Select(MapPipelineStep).ToList());
         }
 
-        [RequireAccess("Permite cadastrar uma nova etapa em um pipeline.")]
+        [RequireAccess("pipelineSteps.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreatePipelineStepRequest request, CancellationToken cancellationToken)
         {
@@ -72,7 +73,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapPipelineStep(step), Localizer["pipeline.step.created"]);
         }
 
-        [RequireAccess("Permite atualizar a configuração de uma etapa de pipeline.")]
+        [RequireAccess("pipelineSteps.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdatePipelineStepRequest request, CancellationToken cancellationToken)
         {
@@ -86,7 +87,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapPipelineStep(step), Localizer["pipeline.step.updated"]);
         }
 
-        [RequireAccess("Permite excluir uma etapa cadastrada em um pipeline.")]
+        [RequireAccess("pipelineSteps.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

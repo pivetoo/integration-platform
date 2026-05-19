@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("references.area")]
     public sealed class ReferencesController : ApiControllerBase
     {
         private readonly IReferenceService referenceService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as referências internas e externas registradas na plataforma.")]
+        [RequireAccess("references.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma referência específica.")]
+        [RequireAccess("references.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +45,7 @@ namespace IntegrationPlatform.Api.Controllers
             return reference is null ? Http404(Localizer["reference.notFound"]) : Http200(MapReference(reference));
         }
 
-        [RequireAccess("Permite listar as referências vinculadas a um conector específico.")]
+        [RequireAccess("references.getByConnector.description")]
         [GetEndpoint("connector/{connectorId:long}")]
         public async Task<IActionResult> GetByConnector(long connectorId, CancellationToken cancellationToken)
         {
@@ -58,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(references.Select(MapReference).ToList());
         }
 
-        [RequireAccess("Permite cadastrar uma nova referência entre identificadores internos e externos.")]
+        [RequireAccess("references.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateReferenceRequest request, CancellationToken cancellationToken)
         {
@@ -72,7 +73,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapReference(reference), Localizer["reference.created"]);
         }
 
-        [RequireAccess("Permite atualizar uma referência entre identificadores internos e externos.")]
+        [RequireAccess("references.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateReferenceRequest request, CancellationToken cancellationToken)
         {
@@ -86,7 +87,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapReference(updatedReference), Localizer["reference.updated"]);
         }
 
-        [RequireAccess("Permite excluir uma referência cadastrada na plataforma.")]
+        [RequireAccess("references.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

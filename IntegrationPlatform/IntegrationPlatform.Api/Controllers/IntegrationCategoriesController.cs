@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("integrationCategories.area")]
     public sealed class IntegrationCategoriesController : ApiControllerBase
     {
         private readonly IIntegrationCategoryService integrationCategoryService;
@@ -21,7 +22,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as categorias de integração cadastradas na plataforma.")]
+        [RequireAccess("integrationCategories.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -29,7 +30,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(result);
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma categoria de integração específica.")]
+        [RequireAccess("integrationCategories.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -42,7 +43,7 @@ namespace IntegrationPlatform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess("Permite consultar uma categoria de integração pelo identifier semântico.")]
+        [RequireAccess("integrationCategories.getByIdentifier.description")]
         [GetEndpoint("by-identifier/{identifier}")]
         public async Task<IActionResult> GetByIdentifier(string identifier, CancellationToken cancellationToken)
         {
@@ -55,7 +56,7 @@ namespace IntegrationPlatform.Api.Controllers
             return entity is null ? Http404(Localizer["record.notFound"]) : Http200(entity);
         }
 
-        [RequireAccess("Permite cadastrar uma nova categoria de integração.")]
+        [RequireAccess("integrationCategories.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateIntegrationCategoryRequest request, CancellationToken cancellationToken)
         {
@@ -69,7 +70,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(category, Localizer["integration.category.created"]);
         }
 
-        [RequireAccess("Permite atualizar os dados de uma categoria de integração cadastrada.")]
+        [RequireAccess("integrationCategories.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateIntegrationCategoryRequest request, CancellationToken cancellationToken)
         {
@@ -91,7 +92,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(categories);
         }
 
-        [RequireAccess("Permite excluir uma categoria de integração cadastrada.")]
+        [RequireAccess("integrationCategories.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

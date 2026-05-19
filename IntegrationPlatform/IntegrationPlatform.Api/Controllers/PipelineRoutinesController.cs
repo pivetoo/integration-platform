@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("pipelineRoutines.area")]
     public sealed class PipelineRoutinesController : ApiControllerBase
     {
         private readonly IPipelineRoutineService pipelineRoutineService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as rotinas agendadas de pipelines.")]
+        [RequireAccess("pipelineRoutines.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma rotina agendada de pipeline.")]
+        [RequireAccess("pipelineRoutines.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -44,7 +45,7 @@ namespace IntegrationPlatform.Api.Controllers
             return routine is null ? Http404(Localizer["pipeline.routine.notFound"]) : Http200(MapPipelineRoutine(routine));
         }
 
-        [RequireAccess("Permite cadastrar uma nova rotina agendada para um pipeline.")]
+        [RequireAccess("pipelineRoutines.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreatePipelineRoutineRequest request, CancellationToken cancellationToken)
         {
@@ -58,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapPipelineRoutine(routine), Localizer["pipeline.routine.created"]);
         }
 
-        [RequireAccess("Permite atualizar uma rotina agendada de pipeline.")]
+        [RequireAccess("pipelineRoutines.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdatePipelineRoutineRequest request, CancellationToken cancellationToken)
         {
@@ -79,7 +80,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapPipelineRoutine(updatedRoutine), Localizer["pipeline.routine.updated"]);
         }
 
-        [RequireAccess("Permite excluir uma rotina agendada de pipeline.")]
+        [RequireAccess("pipelineRoutines.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

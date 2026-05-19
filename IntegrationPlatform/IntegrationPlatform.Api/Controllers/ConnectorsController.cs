@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("connectors.area")]
     public sealed class ConnectorsController : ApiControllerBase
     {
         private readonly IConnectorService connectorService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar os conectores cadastrados na plataforma.")]
+        [RequireAccess("connectors.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -58,7 +59,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(connectors.Select(MapConnector).ToList());
         }
 
-        [RequireAccess("Permite listar apenas os conectores ativos.")]
+        [RequireAccess("connectors.getActive.description")]
         [GetEndpoint("active")]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
@@ -67,7 +68,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(connectors.Select(MapConnector).ToList());
         }
 
-        [RequireAccess("Permite listar conectores ativos filtrados pelo identifier semântico da categoria.")]
+        [RequireAccess("connectors.getByCategoryIdentifier.description")]
         [GetEndpoint("by-category-identifier/{identifier}")]
         public async Task<IActionResult> GetByCategoryIdentifier(string identifier, CancellationToken cancellationToken)
         {
@@ -104,7 +105,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapConnector(connector), Localizer["connector.updated"]);
         }
 
-        [RequireAccess("Permite excluir um conector cadastrado na plataforma.")]
+        [RequireAccess("connectors.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

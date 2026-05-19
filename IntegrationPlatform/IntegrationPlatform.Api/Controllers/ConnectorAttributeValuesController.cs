@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("connectorAttributeValues.area")]
     public sealed class ConnectorAttributeValuesController : ApiControllerBase
     {
         private readonly IConnectorAttributeValueService connectorAttributeValueService;
@@ -21,7 +22,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar os valores de atributos configurados nos conectores.")]
+        [RequireAccess("connectorAttributeValues.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, CancellationToken cancellationToken)
         {
@@ -29,7 +30,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(result);
         }
 
-        [RequireAccess("Permite consultar os detalhes de um valor de atributo de conector.")]
+        [RequireAccess("connectorAttributeValues.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -94,7 +95,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(updatedValue, Localizer["connector.attributeValue.updated"]);
         }
 
-        [RequireAccess("Permite excluir um valor de atributo configurado em um conector.")]
+        [RequireAccess("connectorAttributeValues.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {

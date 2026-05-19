@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace IntegrationPlatform.Api.Controllers
 {
+    [AccessArea("databaseConnections.area")]
     public sealed class DatabaseConnectionsController : ApiControllerBase
     {
         private readonly IDatabaseConnectionService databaseConnectionService;
@@ -23,7 +24,7 @@ namespace IntegrationPlatform.Api.Controllers
             Localizer = localizer;
         }
 
-        [RequireAccess("Permite listar as conexões de banco de dados cadastradas na plataforma.")]
+        [RequireAccess("databaseConnections.get.description")]
         [GetEndpoint]
         public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
         {
@@ -35,7 +36,7 @@ namespace IntegrationPlatform.Api.Controllers
             });
         }
 
-        [RequireAccess("Permite consultar os detalhes de uma conexão de banco de dados específica.")]
+        [RequireAccess("databaseConnections.getById.description")]
         [GetEndpoint("{id:long}")]
         public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
         {
@@ -43,7 +44,7 @@ namespace IntegrationPlatform.Api.Controllers
             return connection is null ? Http404(Localizer["database.connection.notFound"]) : Http200(MapDatabaseConnection(connection));
         }
 
-        [RequireAccess("Permite cadastrar uma nova conexão de banco de dados externo.")]
+        [RequireAccess("databaseConnections.create.description")]
         [PostEndpoint]
         public async Task<IActionResult> Create([FromBody] CreateDatabaseConnectionRequest request, CancellationToken cancellationToken)
         {
@@ -57,7 +58,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http201(MapDatabaseConnection(connection), Localizer["database.connection.created"]);
         }
 
-        [RequireAccess("Permite atualizar a configuração de uma conexão de banco de dados.")]
+        [RequireAccess("databaseConnections.update.description")]
         [PutEndpoint("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateDatabaseConnectionRequest request, CancellationToken cancellationToken)
         {
@@ -71,7 +72,7 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapDatabaseConnection(connection), Localizer["database.connection.updated"]);
         }
 
-        [RequireAccess("Permite testar a conexão com um banco de dados externo antes do uso.")]
+        [RequireAccess("databaseConnections.test.description")]
         [PostEndpoint("test")]
         public async Task<IActionResult> Test([FromBody] CreateDatabaseConnectionRequest request, CancellationToken cancellationToken)
         {
@@ -92,7 +93,7 @@ namespace IntegrationPlatform.Api.Controllers
             }
         }
 
-        [RequireAccess("Permite excluir uma conexão de banco de dados cadastrada.")]
+        [RequireAccess("databaseConnections.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
