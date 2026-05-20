@@ -9,6 +9,15 @@ export interface IntegrationCategory {
   updatedAt: string;
 }
 
+export const IntegrationCategoryIdentifier = {
+  Payment: 'payment',
+  Banking: 'banking',
+  DigitalSignature: 'digital-signature',
+  Email: 'email',
+} as const;
+
+export type IntegrationCategoryIdentifierValue = (typeof IntegrationCategoryIdentifier)[keyof typeof IntegrationCategoryIdentifier];
+
 export interface CreateIntegrationCategoryRequest {
   identifier: string;
   name: string;

@@ -23,6 +23,11 @@ export const connectorService = {
     return response.data ?? [];
   },
 
+  getByCategoryIdentifier: async (identifier: string) => {
+    const response = await httpClient.get<Conector[]>(`${BASE_URL}/by-category-identifier/${encodeURIComponent(identifier)}`);
+    return response.data ?? [];
+  },
+
   getActive: async () => {
     const response = await httpClient.get<Conector[]>(`${BASE_URL}/active`);
     return response.data ?? [];
