@@ -803,4 +803,32 @@
   <data name="references.getByConnector.description" xml:space="preserve"><value>Permite listar as referências vinculadas a um conector específico.</value></data>
   <data name="references.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma referência específica.</value></data>
   <data name="references.update.description" xml:space="preserve"><value>Permite atualizar uma referência entre identificadores internos e externos.</value></data>
+  <data name="serviceContract.created" xml:space="preserve"><value>Contrato de serviço criado com sucesso.</value></data>
+  <data name="serviceContract.updated" xml:space="preserve"><value>Contrato de serviço atualizado com sucesso.</value></data>
+  <data name="serviceContract.deleted" xml:space="preserve"><value>Contrato de serviço excluído com sucesso.</value></data>
+  <data name="serviceContract.notFound" xml:space="preserve"><value>Contrato de serviço não encontrado.</value></data>
+  <data name="serviceContract.identifier.duplicated" xml:space="preserve"><value>Já existe um contrato de serviço com este identificador.</value></data>
+  <data name="serviceContract.identifier.systemReadonly" xml:space="preserve"><value>O identificador de um contrato de serviço do sistema não pode ser alterado.</value></data>
+  <data name="serviceContract.system.cannotDelete" xml:space="preserve"><value>Contratos de serviço do sistema não podem ser excluídos.</value></data>
+  <data name="serviceContract.integration.bound" xml:space="preserve"><value>Integração vinculada ao contrato de serviço.</value></data>
+  <data name="serviceContract.integration.unbound" xml:space="preserve"><value>Vínculo entre integração e contrato de serviço removido.</value></data>
+  <data name="validation.serviceContract.identifier.invalidFormat" xml:space="preserve"><value>O identificador deve usar minúsculas, números, pontos e hífens (ex.: email.send).</value></data>
+  <data name="serviceContracts.area" xml:space="preserve"><value>ServiceContracts</value></data>
+  <data name="serviceContracts.get.description" xml:space="preserve"><value>Permite listar contratos de serviço disponíveis na plataforma.</value></data>
+  <data name="serviceContracts.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um contrato de serviço específico.</value></data>
+  <data name="serviceContracts.getByIdentifier.description" xml:space="preserve"><value>Permite consultar um contrato de serviço pelo identificador semântico.</value></data>
+  <data name="serviceContracts.getActive.description" xml:space="preserve"><value>Permite listar contratos de serviço ativos.</value></data>
+  <data name="serviceContracts.getByIntegration.description" xml:space="preserve"><value>Permite listar contratos de serviço suportados por uma integração.</value></data>
+  <data name="serviceContracts.create.description" xml:space="preserve"><value>Permite cadastrar um novo contrato de serviço na plataforma.</value></data>
+  <data name="serviceContracts.update.description" xml:space="preserve"><value>Permite atualizar um contrato de serviço existente.</value></data>
+  <data name="serviceContracts.delete.description" xml:space="preserve"><value>Permite excluir um contrato de serviço cadastrado.</value></data>
+  <data name="serviceContracts.setIntegration.description" xml:space="preserve"><value>Permite vincular ou ativar uma integração em um contrato de serviço.</value></data>
+  <data name="serviceContracts.removeIntegration.description" xml:space="preserve"><value>Permite remover o vínculo entre uma integração e um contrato de serviço.</value></data>
+  <data name="serviceContract.identifier.required" xml:space="preserve"><value>O identificador do contrato de serviço é obrigatório.</value></data>
+  <data name="serviceContract.integration.notSupported" xml:space="preserve"><value>A integração do conector não suporta este contrato de serviço.</value></data>
+  <data name="serviceContract.pipeline.notFound" xml:space="preserve"><value>Nenhum pipeline ativo vinculado a este contrato de serviço foi encontrado na integração.</value></data>
+  <data name="serviceExecutions.area" xml:space="preserve"><value>ServiceExecutions</value></data>
+  <data name="serviceExecutions.execute.description" xml:space="preserve"><value>Permite executar um contrato de serviço a partir do identificador semântico e do conector escolhido.</value></data>
+  <data name="serviceExecutions.enqueue.description" xml:space="preserve"><value>Permite enfileirar a execução de um contrato de serviço para processamento posterior.</value></data>
+  <data name="serviceExecution.enqueued" xml:space="preserve"><value>Execução do contrato de serviço enfileirada com sucesso.</value></data>
 </root>

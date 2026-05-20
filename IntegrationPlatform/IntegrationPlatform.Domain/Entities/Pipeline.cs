@@ -25,6 +25,10 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsTestPipeline { get; private set; }
 
+        public long? ServiceContractId { get; private set; }
+
+        public ServiceContract? ServiceContract { get; private set; }
+
         public IReadOnlyCollection<PipelineStep> Steps => steps.AsReadOnly();
 
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
@@ -78,6 +82,21 @@ namespace IntegrationPlatform.Domain.Entities
             Name = name.Trim();
             Description = description?.Trim();
             IsActive = isActive;
+        }
+
+        public void BindServiceContract(long serviceContractId)
+        {
+            if (serviceContractId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(serviceContractId));
+            }
+
+            ServiceContractId = serviceContractId;
+        }
+
+        public void UnbindServiceContract()
+        {
+            ServiceContractId = null;
         }
     }
 }

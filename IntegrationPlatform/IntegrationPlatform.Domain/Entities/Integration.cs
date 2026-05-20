@@ -7,6 +7,7 @@ namespace IntegrationPlatform.Domain.Entities
         private readonly List<IntegrationAttribute> attributes = [];
         private readonly List<Pipeline> pipelines = [];
         private readonly List<Connector> connectors = [];
+        private readonly List<IntegrationServiceContract> serviceContracts = [];
 
         public string Identifier { get; private set; } = string.Empty;
 
@@ -29,6 +30,8 @@ namespace IntegrationPlatform.Domain.Entities
         public IReadOnlyCollection<Pipeline> Pipelines => pipelines.AsReadOnly();
 
         public IReadOnlyCollection<Connector> Connectors => connectors.AsReadOnly();
+
+        public IReadOnlyCollection<IntegrationServiceContract> ServiceContracts => serviceContracts.AsReadOnly();
 
         private Integration()
         {

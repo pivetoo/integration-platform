@@ -27,6 +27,11 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
 
             builder.Property(entity => entity.IsDefault).IsRequired();
 
+            builder.HasOne(entity => entity.ServiceContract)
+                .WithMany(entity => entity.Pipelines)
+                .HasForeignKey(entity => entity.ServiceContractId)
+                .IsRequired(false);
+
             builder.HasIndex(entity => new { entity.IntegrationId, entity.Identifier })
                 .IsUnique();
         }

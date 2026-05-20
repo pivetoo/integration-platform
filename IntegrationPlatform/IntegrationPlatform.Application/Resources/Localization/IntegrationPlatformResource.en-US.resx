@@ -803,4 +803,32 @@
   <data name="references.getByConnector.description" xml:space="preserve"><value>Permite listar as referências vinculadas a um conector específico.</value></data>
   <data name="references.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma referência específica.</value></data>
   <data name="references.update.description" xml:space="preserve"><value>Permite atualizar uma referência entre identificadores internos e externos.</value></data>
+  <data name="serviceContract.created" xml:space="preserve"><value>Service contract created successfully.</value></data>
+  <data name="serviceContract.updated" xml:space="preserve"><value>Service contract updated successfully.</value></data>
+  <data name="serviceContract.deleted" xml:space="preserve"><value>Service contract deleted successfully.</value></data>
+  <data name="serviceContract.notFound" xml:space="preserve"><value>Service contract not found.</value></data>
+  <data name="serviceContract.identifier.duplicated" xml:space="preserve"><value>A service contract with this identifier already exists.</value></data>
+  <data name="serviceContract.identifier.systemReadonly" xml:space="preserve"><value>System service contract identifier is read-only.</value></data>
+  <data name="serviceContract.system.cannotDelete" xml:space="preserve"><value>System service contracts cannot be deleted.</value></data>
+  <data name="serviceContract.integration.bound" xml:space="preserve"><value>Integration bound to service contract.</value></data>
+  <data name="serviceContract.integration.unbound" xml:space="preserve"><value>Integration unbound from service contract.</value></data>
+  <data name="validation.serviceContract.identifier.invalidFormat" xml:space="preserve"><value>Identifier must use lowercase letters, numbers, dots and hyphens (e.g. email.send).</value></data>
+  <data name="serviceContracts.area" xml:space="preserve"><value>ServiceContracts</value></data>
+  <data name="serviceContracts.get.description" xml:space="preserve"><value>List service contracts available in the platform.</value></data>
+  <data name="serviceContracts.getById.description" xml:space="preserve"><value>Get the details of a specific service contract.</value></data>
+  <data name="serviceContracts.getByIdentifier.description" xml:space="preserve"><value>Get a service contract by its semantic identifier.</value></data>
+  <data name="serviceContracts.getActive.description" xml:space="preserve"><value>List active service contracts.</value></data>
+  <data name="serviceContracts.getByIntegration.description" xml:space="preserve"><value>List service contracts supported by an integration.</value></data>
+  <data name="serviceContracts.create.description" xml:space="preserve"><value>Create a new service contract in the platform.</value></data>
+  <data name="serviceContracts.update.description" xml:space="preserve"><value>Update an existing service contract.</value></data>
+  <data name="serviceContracts.delete.description" xml:space="preserve"><value>Delete an existing service contract.</value></data>
+  <data name="serviceContracts.setIntegration.description" xml:space="preserve"><value>Bind or activate an integration on a service contract.</value></data>
+  <data name="serviceContracts.removeIntegration.description" xml:space="preserve"><value>Remove the binding between an integration and a service contract.</value></data>
+  <data name="serviceContract.identifier.required" xml:space="preserve"><value>Service contract identifier is required.</value></data>
+  <data name="serviceContract.integration.notSupported" xml:space="preserve"><value>The connector's integration does not support this service contract.</value></data>
+  <data name="serviceContract.pipeline.notFound" xml:space="preserve"><value>No active pipeline bound to this service contract was found in the integration.</value></data>
+  <data name="serviceExecutions.area" xml:space="preserve"><value>ServiceExecutions</value></data>
+  <data name="serviceExecutions.execute.description" xml:space="preserve"><value>Execute a service contract from its semantic identifier and the chosen connector.</value></data>
+  <data name="serviceExecutions.enqueue.description" xml:space="preserve"><value>Enqueue a service contract execution for later processing.</value></data>
+  <data name="serviceExecution.enqueued" xml:space="preserve"><value>Service contract execution enqueued successfully.</value></data>
 </root>
