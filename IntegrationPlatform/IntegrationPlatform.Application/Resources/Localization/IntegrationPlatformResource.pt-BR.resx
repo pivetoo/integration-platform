@@ -831,4 +831,6 @@
   <data name="serviceExecutions.execute.description" xml:space="preserve"><value>Permite executar um contrato de serviço a partir do identificador semântico e do conector escolhido.</value></data>
   <data name="serviceExecutions.enqueue.description" xml:space="preserve"><value>Permite enfileirar a execução de um contrato de serviço para processamento posterior.</value></data>
   <data name="serviceExecution.enqueued" xml:space="preserve"><value>Execução do contrato de serviço enfileirada com sucesso.</value></data>
+  <data name="execution.callback.delivered" xml:space="preserve"><value>Callback entregue ao consumer: {0}</value></data>
+  <data name="execution.callback.failed" xml:space="preserve"><value>Falha ao entregar callback ao consumer: {0}</value></data>
 </root>

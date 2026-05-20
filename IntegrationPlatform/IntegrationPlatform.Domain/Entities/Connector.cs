@@ -22,6 +22,10 @@ namespace IntegrationPlatform.Domain.Entities
 
         public string? WebhookToken { get; private set; }
 
+        public string? CallbackUrl { get; private set; }
+
+        public string? CallbackToken { get; private set; }
+
         public IReadOnlyCollection<ConnectorAttributeValue> AttributeValues => attributeValues.AsReadOnly();
 
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
@@ -64,6 +68,12 @@ namespace IntegrationPlatform.Domain.Entities
             Name = name.Trim();
             SystemApplicationId = systemApplicationId?.Trim();
             IsActive = isActive;
+        }
+
+        public void SetCallback(string? callbackUrl, string? callbackToken)
+        {
+            CallbackUrl = string.IsNullOrWhiteSpace(callbackUrl) ? null : callbackUrl.Trim();
+            CallbackToken = string.IsNullOrWhiteSpace(callbackToken) ? null : callbackToken.Trim();
         }
 
         public void EnsureWebhookToken()

@@ -19,12 +19,14 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
         private readonly DbContext dbContext;
         private readonly IStepExecutorService stepExecutorService;
+        private readonly IServiceCallbackDispatcher serviceCallbackDispatcher;
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
 
-        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IStringLocalizer<IntegrationPlatformResource> localizer)
+        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, IStringLocalizer<IntegrationPlatformResource> localizer)
         {
             this.dbContext = dbContext;
             this.stepExecutorService = stepExecutorService;
+            this.serviceCallbackDispatcher = serviceCallbackDispatcher;
             Localizer = localizer;
         }
 
@@ -483,6 +485,23 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             dbContext.Set<ExecutionLog>().AddRange(logs);
             await dbContext.SaveChangesAsync(CancellationToken.None);
+
+            if (finalStatus == ExecutionStatus.Success)
+            {
+                ServiceCallbackResult callback = await serviceCallbackDispatcher.DispatchAsync(trackedExecution, cancellationToken);
+                if (callback.Attempted)
+                {
+                    LogLevelType level = callback.Success ? LogLevelType.Info : LogLevelType.Warning;
+                    string message = callback.Success
+                        ? Localizer["execution.callback.delivered", callback.Detail ?? string.Empty].Value
+                        : Localizer["execution.callback.failed", callback.Detail ?? string.Empty].Value;
+
+                    ExecutionLog callbackLog = CreateLog(trackedExecution, null, level, message);
+                    callbackLog.SetCreatedAt(DateTimeOffset.UtcNow);
+                    dbContext.Set<ExecutionLog>().Add(callbackLog);
+                    await dbContext.SaveChangesAsync(CancellationToken.None);
+                }
+            }
         }
 
         private async Task InsertLogs(IEnumerable<ExecutionLog> logs, CancellationToken cancellationToken)

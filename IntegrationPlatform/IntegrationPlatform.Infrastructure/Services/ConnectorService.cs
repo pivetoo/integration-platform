@@ -140,6 +140,7 @@ namespace IntegrationPlatform.Infrastructure.Services
 
             connector.Update(request.IntegrationId, request.Name, request.SystemApplicationId, request.IsActive);
             connector.EnsureWebhookToken();
+            connector.SetCallback(request.CallbackUrl, request.CallbackToken);
 
             Connector? result = await Update(connector, cancellationToken);
             if (result is null)

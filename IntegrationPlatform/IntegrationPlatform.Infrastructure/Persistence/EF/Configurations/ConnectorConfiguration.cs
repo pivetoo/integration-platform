@@ -24,6 +24,12 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
                 .IsUnique()
                 .HasDatabaseName("ix_connector_webhooktoken");
 
+            builder.Property(entity => entity.CallbackUrl)
+                .HasMaxLength(500);
+
+            builder.Property(entity => entity.CallbackToken)
+                .HasMaxLength(120);
+
             builder.HasOne(entity => entity.Integration)
                 .WithMany(entity => entity.Connectors)
                 .HasForeignKey(entity => entity.IntegrationId);
