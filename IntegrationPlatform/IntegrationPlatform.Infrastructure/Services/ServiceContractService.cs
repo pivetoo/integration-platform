@@ -115,7 +115,43 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
+            await AutoBindIntegrationsToService(entity.Id, request.IntegrationCategoryId, cancellationToken);
+
             return entity;
+        }
+
+        private async Task AutoBindIntegrationsToService(long serviceContractId, long integrationCategoryId, CancellationToken cancellationToken)
+        {
+            List<long> integrationIds = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.IntegrationCategoryId == integrationCategoryId)
+                .Select(item => item.Id)
+                .ToListAsync(cancellationToken);
+
+            if (integrationIds.Count == 0)
+            {
+                return;
+            }
+
+            HashSet<long> alreadyBound = (await DbContext.Set<IntegrationServiceContract>()
+                .AsNoTracking()
+                .Where(item => item.ServiceContractId == serviceContractId)
+                .Select(item => item.IntegrationId)
+                .ToListAsync(cancellationToken))
+                .ToHashSet();
+
+            foreach (long integrationId in integrationIds)
+            {
+                if (alreadyBound.Contains(integrationId))
+                {
+                    continue;
+                }
+
+                IntegrationServiceContract binding = new(integrationId, serviceContractId);
+                await DbContext.Set<IntegrationServiceContract>().AddAsync(binding, cancellationToken);
+            }
+
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<ServiceContract> UpdateServiceContract(long id, UpdateServiceContractRequest request, CancellationToken cancellationToken = default)

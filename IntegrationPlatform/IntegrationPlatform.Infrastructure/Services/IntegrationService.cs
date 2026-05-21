@@ -65,6 +65,8 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
+            await SyncServiceContractBindings(integration.Id, integration.IntegrationCategoryId, cancellationToken);
+
             return await GetIntegrationById(integration.Id, cancellationToken) ?? integration;
         }
 
@@ -94,7 +96,48 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException(GetErrorMessages());
             }
 
+            await SyncServiceContractBindings(result.Id, result.IntegrationCategoryId, cancellationToken);
+
             return await GetIntegrationById(result.Id, cancellationToken) ?? result;
+        }
+
+        private async Task SyncServiceContractBindings(long integrationId, long? integrationCategoryId, CancellationToken cancellationToken)
+        {
+            if (!integrationCategoryId.HasValue)
+            {
+                return;
+            }
+
+            List<long> serviceContractIds = await DbContext.Set<ServiceContract>()
+                .AsNoTracking()
+                .Where(item => item.IntegrationCategoryId == integrationCategoryId.Value && item.IsActive)
+                .Select(item => item.Id)
+                .ToListAsync(cancellationToken);
+
+            if (serviceContractIds.Count == 0)
+            {
+                return;
+            }
+
+            HashSet<long> alreadyBound = (await DbContext.Set<IntegrationServiceContract>()
+                .AsNoTracking()
+                .Where(item => item.IntegrationId == integrationId)
+                .Select(item => item.ServiceContractId)
+                .ToListAsync(cancellationToken))
+                .ToHashSet();
+
+            foreach (long serviceContractId in serviceContractIds)
+            {
+                if (alreadyBound.Contains(serviceContractId))
+                {
+                    continue;
+                }
+
+                IntegrationServiceContract binding = new(integrationId, serviceContractId);
+                await DbContext.Set<IntegrationServiceContract>().AddAsync(binding, cancellationToken);
+            }
+
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         private async Task EnsureUniqueIdentifier(string identifier, long? currentId, CancellationToken cancellationToken)
