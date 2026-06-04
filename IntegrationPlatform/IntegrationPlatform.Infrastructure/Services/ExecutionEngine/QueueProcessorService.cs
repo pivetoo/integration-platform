@@ -48,6 +48,23 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     .SetProperty(item => item.UpdatedAt, (DateTimeOffset?)now), cancellationToken);
         }
 
+        // Fecha execucoes orfas presas em Running alem do timeout (processo morto a meio, falha de
+        // persistencia pos-insert, ou cancelamento). Sem isso a Execution ficaria Running para sempre,
+        // mesmo com o item da fila ja recuperado. Espelha RecoverStuckItems.
+        public async Task<int> RecoverStuckExecutions(TimeSpan timeout, CancellationToken cancellationToken = default)
+        {
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            DateTimeOffset cutoff = now - timeout;
+
+            return await dbContext.Set<Execution>()
+                .Where(item => item.Status == ExecutionStatus.Running && item.StartedAt < cutoff)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(item => item.Status, ExecutionStatus.Error)
+                    .SetProperty(item => item.Errors, "Execucao interrompida: presa em Running alem do timeout.")
+                    .SetProperty(item => item.FinishedAt, (DateTimeOffset?)now)
+                    .SetProperty(item => item.UpdatedAt, (DateTimeOffset?)now), cancellationToken);
+        }
+
         public async Task ProcessItem(long processingQueueId, CancellationToken cancellationToken = default)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;

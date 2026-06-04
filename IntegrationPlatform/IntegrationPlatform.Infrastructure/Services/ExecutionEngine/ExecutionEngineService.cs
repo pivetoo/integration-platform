@@ -497,7 +497,10 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             if (finalStatus == ExecutionStatus.Success || finalStatus == ExecutionStatus.Partial)
             {
-                ServiceCallbackResult callback = await serviceCallbackDispatcher.DispatchAsync(trackedExecution, cancellationToken);
+                // CancellationToken.None de proposito: o enfileiramento do callback faz parte da
+                // persistencia critica do resultado (igual aos SaveChanges acima); nao pode ser cancelado
+                // a meio, senao a execucao fica Success/Partial sem o CallbackDelivery correspondente.
+                ServiceCallbackResult callback = await serviceCallbackDispatcher.DispatchAsync(trackedExecution, CancellationToken.None);
                 if (callback.Attempted)
                 {
                     LogLevelType level = callback.Success ? LogLevelType.Info : LogLevelType.Warning;

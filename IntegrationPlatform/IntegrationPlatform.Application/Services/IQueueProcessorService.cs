@@ -8,6 +8,8 @@ namespace IntegrationPlatform.Application.Services
 
         Task<int> RecoverStuckItems(TimeSpan timeout, CancellationToken cancellationToken = default);
 
+        Task<int> RecoverStuckExecutions(TimeSpan timeout, CancellationToken cancellationToken = default);
+
         Task ProcessItem(long processingQueueId, CancellationToken cancellationToken = default);
     }
 }

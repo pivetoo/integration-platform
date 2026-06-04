@@ -269,6 +269,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 SecureSocketOptions socketOptions = enableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None;
 
                 using SmtpClient client = new();
+                client.Timeout = (int)TimeSpan.FromSeconds(60).TotalMilliseconds;
                 await client.ConnectAsync(host, port, socketOptions, cancellationToken);
 
                 if (!string.IsNullOrWhiteSpace(username))

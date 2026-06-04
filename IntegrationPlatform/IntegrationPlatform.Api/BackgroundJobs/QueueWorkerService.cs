@@ -77,6 +77,12 @@ namespace IntegrationPlatform.Api.BackgroundJobs
                     logger.LogWarning("Recovered {Count} stuck queue item(s) (marked as Error after exceeding the processing timeout).", recovered);
                 }
 
+                int recoveredExecutions = await queueProcessorService.RecoverStuckExecutions(options.StuckItemTimeout, tenantCancellationToken);
+                if (recoveredExecutions > 0)
+                {
+                    logger.LogWarning("Recovered {Count} orphaned execution(s) stuck in Running (marked as Error after exceeding the timeout).", recoveredExecutions);
+                }
+
                 IReadOnlyCollection<ProcessingQueue> pending = await queueProcessorService.GetPendingToProcess(options.MaxItemsPerCycle, tenantCancellationToken);
 
                 foreach (ProcessingQueue queued in pending)

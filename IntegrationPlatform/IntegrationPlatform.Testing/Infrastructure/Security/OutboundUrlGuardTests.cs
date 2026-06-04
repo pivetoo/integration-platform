@@ -15,6 +15,7 @@ namespace IntegrationPlatform.Testing.Infrastructure.Security
         [TestCase("192.168.1.1", true)]
         [TestCase("169.254.169.254", true)]
         [TestCase("0.0.0.0", true)]
+        [TestCase("::", true)]
         [TestCase("100.64.0.1", true)]
         [TestCase("8.8.8.8", false)]
         [TestCase("1.1.1.1", false)]

@@ -15,6 +15,12 @@ namespace IntegrationPlatform.Infrastructure.Security
                 return true;
             }
 
+            // Enderecos "unspecified" (0.0.0.0 e ::) podem rotear para servicos locais.
+            if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
+            {
+                return true;
+            }
+
             if (address.AddressFamily == AddressFamily.InterNetworkV6 && address.IsIPv4MappedToIPv6)
             {
                 return IsBlockedAddress(address.MapToIPv4());
