@@ -3,19 +3,19 @@ import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, 
 import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { processingQueueService } from '../../../services/processingQueueService';
-import { ProcessingStatusLabels } from '../../../types/processingQueue';
-import type { ProcessingQueueItem, ProcessingStatus } from '../../../types/processingQueue';
+import { ProcessingStatusLabels, ProcessingStatus } from '../../../types/processingQueue';
+import type { ProcessingQueueItem } from '../../../types/processingQueue';
 import type { Conector } from '../../../types/connector';
 import type { Pipeline } from '../../../types/pipeline';
 import ProcessingQueueFormModal from '../../../components/modals/ProcessingQueueFormModal';
 import { formatDateTime } from '../../../utils/formatters';
 
 const statusVariantMap: Record<number, string> = {
-  0: 'warning',
-  1: 'info',
-  2: 'success',
-  3: 'destructive',
-  4: 'secondary',
+  [ProcessingStatus.Pending]: 'warning',
+  [ProcessingStatus.Processing]: 'info',
+  [ProcessingStatus.Completed]: 'success',
+  [ProcessingStatus.Error]: 'destructive',
+  [ProcessingStatus.Cancelled]: 'secondary',
 };
 
 export default function ProcessingQueue() {

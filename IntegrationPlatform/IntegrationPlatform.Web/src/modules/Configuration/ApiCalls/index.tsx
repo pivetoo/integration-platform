@@ -3,16 +3,16 @@ import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI1
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { apiCallService } from '../../../services/apiCallService';
-import { HttpMethodLabels } from '../../../types/apiCall';
-import type { ApiCall, HttpMethod } from '../../../types/apiCall';
+import { HttpMethodLabels, HttpMethod } from '../../../types/apiCall';
+import type { ApiCall } from '../../../types/apiCall';
 import ChamadaApiFormModal from '../../../components/modals/ApiCallFormModal';
 
 const metodoVariantMap: Record<number, string> = {
-  0: 'success',
-  1: 'default',
-  2: 'warning',
-  3: 'secondary',
-  4: 'destructive',
+  [HttpMethod.GET]: 'success',
+  [HttpMethod.POST]: 'default',
+  [HttpMethod.PUT]: 'warning',
+  [HttpMethod.PATCH]: 'secondary',
+  [HttpMethod.DELETE]: 'destructive',
 };
 
 export default function ChamadasApi() {

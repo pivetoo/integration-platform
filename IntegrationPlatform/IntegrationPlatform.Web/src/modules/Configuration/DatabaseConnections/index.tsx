@@ -3,15 +3,15 @@ import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI1
 import type { DataTableColumn } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { databaseConnectionService } from '../../../services/databaseConnectionService';
-import { DatabaseTypeLabels } from '../../../types/databaseConnection';
-import type { DatabaseConnection, DatabaseType } from '../../../types/databaseConnection';
+import { DatabaseTypeLabels, DatabaseType } from '../../../types/databaseConnection';
+import type { DatabaseConnection } from '../../../types/databaseConnection';
 import ConexaoBancoDadosFormModal from '../../../components/modals/DatabaseConnectionFormModal';
 
 const tipoBancoVariantMap: Record<number, string> = {
-  0: 'default',
-  1: 'secondary',
-  2: 'warning',
-  3: 'success',
+  [DatabaseType.PostgreSQL]: 'default',
+  [DatabaseType.SqlServer]: 'secondary',
+  [DatabaseType.Oracle]: 'warning',
+  [DatabaseType.MySQL]: 'success',
 };
 
 export default function ConexoesBancoDados() {
