@@ -2,9 +2,6 @@ using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
 using IntegrationPlatform.Infrastructure.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace IntegrationPlatform.Api.BackgroundJobs
