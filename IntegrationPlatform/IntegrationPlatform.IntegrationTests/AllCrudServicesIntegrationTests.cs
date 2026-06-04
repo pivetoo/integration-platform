@@ -161,9 +161,15 @@ namespace IntegrationPlatform.IntegrationTests
             await InScopeAsync(async serviceProvider =>
             {
                 (_, long pipelineId) = await SeedConnectorAndPipeline(serviceProvider);
+                DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
+                JavaScriptFunction function = new("step-fn", "return payload;");
+                function.SetCreatedAt(DateTimeOffset.UtcNow);
+                dbContext.Add(function);
+                await dbContext.SaveChangesAsync();
+
                 IPipelineStepService service = serviceProvider.GetRequiredService<IPipelineStepService>();
 
-                PipelineStep created = await service.CreatePipelineStep(new CreatePipelineStepRequest { PipelineId = pipelineId, Order = 1, Name = "Step 1", Type = PipelineStepType.HttpRequest, ErrorAction = ErrorAction.Stop });
+                PipelineStep created = await service.CreatePipelineStep(new CreatePipelineStepRequest { PipelineId = pipelineId, Order = 1, Name = "Step 1", Type = PipelineStepType.JavaScriptFunction, ErrorAction = ErrorAction.Stop, JavaScriptFunctionId = function.Id });
 
                 PipelineStep? fetched = await service.GetPipelineStepById(created.Id);
                 fetched.Should().NotBeNull();
