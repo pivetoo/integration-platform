@@ -1,3 +1,4 @@
+using IntegrationPlatform.Application.Models;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
@@ -82,6 +83,33 @@ namespace IntegrationPlatform.IntegrationTests
                 delivery.Should().NotBeNull();
                 delivery!.Status.Should().Be(CallbackDeliveryStatus.Pending);
                 delivery.CallbackUrl.Should().Be("https://consumer.example.com/callback");
+            });
+        }
+
+        [Test]
+        public async Task DebugPipeline_runs_step_by_step_and_finishes_successfully()
+        {
+            long connectorId = 0;
+            long pipelineId = 0;
+
+            await InScopeAsync(async serviceProvider =>
+            {
+                (connectorId, pipelineId) = await SeedJavaScriptPipeline(serviceProvider, "result.value = { ok: true };");
+            });
+
+            await InScopeAsync(async serviceProvider =>
+            {
+                IExecutionEngineService engine = serviceProvider.GetRequiredService<IExecutionEngineService>();
+
+                DebugSessionState session = await engine.StartDebugPipeline(connectorId, pipelineId, "{}");
+                session.SessionId.Should().NotBeNullOrEmpty();
+
+                ExecuteNextDebugStepResult step = await engine.ExecuteNextDebugStep(session.SessionId);
+                step.ExecutedStep.Should().BeTrue();
+                step.Success.Should().BeTrue();
+
+                Execution execution = await engine.FinishDebugPipeline(session.SessionId);
+                execution.Status.Should().Be(ExecutionStatus.Success);
             });
         }
     }

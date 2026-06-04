@@ -72,7 +72,9 @@ namespace IntegrationPlatform.IntegrationTests
             DbContext dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
             await dbContext.Database.ExecuteSqlRawAsync(
                 "TRUNCATE callbackdelivery, executionlog, execution, processingqueue, reference, " +
-                "connectorattributevalue, pipelineroutine, pipelinestep, pipeline, connector, integration " +
+                "connectorattributevalue, pipelineroutine, pipelinestep, pipeline, connector, integration, " +
+                "integrationservicecontract, servicecontract, integrationcategory, databasescript, databaseconnection, " +
+                "apicall, javascriptfunction, integrationattribute " +
                 "RESTART IDENTITY CASCADE");
         }
 
