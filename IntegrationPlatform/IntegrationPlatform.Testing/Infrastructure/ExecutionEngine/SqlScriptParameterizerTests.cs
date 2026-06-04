@@ -137,6 +137,66 @@ namespace IntegrationPlatform.Testing.Infrastructure.ExecutionEngine
         }
 
         [Test]
+        public void Build_should_parameterize_the_whole_literal_when_token_is_embedded_in_wildcards()
+        {
+            Dictionary<string, object> payload = Data(("q", "ac'me"));
+            string script = "SELECT * FROM t WHERE name LIKE '%{{ q }}%'";
+
+            ParameterizedSql result = SqlScriptParameterizer.Build(script, Data(), payload, Attrs());
+
+            result.CommandText.Should().Be("SELECT * FROM t WHERE name LIKE @p0");
+            result.Parameters.Should().ContainSingle();
+            result.Parameters[0].Value.Should().Be("%ac'me%");
+        }
+
+        [Test]
+        public void Build_should_assemble_literal_with_prefix_and_multiple_tokens()
+        {
+            Dictionary<string, object> payload = Data(("a", "x"), ("b", "y"));
+            string script = "SELECT * FROM t WHERE k = 'p-{{ a }}-{{ b }}'";
+
+            ParameterizedSql result = SqlScriptParameterizer.Build(script, Data(), payload, Attrs());
+
+            result.CommandText.Should().Be("SELECT * FROM t WHERE k = @p0");
+            result.Parameters.Should().ContainSingle();
+            result.Parameters[0].Value.Should().Be("p-x-y");
+        }
+
+        [Test]
+        public void Build_should_keep_static_string_literal_untouched()
+        {
+            string script = "SELECT * FROM t WHERE status = 'active'";
+
+            ParameterizedSql result = SqlScriptParameterizer.Build(script, Data(), Data(), Attrs());
+
+            result.CommandText.Should().Be("SELECT * FROM t WHERE status = 'active'");
+            result.Parameters.Should().BeEmpty();
+        }
+
+        [Test]
+        public void Build_should_generate_distinct_parameters_for_twelve_tokens()
+        {
+            Dictionary<string, object> payload = new();
+            List<string> conditions = new();
+            for (int index = 0; index < 12; index++)
+            {
+                payload["v" + index] = "val" + index;
+                conditions.Add("c" + index + " = '{{ v" + index + " }}'");
+            }
+
+            string script = "SELECT 1 WHERE " + string.Join(" AND ", conditions);
+
+            ParameterizedSql result = SqlScriptParameterizer.Build(script, Data(), payload, Attrs());
+
+            result.Parameters.Should().HaveCount(12);
+            result.Parameters.Select(parameter => parameter.Name).Should().OnlyHaveUniqueItems();
+            result.Parameters[10].Name.Should().Be("@p10");
+            result.Parameters[10].Value.Should().Be("val10");
+            result.CommandText.Should().Contain("c10 = @p10");
+            result.CommandText.Should().Contain("c1 = @p1 ");
+        }
+
+        [Test]
         public void Build_should_not_re_expand_template_syntax_present_in_a_value()
         {
             Dictionary<string, object> payload = Data(

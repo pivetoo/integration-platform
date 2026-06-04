@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -18,13 +19,20 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
         public IReadOnlyList<SqlScriptParameter> Parameters { get; }
     }
 
+    /// <summary>
+    /// Converte um script SQL com tokens {{ var }} em SQL parametrizado (@p0, @p1, ...),
+    /// vinculando os valores resolvidos como parametros ADO.NET em vez de concatena-los no
+    /// texto do comando. Dados de origem externa (payload do webhook, variaveis de step)
+    /// nunca alcancam o texto do SQL: viram sempre valor de parametro.
+    /// </summary>
     public static class SqlScriptParameterizer
     {
         private const string TokenInner = @"\s*[\w.\-]+(?:\s*\|\s*\w+)?\s*";
 
-        private static readonly Regex TokenRegex = new(
-            $@"'\{{\{{({TokenInner})\}}\}}'|\{{\{{({TokenInner})\}}\}}",
-            RegexOptions.Compiled);
+        private static readonly Regex TokenRegex = new($@"\{{\{{({TokenInner})\}}\}}", RegexOptions.Compiled);
+
+        // Casa um literal single-quoted completo (tratando aspas escapadas '') OU um token nao-aspado.
+        private static readonly Regex SegmentRegex = new($@"'(?:[^']|'')*'|\{{\{{({TokenInner})\}}\}}", RegexOptions.Compiled);
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -43,27 +51,61 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             }
 
             List<SqlScriptParameter> parameters = [];
-            Dictionary<string, string> expressionToParameter = new(StringComparer.Ordinal);
+            Dictionary<string, string> valueKeyToParameter = new(StringComparer.Ordinal);
 
-            string commandText = TokenRegex.Replace(scriptTemplate, match =>
+            string AddParameter(object? value)
             {
-                string expression = (match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value).Trim();
-
-                if (expressionToParameter.TryGetValue(expression, out string? existingParameter))
+                string key = ValueKey(value);
+                if (valueKeyToParameter.TryGetValue(key, out string? existing))
                 {
-                    return existingParameter;
+                    return existing;
                 }
 
                 string parameterName = $"@p{parameters.Count}";
-                (string variable, string? filter) = ParseExpression(expression);
-                object? value = ResolveValue(variable, filter, stepVariables, payloadData, connectorAttributes);
-
                 parameters.Add(new SqlScriptParameter(parameterName, value));
-                expressionToParameter[expression] = parameterName;
+                valueKeyToParameter[key] = parameterName;
                 return parameterName;
+            }
+
+            string commandText = SegmentRegex.Replace(scriptTemplate, match =>
+            {
+                bool isLiteral = match.Value.Length > 0 && match.Value[0] == '\'';
+
+                if (isLiteral)
+                {
+                    string innerRaw = match.Value.Substring(1, match.Value.Length - 2);
+                    string innerUnescaped = innerRaw.Replace("''", "'");
+
+                    if (!TokenRegex.IsMatch(innerUnescaped))
+                    {
+                        return match.Value;
+                    }
+
+                    string assembledValue = TokenRegex.Replace(innerUnescaped, inner =>
+                    {
+                        (string variable, string? filter) = ParseExpression(inner.Groups[1].Value.Trim());
+                        return ResolveString(variable, filter, stepVariables, payloadData, connectorAttributes);
+                    });
+
+                    return AddParameter(assembledValue);
+                }
+
+                (string tokenVariable, string? tokenFilter) = ParseExpression(match.Groups[1].Value.Trim());
+                object? value = ResolveValue(tokenVariable, tokenFilter, stepVariables, payloadData, connectorAttributes);
+                return AddParameter(value);
             });
 
             return new ParameterizedSql(commandText, parameters);
+        }
+
+        private static string ValueKey(object? value)
+        {
+            if (value is null)
+            {
+                return "\0null";
+            }
+
+            return value.GetType().FullName + "" + Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
         private static (string variable, string? filter) ParseExpression(string expression)
@@ -79,6 +121,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return (variable, filter);
         }
 
+        // Resolve um token solto (fora de literal) para seu valor tipado, ligado como parametro.
         private static object? ResolveValue(
             string variable,
             string? filter,
@@ -94,6 +137,27 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
 
                 return Normalize(raw);
+            }
+
+            return filter == "json" ? "null" : string.Empty;
+        }
+
+        // Resolve um token dentro de um literal para sua forma string, para montar o valor do literal.
+        private static string ResolveString(
+            string variable,
+            string? filter,
+            Dictionary<string, object> stepVariables,
+            Dictionary<string, object> payloadData,
+            Dictionary<string, string> connectorAttributes)
+        {
+            if (TryResolveRaw(variable, stepVariables, payloadData, connectorAttributes, out object? raw))
+            {
+                if (filter == "json")
+                {
+                    return JsonSerializer.Serialize(raw, JsonOptions);
+                }
+
+                return ConvertToString(raw);
             }
 
             return filter == "json" ? "null" : string.Empty;
@@ -148,6 +212,29 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             }
 
             return value;
+        }
+
+        private static string ConvertToString(object? value)
+        {
+            if (value is null)
+            {
+                return string.Empty;
+            }
+
+            if (value is JsonElement jsonElement)
+            {
+                return jsonElement.ValueKind switch
+                {
+                    JsonValueKind.String => jsonElement.GetString() ?? string.Empty,
+                    JsonValueKind.Number => jsonElement.GetRawText(),
+                    JsonValueKind.True => "true",
+                    JsonValueKind.False => "false",
+                    JsonValueKind.Null => string.Empty,
+                    _ => jsonElement.GetRawText()
+                };
+            }
+
+            return Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
         }
 
         private static object? ResolveDottedPath(Dictionary<string, object> data, string path)
