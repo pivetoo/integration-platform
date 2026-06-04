@@ -58,7 +58,16 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                 WHERE servicecontractid IS NULL AND (identifier = 'gerarCobranca' OR identifier LIKE '%-create-charge' OR identifier LIKE '%-create-cobranca');
             ");
 
-            Execute.Sql("DELETE FROM integrationcategory WHERE identifier IN ('banking', 'messaging') AND NOT EXISTS (SELECT 1 FROM integration WHERE integrationcategoryid = integrationcategory.id);");
+            // So remove a categoria se NENHUMA integration E NENHUM servicecontract a referenciam.
+            // Num banco limpo, 'messaging.send' segue apontando para 'messaging' (a consolidacao para
+            // 'whatsapp' nao roda porque a categoria 'whatsapp' nao existe), entao sem o guard de
+            // servicecontract o DELETE violaria a FK servicecontract_integrationcategoryid_fkey.
+            Execute.Sql(@"
+                DELETE FROM integrationcategory
+                WHERE identifier IN ('banking', 'messaging')
+                  AND NOT EXISTS (SELECT 1 FROM integration WHERE integrationcategoryid = integrationcategory.id)
+                  AND NOT EXISTS (SELECT 1 FROM servicecontract WHERE integrationcategoryid = integrationcategory.id);
+            ");
         }
 
         public override void Down()
