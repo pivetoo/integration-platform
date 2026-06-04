@@ -20,7 +20,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
         public async Task<ServiceCallbackResult> DispatchAsync(Execution execution, CancellationToken cancellationToken = default)
         {
-            if (execution.Status != ExecutionStatus.Success)
+            if (execution.Status != ExecutionStatus.Success && execution.Status != ExecutionStatus.Partial)
             {
                 return new ServiceCallbackResult(false, false, "execution.notSuccessful");
             }

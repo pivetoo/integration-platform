@@ -100,7 +100,7 @@ namespace IntegrationPlatform.Api.BackgroundJobs
                         queueItem.SetCreatedAt(now);
                         dbContext.Set<ProcessingQueue>().Add(queueItem);
 
-                        DateTimeOffset nextExecution = now.AddMinutes(routine.IntervalInMinutes);
+                        DateTimeOffset nextExecution = RoutineSchedule.ComputeNextExecution(routine.NextExecutionAt, routine.IntervalInMinutes, now);
                         routine.MarkExecution(now, nextExecution);
                         routine.SetUpdatedAt(now);
 

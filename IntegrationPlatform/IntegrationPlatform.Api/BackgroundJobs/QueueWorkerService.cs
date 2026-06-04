@@ -70,21 +70,27 @@ namespace IntegrationPlatform.Api.BackgroundJobs
             await tenantJobRunner.RunForAllTenants(async (provider, tenantCancellationToken) =>
             {
                 IQueueProcessorService queueProcessorService = provider.GetRequiredService<IQueueProcessorService>();
-                IReadOnlyCollection<ProcessingQueue> pending = await queueProcessorService.GetPendingToProcess(tenantCancellationToken);
-                List<long> pendingIds = pending.Take(options.MaxItemsPerCycle).Select(item => item.Id).ToList();
 
-                foreach (long id in pendingIds)
+                int recovered = await queueProcessorService.RecoverStuckItems(options.StuckItemTimeout, tenantCancellationToken);
+                if (recovered > 0)
+                {
+                    logger.LogWarning("Recovered {Count} stuck queue item(s) (marked as Error after exceeding the processing timeout).", recovered);
+                }
+
+                IReadOnlyCollection<ProcessingQueue> pending = await queueProcessorService.GetPendingToProcess(options.MaxItemsPerCycle, tenantCancellationToken);
+
+                foreach (ProcessingQueue queued in pending)
                 {
                     tenantCancellationToken.ThrowIfCancellationRequested();
 
                     try
                     {
-                        await queueProcessorService.ProcessItem(id, tenantCancellationToken);
+                        await queueProcessorService.ProcessItem(queued.Id, tenantCancellationToken);
                         processedCount++;
                     }
                     catch (Exception exception)
                     {
-                        logger.LogError(exception, "Failed to process queue item {QueueItemId}.", id);
+                        logger.LogError(exception, "Failed to process queue item {QueueItemId}.", queued.Id);
                     }
                 }
             }, cancellationToken);

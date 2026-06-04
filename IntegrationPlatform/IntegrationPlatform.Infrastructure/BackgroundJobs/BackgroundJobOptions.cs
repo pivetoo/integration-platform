@@ -11,5 +11,7 @@ namespace IntegrationPlatform.Infrastructure.BackgroundJobs
         public TimeSpan QueueWorkerPollingInterval { get; set; } = TimeSpan.FromSeconds(5);
 
         public int MaxItemsPerCycle { get; set; } = 10;
+
+        public TimeSpan StuckItemTimeout { get; set; } = TimeSpan.FromMinutes(10);
     }
 }

@@ -38,12 +38,17 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 ? await dbContext.Set<ProcessingQueue>().AsTracking().FirstOrDefaultAsync(item => item.Id == queueItem.Id, cancellationToken)
                 : null;
 
+            if (!PipelinePayloadParser.TryParse(inputData, out Dictionary<string, object> payloadData))
+            {
+                throw new ValidationException(Localizer["execution.inputData.invalid", inputData ?? string.Empty]);
+            }
+
             Execution execution = new(type, connector.Id, ExecutionStatus.Running, DateTimeOffset.UtcNow, pipeline.Id, trackedQueueItem?.Id, inputData);
             execution.SetCreatedAt(DateTimeOffset.UtcNow);
             dbContext.Set<Execution>().Add(execution);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, inputData);
+            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData);
             List<ExecutionLog> logs = [];
             Dictionary<string, object?> stepOutputs = [];
             int nextOutputIndex = 1;
@@ -133,12 +138,17 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             Connector connector = await GetConnector(connectorId, cancellationToken);
             Pipeline pipeline = await GetPipeline(pipelineId, cancellationToken);
 
+            if (!PipelinePayloadParser.TryParse(inputData, out Dictionary<string, object> payloadData))
+            {
+                throw new ValidationException(Localizer["execution.inputData.invalid", inputData ?? string.Empty]);
+            }
+
             Execution execution = new(ExecutionType.Manual, connector.Id, ExecutionStatus.Running, DateTimeOffset.UtcNow, pipeline.Id, null, inputData);
             execution.SetCreatedAt(DateTimeOffset.UtcNow);
             dbContext.Set<Execution>().Add(execution);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, inputData);
+            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData);
             List<PipelineStep> activeSteps = pipeline.Steps
                 .Where(step => step.IsActive)
                 .OrderBy(step => step.Order)
@@ -417,34 +427,19 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return pipeline ?? throw new KeyNotFoundException(Localizer["pipeline.notFound"]);
         }
 
-        private PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, string? inputData)
+        private static PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, Dictionary<string, object> payloadData)
         {
             PipelineExecutionContext context = new()
             {
                 Connector = connector,
                 Pipeline = pipeline,
-                Execution = execution
+                Execution = execution,
+                PayloadData = payloadData
             };
 
             foreach (ConnectorAttributeValue attribute in connector.AttributeValues)
             {
                 context.ConnectorAttributes[attribute.IntegrationAttribute.Field] = attribute.Value;
-            }
-
-            if (!string.IsNullOrWhiteSpace(inputData))
-            {
-                try
-                {
-                    Dictionary<string, object>? payload = JsonSerializer.Deserialize<Dictionary<string, object>>(inputData);
-                    if (payload is not null)
-                    {
-                        context.PayloadData = payload;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    throw new ValidationException(Localizer["execution.inputData.invalid", exception.Message]);
-                }
             }
 
             return context;
@@ -491,7 +486,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             dbContext.Set<ExecutionLog>().AddRange(logs);
             await dbContext.SaveChangesAsync(CancellationToken.None);
 
-            if (finalStatus == ExecutionStatus.Success)
+            if (finalStatus == ExecutionStatus.Success || finalStatus == ExecutionStatus.Partial)
             {
                 ServiceCallbackResult callback = await serviceCallbackDispatcher.DispatchAsync(trackedExecution, cancellationToken);
                 if (callback.Attempted)

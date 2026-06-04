@@ -76,6 +76,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
                 string requestInfo = await SerializeRequest(request);
                 HttpClient client = httpClientFactory.CreateClient();
+                client.Timeout = TimeSpan.FromSeconds(60);
                 using HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
 
                 string responseBody;

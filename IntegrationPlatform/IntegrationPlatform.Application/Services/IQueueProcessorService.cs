@@ -4,7 +4,9 @@ namespace IntegrationPlatform.Application.Services
 {
     public interface IQueueProcessorService
     {
-        Task<IReadOnlyCollection<ProcessingQueue>> GetPendingToProcess(CancellationToken cancellationToken = default);
+        Task<IReadOnlyCollection<ProcessingQueue>> GetPendingToProcess(int maxItems, CancellationToken cancellationToken = default);
+
+        Task<int> RecoverStuckItems(TimeSpan timeout, CancellationToken cancellationToken = default);
 
         Task ProcessItem(long processingQueueId, CancellationToken cancellationToken = default);
     }
