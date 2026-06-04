@@ -12,6 +12,10 @@ namespace IntegrationPlatform.Application.Models
 
         public Dictionary<string, string> ConnectorAttributes { get; set; } = [];
 
+        // Campos de ConnectorAttributes marcados como IsSensitive (senhas, API keys). Usados para NAO
+        // injetar segredos no escopo do passo JavaScript do usuario.
+        public HashSet<string> SensitiveAttributeFields { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
         public Dictionary<string, object> StepVariables { get; set; } = [];
 
         public Dictionary<string, object> PayloadData { get; set; } = [];

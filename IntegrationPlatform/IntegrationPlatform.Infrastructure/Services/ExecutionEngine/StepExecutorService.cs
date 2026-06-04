@@ -148,9 +148,13 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     .LimitMemory(50_000_000)
                     .LimitRecursion(100));
 
+                Dictionary<string, string> scriptAttributes = context.ConnectorAttributes
+                    .Where(pair => !context.SensitiveAttributeFields.Contains(pair.Key))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value);
+
                 engine.SetValue("variables", context.StepVariables);
                 engine.SetValue("payload", context.PayloadData);
-                engine.SetValue("attributes", context.ConnectorAttributes);
+                engine.SetValue("attributes", scriptAttributes);
                 engine.SetValue("result", new Dictionary<string, object?> { ["value"] = null });
 
                 engine.Execute(javaScriptFunction.Code);

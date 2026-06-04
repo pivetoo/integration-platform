@@ -5,6 +5,7 @@ using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -21,13 +22,15 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
         private readonly IStepExecutorService stepExecutorService;
         private readonly IServiceCallbackDispatcher serviceCallbackDispatcher;
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
+        private readonly ILogger<ExecutionEngineService> logger;
 
-        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, IStringLocalizer<IntegrationPlatformResource> localizer)
+        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger)
         {
             this.dbContext = dbContext;
             this.stepExecutorService = stepExecutorService;
             this.serviceCallbackDispatcher = serviceCallbackDispatcher;
             Localizer = localizer;
+            this.logger = logger;
         }
 
         public async Task<Execution> ExecutePipeline(long connectorId, long pipelineId, string? inputData, ExecutionType type, ProcessingQueue? queueItem = null, long? initialStepId = null, CancellationToken cancellationToken = default)
@@ -378,7 +381,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return await ExecutePipeline(connector.Id, pipeline.Id, normalizedBody, ExecutionType.Webhook, null, null, cancellationToken);
         }
 
-        private static string WrapPayloadAsObject(string rawBody)
+        private string WrapPayloadAsObject(string rawBody)
         {
             if (string.IsNullOrWhiteSpace(rawBody))
             {
@@ -394,8 +397,9 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
                 return JsonSerializer.Serialize(new { raw = JsonSerializer.Deserialize<object>(rawBody) });
             }
-            catch
+            catch (JsonException exception)
             {
+                logger.LogDebug(exception, "Webhook body is not valid JSON; wrapping it as a raw payload.");
                 return JsonSerializer.Serialize(new { raw = rawBody });
             }
         }
@@ -440,6 +444,11 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             foreach (ConnectorAttributeValue attribute in connector.AttributeValues)
             {
                 context.ConnectorAttributes[attribute.IntegrationAttribute.Field] = attribute.Value;
+
+                if (attribute.IntegrationAttribute.IsSensitive)
+                {
+                    context.SensitiveAttributeFields.Add(attribute.IntegrationAttribute.Field);
+                }
             }
 
             return context;
@@ -578,19 +587,20 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return result.ExtractedResult;
         }
 
-        private static string? SerializeSafely(Dictionary<string, object?> outputs)
+        private string? SerializeSafely(Dictionary<string, object?> outputs)
         {
             try
             {
                 return JsonSerializer.Serialize(outputs);
             }
-            catch
+            catch (Exception exception)
             {
+                logger.LogWarning(exception, "Failed to serialize pipeline output; OutputData will be persisted as null.");
                 return null;
             }
         }
 
-        private static void ExtractStepVariables(string? responseBody, PipelineExecutionContext context)
+        private void ExtractStepVariables(string? responseBody, PipelineExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(responseBody))
             {
@@ -620,8 +630,9 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     }
                 }
             }
-            catch
+            catch (Exception exception)
             {
+                logger.LogWarning(exception, "Failed to extract step variables from the response body; no variables were propagated to the next step.");
             }
         }
 
