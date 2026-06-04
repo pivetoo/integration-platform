@@ -1,0 +1,47 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout integration platform
+        uses: actions/checkout@v4
+        with:
+          path: system/integration-platform
+
+      - name: Checkout archon framework
+        uses: actions/checkout@v4
+        with:
+          repository: pivetoo/archon-framework
+          token: ${{ secrets.GH_PAT }}
+          path: frameworks/archon-framework
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Unit tests (Domain + pure logic)
+        run: >
+          dotnet test
+          system/integration-platform/IntegrationPlatform/IntegrationPlatform.Testing/IntegrationPlatform.Testing.csproj
+          -c Release
+          --settings system/integration-platform/IntegrationPlatform/IntegrationPlatform.Testing/coverlet.runsettings
+          --collect:"XPlat Code Coverage"
+
+      # Sobe um Postgres efemero via Testcontainers (Docker ja disponivel nos runners ubuntu-latest)
+      # e exercita a camada acoplada a banco (fila, recovery, outbox de callback).
+      - name: Integration tests (Testcontainers Postgres)
+        run: >
+          dotnet test
+          system/integration-platform/IntegrationPlatform/IntegrationPlatform.IntegrationTests/IntegrationPlatform.IntegrationTests.csproj
+          -c Release

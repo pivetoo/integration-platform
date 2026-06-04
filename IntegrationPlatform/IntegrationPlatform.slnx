@@ -10,6 +10,7 @@
   <Project Path="IntegrationPlatform.Domain/IntegrationPlatform.Domain.csproj" />
   <Project Path="IntegrationPlatform.Infrastructure/IntegrationPlatform.Infrastructure.csproj" />
   <Project Path="IntegrationPlatform.Testing/IntegrationPlatform.Testing.csproj" />
+  <Project Path="IntegrationPlatform.IntegrationTests/IntegrationPlatform.IntegrationTests.csproj" />
   <Project Path="IntegrationPlatform.Web/IntegrationPlatform.Web.esproj">
     <Build Solution="Release|*" />
     <Deploy Solution="Release|*" />
