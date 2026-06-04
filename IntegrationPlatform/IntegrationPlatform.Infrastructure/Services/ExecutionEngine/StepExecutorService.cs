@@ -5,11 +5,14 @@ using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
+using IntegrationPlatform.Infrastructure.Security;
 using Jint;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Localization;
 using MimeKit;
+using Npgsql;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -60,6 +63,18 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             try
             {
                 string url = TemplateInterpolator.Interpolate(apiCall.Url, context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+
+                if (!await OutboundUrlGuard.IsAllowedAsync(url, cancellationToken))
+                {
+                    stopwatch.Stop();
+                    return new PipelineStepExecutionResult
+                    {
+                        Success = false,
+                        DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
+                        Error = Localizer["step.http.urlBlocked", url]
+                    };
+                }
+
                 HttpMethod method = ResolveHttpMethod(apiCall.Method);
                 using HttpRequestMessage request = new(method, url);
 
@@ -75,7 +90,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
 
                 string requestInfo = await SerializeRequest(request);
-                HttpClient client = httpClientFactory.CreateClient();
+                HttpClient client = httpClientFactory.CreateClient("outbound");
                 client.Timeout = TimeSpan.FromSeconds(60);
                 using HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
 
@@ -481,12 +496,33 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
         private string BuildConnectionString(DatabaseConnection connection)
         {
-            return connection.Type switch
+            switch (connection.Type)
             {
-                DatabaseType.PostgreSql => $"Host={connection.Host};Port={connection.Port};Database={connection.Database};Username={connection.Username};Password={connection.Password}",
-                DatabaseType.SqlServer => $"Server={connection.Host},{connection.Port};Database={connection.Database};User Id={connection.Username};Password={connection.Password};TrustServerCertificate=True",
-                _ => throw new NotSupportedException(Localizer["step.database.type.unsupported", connection.Type])
-            };
+                case DatabaseType.PostgreSql:
+                    NpgsqlConnectionStringBuilder postgres = new()
+                    {
+                        Host = connection.Host,
+                        Port = connection.Port,
+                        Database = connection.Database,
+                        Username = connection.Username,
+                        Password = connection.Password
+                    };
+                    return postgres.ConnectionString;
+
+                case DatabaseType.SqlServer:
+                    SqlConnectionStringBuilder sqlServer = new()
+                    {
+                        DataSource = $"{connection.Host},{connection.Port}",
+                        InitialCatalog = connection.Database,
+                        UserID = connection.Username,
+                        Password = connection.Password,
+                        TrustServerCertificate = true
+                    };
+                    return sqlServer.ConnectionString;
+
+                default:
+                    throw new NotSupportedException(Localizer["step.database.type.unsupported", connection.Type]);
+            }
         }
 
         private IDatabaseExecutor ResolveDatabaseExecutor(DatabaseType databaseType)

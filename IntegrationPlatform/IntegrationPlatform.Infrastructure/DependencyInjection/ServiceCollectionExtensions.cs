@@ -15,6 +15,7 @@ namespace IntegrationPlatform.Infrastructure.DependencyInjection
         {
             services.AddArchonPersistence(configuration, typeof(ServiceCollectionExtensions).Assembly);
             services.AddHttpClient();
+            services.AddHttpClient("outbound").ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
             services.RunMigrations(
                 configuration,
                 GetMigrationSchema(configuration),

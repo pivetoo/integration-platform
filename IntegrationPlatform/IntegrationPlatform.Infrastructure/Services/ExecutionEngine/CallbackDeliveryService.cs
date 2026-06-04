@@ -2,6 +2,7 @@ using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
 using IntegrationPlatform.Infrastructure.BackgroundJobs;
+using IntegrationPlatform.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -53,9 +54,18 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
+            if (!await OutboundUrlGuard.IsAllowedAsync(delivery.CallbackUrl, cancellationToken))
+            {
+                delivery.MarkFailed("CallbackUrl bloqueada (protecao SSRF).");
+                delivery.SetUpdatedAt(now);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                logger.LogWarning("Callback delivery {Id} blocked: CallbackUrl is not allowed (SSRF protection).", delivery.Id);
+                return;
+            }
+
             try
             {
-                HttpClient client = httpClientFactory.CreateClient();
+                HttpClient client = httpClientFactory.CreateClient("outbound");
                 client.Timeout = TimeSpan.FromSeconds(15);
 
                 using HttpRequestMessage request = new(HttpMethod.Post, delivery.CallbackUrl)

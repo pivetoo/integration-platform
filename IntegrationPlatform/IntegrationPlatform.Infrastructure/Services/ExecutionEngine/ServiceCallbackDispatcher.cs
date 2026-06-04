@@ -83,7 +83,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 status = execution.Status.ToString(),
                 startedAt = execution.StartedAt,
                 finishedAt = execution.FinishedAt,
-                output = TryParseJson(execution.OutputData)
+                output = service.IncludeOutputInCallback ? TryParseJson(execution.OutputData) : null
             };
 
             return System.Text.Json.JsonSerializer.Serialize(envelope);

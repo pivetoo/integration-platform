@@ -25,6 +25,10 @@ namespace IntegrationPlatform.Domain.Entities
 
         public string? CallbackSchema { get; private set; }
 
+        // Por padrao (false) o callback leva apenas identificadores + status; o output da execucao
+        // so e incluido quando explicitamente habilitado (opt-in), evitando vazar dados sensiveis.
+        public bool IncludeOutputInCallback { get; private set; }
+
         public bool IsActive { get; private set; } = true;
 
         public bool IsSystem { get; private set; }
@@ -83,6 +87,11 @@ namespace IntegrationPlatform.Domain.Entities
             HasCallback = hasCallback;
             CallbackSchema = callbackSchema?.Trim();
             IsActive = isActive;
+        }
+
+        public void SetCallbackOutputInclusion(bool include)
+        {
+            IncludeOutputInCallback = include;
         }
 
         private static string NormalizeIdentifier(string value)
