@@ -1,11 +1,9 @@
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using IntegrationPlatform.Infrastructure.BackgroundJobs;
 using Microsoft.Extensions.Options;
 
-namespace IntegrationPlatform.Infrastructure.BackgroundServices
+namespace IntegrationPlatform.Api.BackgroundJobs
 {
     public sealed class QueueWorkerService : BackgroundService
     {

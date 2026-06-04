@@ -2,7 +2,7 @@ using Archon.Infrastructure.DependencyInjection;
 using Archon.Infrastructure.Migrations;
 using Archon.Infrastructure.MultiTenancy;
 using IntegrationPlatform.Application.Services;
-using IntegrationPlatform.Infrastructure.BackgroundServices;
+using IntegrationPlatform.Infrastructure.BackgroundJobs;
 using IntegrationPlatform.Infrastructure.Services.ExecutionEngine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

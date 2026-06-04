@@ -3,7 +3,7 @@ using Archon.Infrastructure.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace IntegrationPlatform.Infrastructure.BackgroundServices
+namespace IntegrationPlatform.Infrastructure.BackgroundJobs
 {
     /// <summary>
     /// Executa uma acao uma vez por tenant configurado, criando um escopo DI proprio e

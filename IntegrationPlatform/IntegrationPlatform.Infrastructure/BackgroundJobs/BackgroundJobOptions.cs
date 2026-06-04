@@ -1,4 +1,4 @@
-namespace IntegrationPlatform.Infrastructure.BackgroundServices
+namespace IntegrationPlatform.Infrastructure.BackgroundJobs
 {
     public sealed class BackgroundJobOptions
     {

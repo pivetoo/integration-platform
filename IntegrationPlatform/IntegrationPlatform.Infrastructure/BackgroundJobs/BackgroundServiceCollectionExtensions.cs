@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationPlatform.Infrastructure.BackgroundServices
+namespace IntegrationPlatform.Infrastructure.BackgroundJobs
 {
     public static class BackgroundServiceCollectionExtensions
     {
@@ -9,8 +9,6 @@ namespace IntegrationPlatform.Infrastructure.BackgroundServices
         {
             services.Configure<BackgroundJobOptions>(configuration.GetSection("BackgroundJobs"));
             services.AddSingleton<TenantJobRunner>();
-            services.AddHostedService<PipelineRoutineSchedulerService>();
-            services.AddHostedService<QueueWorkerService>();
 
             return services;
         }
