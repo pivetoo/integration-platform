@@ -16,8 +16,6 @@ namespace IntegrationPlatform.Application.Services
 
         Task<Execution> ExecutePipelineByIdentifier(string integrationIdentifier, string pipelineIdentifier, Dictionary<string, object> inputData, ExecutionType type, CancellationToken cancellationToken = default);
 
-        Task<Execution> ExecuteWebhook(string webhookToken, string rawBody, CancellationToken cancellationToken = default);
-
         Task<Execution> ExecuteWebhookByIntegration(string integrationIdentifier, string rawBody, CancellationToken cancellationToken = default);
     }
 }
