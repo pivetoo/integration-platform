@@ -107,15 +107,15 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
         private void ScheduleRetryOrFail(CallbackDelivery delivery, DateTimeOffset now, string error)
         {
-            if (delivery.Attempts + 1 >= options.CallbackMaxAttempts)
+            TimeSpan? delay = CallbackRetryPolicy.NextRetryDelay(delivery.Attempts, options.CallbackMaxAttempts, options.CallbackBaseBackoffSeconds);
+            if (delay is null)
             {
                 delivery.MarkFailed(error);
                 logger.LogWarning("Callback delivery {Id} permanently failed after {Attempts} attempt(s): {Error}", delivery.Id, delivery.Attempts + 1, error);
                 return;
             }
 
-            double backoffSeconds = options.CallbackBaseBackoffSeconds * Math.Pow(2, delivery.Attempts);
-            delivery.ScheduleRetry(now.AddSeconds(backoffSeconds), error);
+            delivery.ScheduleRetry(now + delay.Value, error);
         }
     }
 }
