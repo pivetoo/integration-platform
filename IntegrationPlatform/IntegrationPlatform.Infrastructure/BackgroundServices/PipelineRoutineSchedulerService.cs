@@ -10,16 +10,16 @@ namespace IntegrationPlatform.Infrastructure.BackgroundServices
 {
     public sealed class PipelineRoutineSchedulerService : BackgroundService
     {
-        private readonly IServiceScopeFactory scopeFactory;
+        private readonly TenantJobRunner tenantJobRunner;
         private readonly ILogger<PipelineRoutineSchedulerService> logger;
         private readonly BackgroundJobOptions options;
 
         public PipelineRoutineSchedulerService(
-            IServiceScopeFactory scopeFactory,
+            TenantJobRunner tenantJobRunner,
             ILogger<PipelineRoutineSchedulerService> logger,
             IOptions<BackgroundJobOptions> options)
         {
-            this.scopeFactory = scopeFactory;
+            this.tenantJobRunner = tenantJobRunner;
             this.logger = logger;
             this.options = options.Value;
         }
@@ -64,61 +64,63 @@ namespace IntegrationPlatform.Infrastructure.BackgroundServices
 
         private async Task ScheduleDueRoutines(CancellationToken cancellationToken)
         {
-            using IServiceScope scope = scopeFactory.CreateScope();
-            DbContext dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
-
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-
-            List<PipelineRoutine> dueRoutines = await dbContext.Set<PipelineRoutine>()
-                .AsTracking()
-                .Where(routine => routine.IsActive
-                    && (routine.NextExecutionAt == null || routine.NextExecutionAt <= now))
-                .OrderBy(routine => routine.NextExecutionAt ?? DateTimeOffset.MinValue)
-                .Take(options.MaxItemsPerCycle)
-                .ToListAsync(cancellationToken);
-
-            if (dueRoutines.Count == 0)
+            await tenantJobRunner.RunForAllTenants(async (provider, tenantCancellationToken) =>
             {
-                return;
-            }
+                DbContext dbContext = provider.GetRequiredService<DbContext>();
 
-            logger.LogInformation("Found {Count} pipeline routine(s) due for execution.", dueRoutines.Count);
+                DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            foreach (PipelineRoutine routine in dueRoutines)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+                List<PipelineRoutine> dueRoutines = await dbContext.Set<PipelineRoutine>()
+                    .AsTracking()
+                    .Where(routine => routine.IsActive
+                        && (routine.NextExecutionAt == null || routine.NextExecutionAt <= now))
+                    .OrderBy(routine => routine.NextExecutionAt ?? DateTimeOffset.MinValue)
+                    .Take(options.MaxItemsPerCycle)
+                    .ToListAsync(tenantCancellationToken);
 
-                try
+                if (dueRoutines.Count == 0)
                 {
-                    ProcessingQueue queueItem = new(
-                        routine.ConnectorId,
-                        routine.PipelineId,
-                        priority: 0,
-                        status: ProcessingStatus.Pending,
-                        payload: routine.DefaultPayload,
-                        scheduledAt: now);
-
-                    queueItem.SetCreatedAt(now);
-                    dbContext.Set<ProcessingQueue>().Add(queueItem);
-
-                    DateTimeOffset nextExecution = now.AddMinutes(routine.IntervalInMinutes);
-                    routine.MarkExecution(now, nextExecution);
-                    routine.SetUpdatedAt(now);
-
-                    await dbContext.SaveChangesAsync(cancellationToken);
-
-                    logger.LogInformation(
-                        "Enqueued routine {RoutineId} (connector {ConnectorId}, pipeline {PipelineId}). Next execution at {NextExecution}.",
-                        routine.Id,
-                        routine.ConnectorId,
-                        routine.PipelineId,
-                        nextExecution);
+                    return;
                 }
-                catch (Exception exception)
+
+                logger.LogInformation("Found {Count} pipeline routine(s) due for execution.", dueRoutines.Count);
+
+                foreach (PipelineRoutine routine in dueRoutines)
                 {
-                    logger.LogError(exception, "Failed to enqueue routine {RoutineId}.", routine.Id);
+                    tenantCancellationToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        ProcessingQueue queueItem = new(
+                            routine.ConnectorId,
+                            routine.PipelineId,
+                            priority: 0,
+                            status: ProcessingStatus.Pending,
+                            payload: routine.DefaultPayload,
+                            scheduledAt: now);
+
+                        queueItem.SetCreatedAt(now);
+                        dbContext.Set<ProcessingQueue>().Add(queueItem);
+
+                        DateTimeOffset nextExecution = now.AddMinutes(routine.IntervalInMinutes);
+                        routine.MarkExecution(now, nextExecution);
+                        routine.SetUpdatedAt(now);
+
+                        await dbContext.SaveChangesAsync(tenantCancellationToken);
+
+                        logger.LogInformation(
+                            "Enqueued routine {RoutineId} (connector {ConnectorId}, pipeline {PipelineId}). Next execution at {NextExecution}.",
+                            routine.Id,
+                            routine.ConnectorId,
+                            routine.PipelineId,
+                            nextExecution);
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.LogError(exception, "Failed to enqueue routine {RoutineId}.", routine.Id);
+                    }
                 }
-            }
+            }, cancellationToken);
         }
     }
 }

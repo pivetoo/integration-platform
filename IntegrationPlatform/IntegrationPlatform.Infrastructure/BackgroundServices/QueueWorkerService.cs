@@ -9,16 +9,16 @@ namespace IntegrationPlatform.Infrastructure.BackgroundServices
 {
     public sealed class QueueWorkerService : BackgroundService
     {
-        private readonly IServiceScopeFactory scopeFactory;
+        private readonly TenantJobRunner tenantJobRunner;
         private readonly ILogger<QueueWorkerService> logger;
         private readonly BackgroundJobOptions options;
 
         public QueueWorkerService(
-            IServiceScopeFactory scopeFactory,
+            TenantJobRunner tenantJobRunner,
             ILogger<QueueWorkerService> logger,
             IOptions<BackgroundJobOptions> options)
         {
-            this.scopeFactory = scopeFactory;
+            this.tenantJobRunner = tenantJobRunner;
             this.logger = logger;
             this.options = options.Value;
         }
@@ -67,39 +67,29 @@ namespace IntegrationPlatform.Infrastructure.BackgroundServices
 
         private async Task<int> ProcessPendingItems(CancellationToken cancellationToken)
         {
-            List<long> pendingIds;
-
-            using (IServiceScope scope = scopeFactory.CreateScope())
-            {
-                IQueueProcessorService queueProcessorService = scope.ServiceProvider.GetRequiredService<IQueueProcessorService>();
-                IReadOnlyCollection<ProcessingQueue> pending = await queueProcessorService.GetPendingToProcess(cancellationToken);
-                pendingIds = pending.Take(options.MaxItemsPerCycle).Select(item => item.Id).ToList();
-            }
-
-            if (pendingIds.Count == 0)
-            {
-                return 0;
-            }
-
             int processedCount = 0;
 
-            foreach (long id in pendingIds)
+            await tenantJobRunner.RunForAllTenants(async (provider, tenantCancellationToken) =>
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                IQueueProcessorService queueProcessorService = provider.GetRequiredService<IQueueProcessorService>();
+                IReadOnlyCollection<ProcessingQueue> pending = await queueProcessorService.GetPendingToProcess(tenantCancellationToken);
+                List<long> pendingIds = pending.Take(options.MaxItemsPerCycle).Select(item => item.Id).ToList();
 
-                try
+                foreach (long id in pendingIds)
                 {
-                    using IServiceScope scope = scopeFactory.CreateScope();
-                    IQueueProcessorService queueProcessorService = scope.ServiceProvider.GetRequiredService<IQueueProcessorService>();
+                    tenantCancellationToken.ThrowIfCancellationRequested();
 
-                    await queueProcessorService.ProcessItem(id, cancellationToken);
-                    processedCount++;
+                    try
+                    {
+                        await queueProcessorService.ProcessItem(id, tenantCancellationToken);
+                        processedCount++;
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.LogError(exception, "Failed to process queue item {QueueItemId}.", id);
+                    }
                 }
-                catch (Exception exception)
-                {
-                    logger.LogError(exception, "Failed to process queue item {QueueItemId}.", id);
-                }
-            }
+            }, cancellationToken);
 
             return processedCount;
         }
