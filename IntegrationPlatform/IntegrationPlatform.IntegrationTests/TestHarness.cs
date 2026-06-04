@@ -38,6 +38,8 @@ namespace IntegrationPlatform.IntegrationTests
 
             ServiceCollection services = new();
             services.AddLogging();
+            // IStringLocalizer e usado pelos servicos do motor; no app real vem do AddArchonApi.
+            services.AddLocalization();
             // Roda as migrations contra o container e registra persistencia + servicos reais.
             services.AddIntegrationPlatformInfrastructure(configuration);
 
