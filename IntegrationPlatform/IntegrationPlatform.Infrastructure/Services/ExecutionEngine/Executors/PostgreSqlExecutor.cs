@@ -14,7 +14,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             Localizer = localizer;
         }
 
-        public async Task<object> ExecuteQueryAsync(string connectionString, string query, int timeoutSeconds = 60, CancellationToken cancellationToken = default)
+        public async Task<object> ExecuteQueryAsync(string connectionString, string query, IReadOnlyList<SqlScriptParameter> parameters, int timeoutSeconds = 60, CancellationToken cancellationToken = default)
         {
             ValidateQuery(query);
 
@@ -25,6 +25,11 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             {
                 CommandTimeout = timeoutSeconds
             };
+
+            foreach (SqlScriptParameter parameter in parameters)
+            {
+                command.Parameters.AddWithValue(parameter.Name, parameter.Value ?? DBNull.Value);
+            }
 
             string trimmedQuery = query.Trim().ToUpperInvariant();
             bool isSelect = trimmedQuery.StartsWith("SELECT", StringComparison.Ordinal) ||

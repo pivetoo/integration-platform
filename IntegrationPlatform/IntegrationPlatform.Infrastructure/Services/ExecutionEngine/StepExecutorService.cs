@@ -309,21 +309,22 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             }
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            string interpolatedScript = string.Empty;
+            string commandText = string.Empty;
 
             try
             {
-                interpolatedScript = TemplateInterpolator.Interpolate(databaseScript.Script, context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+                ParameterizedSql parameterized = SqlScriptParameterizer.Build(databaseScript.Script, context.StepVariables, context.PayloadData, context.ConnectorAttributes);
+                commandText = parameterized.CommandText;
                 string connectionString = BuildConnectionString(connection);
                 IDatabaseExecutor executor = ResolveDatabaseExecutor(connection.Type);
-                object result = await executor.ExecuteQueryAsync(connectionString, interpolatedScript, cancellationToken: cancellationToken);
+                object result = await executor.ExecuteQueryAsync(connectionString, commandText, parameterized.Parameters, cancellationToken: cancellationToken);
 
                 stopwatch.Stop();
 
                 return new PipelineStepExecutionResult
                 {
                     Success = true,
-                    RequestInfo = interpolatedScript,
+                    RequestInfo = commandText,
                     DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
                     ExtractedResult = result,
                     ResponseBody = JsonSerializer.Serialize(result)
@@ -336,7 +337,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 return new PipelineStepExecutionResult
                 {
                     Success = false,
-                    RequestInfo = interpolatedScript,
+                    RequestInfo = commandText,
                     DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
                     Error = exception.Message
                 };
