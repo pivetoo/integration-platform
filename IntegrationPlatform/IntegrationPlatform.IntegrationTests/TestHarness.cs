@@ -1,4 +1,5 @@
 using IntegrationPlatform.Domain.Entities;
+using IntegrationPlatform.Domain.ValueObjects;
 using IntegrationPlatform.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -99,6 +100,37 @@ namespace IntegrationPlatform.IntegrationTests
             pipeline.SetCreatedAt(now);
             dbContext.Add(connector);
             dbContext.Add(pipeline);
+            await dbContext.SaveChangesAsync();
+
+            return (connector.Id, pipeline.Id);
+        }
+
+        // Semeia um connector + pipeline com UM step JavaScript que roda o codigo informado.
+        // Cobre a execucao real do motor (ExecutePipeline -> StepExecutor JS -> persistencia).
+        protected static async Task<(long connectorId, long pipelineId)> SeedJavaScriptPipeline(IServiceProvider serviceProvider, string jsCode)
+        {
+            DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+
+            Integration integration = new("test-integration", "Test Integration");
+            integration.SetCreatedAt(now);
+            dbContext.Add(integration);
+            await dbContext.SaveChangesAsync();
+
+            Connector connector = new(integration.Id, "Test Connector");
+            connector.SetCreatedAt(now);
+            Pipeline pipeline = new(integration.Id, "test-pipeline", "Test Pipeline");
+            pipeline.SetCreatedAt(now);
+            JavaScriptFunction function = new("transform", jsCode);
+            function.SetCreatedAt(now);
+            dbContext.Add(connector);
+            dbContext.Add(pipeline);
+            dbContext.Add(function);
+            await dbContext.SaveChangesAsync();
+
+            PipelineStep step = new(pipeline.Id, 1, "JS Step", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, javaScriptFunctionId: function.Id);
+            step.SetCreatedAt(now);
+            dbContext.Add(step);
             await dbContext.SaveChangesAsync();
 
             return (connector.Id, pipeline.Id);

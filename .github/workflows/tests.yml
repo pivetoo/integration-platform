@@ -39,9 +39,26 @@ jobs:
           --collect:"XPlat Code Coverage"
 
       # Sobe um Postgres efemero via Testcontainers (Docker ja disponivel nos runners ubuntu-latest)
-      # e exercita a camada acoplada a banco (fila, recovery, outbox de callback).
+      # e exercita a camada acoplada a banco (fila, recovery, outbox, CRUD, execucao do motor).
       - name: Integration tests (Testcontainers Postgres)
         run: >
           dotnet test
           system/integration-platform/IntegrationPlatform/IntegrationPlatform.IntegrationTests/IntegrationPlatform.IntegrationTests.csproj
           -c Release
+          --settings system/integration-platform/IntegrationPlatform/IntegrationPlatform.Testing/coverlet.runsettings
+          --collect:"XPlat Code Coverage"
+
+      # Junta a cobertura dos dois projetos (unit + integracao) e imprime a % combinada do backend.
+      - name: Cobertura combinada (unit + integracao)
+        if: always()
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          reportgenerator \
+            "-reports:**/coverage.cobertura.xml" \
+            "-targetdir:coverage-report" \
+            "-reporttypes:TextSummary;MarkdownSummaryGithub" \
+            "-assemblyfilters:+IntegrationPlatform.Domain;+IntegrationPlatform.Application;+IntegrationPlatform.Infrastructure"
+          echo "===== COBERTURA COMBINADA (backend IntegrationPlatform) ====="
+          cat coverage-report/Summary.txt
+          cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY" || true
