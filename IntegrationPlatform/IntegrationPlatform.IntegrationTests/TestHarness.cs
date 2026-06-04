@@ -135,5 +135,48 @@ namespace IntegrationPlatform.IntegrationTests
 
             return (connector.Id, pipeline.Id);
         }
+
+        // Pipeline com step JS + ServiceContract (HasCallback) vinculado + Connector com CallbackUrl,
+        // para exercitar o enfileiramento de callback (ServiceCallbackDispatcher) ao concluir.
+        protected static async Task<(long connectorId, long pipelineId)> SeedCallbackPipeline(IServiceProvider serviceProvider)
+        {
+            DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+
+            IntegrationCategory category = new("cb-cat", "CB Cat");
+            category.SetCreatedAt(now);
+            dbContext.Add(category);
+            await dbContext.SaveChangesAsync();
+
+            ServiceContract contract = new("cb.service", "CB Service", category.Id, hasCallback: true);
+            contract.SetCreatedAt(now);
+            dbContext.Add(contract);
+            await dbContext.SaveChangesAsync();
+
+            Integration integration = new("cb-integration", "CB Integration");
+            integration.SetCreatedAt(now);
+            dbContext.Add(integration);
+            await dbContext.SaveChangesAsync();
+
+            Connector connector = new(integration.Id, "CB Connector");
+            connector.SetCallback("https://consumer.example.com/callback", null);
+            connector.SetCreatedAt(now);
+            Pipeline pipeline = new(integration.Id, "cb-pipeline", "CB Pipeline");
+            pipeline.BindServiceContract(contract.Id);
+            pipeline.SetCreatedAt(now);
+            JavaScriptFunction function = new("cb-fn", "result.value = { ok: true };");
+            function.SetCreatedAt(now);
+            dbContext.Add(connector);
+            dbContext.Add(pipeline);
+            dbContext.Add(function);
+            await dbContext.SaveChangesAsync();
+
+            PipelineStep step = new(pipeline.Id, 1, "JS Step", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, javaScriptFunctionId: function.Id);
+            step.SetCreatedAt(now);
+            dbContext.Add(step);
+            await dbContext.SaveChangesAsync();
+
+            return (connector.Id, pipeline.Id);
+        }
     }
 }
