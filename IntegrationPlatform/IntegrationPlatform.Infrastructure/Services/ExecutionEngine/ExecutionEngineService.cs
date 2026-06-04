@@ -363,6 +363,46 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return await ExecutePipeline(connector.Id, pipeline.Id, normalizedBody, ExecutionType.Webhook, null, null, cancellationToken);
         }
 
+        public async Task<Execution> ExecuteWebhookByIntegration(string integrationIdentifier, string rawBody, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(integrationIdentifier);
+
+            Integration? integration = await dbContext.Set<Integration>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Identifier == integrationIdentifier, cancellationToken);
+
+            if (integration is null)
+            {
+                throw new KeyNotFoundException(Localizer["execution.integration.notFoundByIdentifier", integrationIdentifier]);
+            }
+
+            Connector? connector = await dbContext.Set<Connector>()
+                .AsNoTracking()
+                .Where(item => item.IntegrationId == integration.Id && item.IsActive)
+                .OrderBy(item => item.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (connector is null)
+            {
+                throw new KeyNotFoundException(Localizer["execution.connector.notFoundByIntegration", integrationIdentifier]);
+            }
+
+            string pipelineIdentifier = $"{integration.Identifier}-webhook";
+
+            Pipeline? pipeline = await dbContext.Set<Pipeline>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.IntegrationId == integration.Id && item.Identifier == pipelineIdentifier && item.IsActive, cancellationToken);
+
+            if (pipeline is null)
+            {
+                throw new KeyNotFoundException(Localizer["webhook.pipeline.notFound", pipelineIdentifier]);
+            }
+
+            string normalizedBody = WrapPayloadAsObject(rawBody);
+
+            return await ExecutePipeline(connector.Id, pipeline.Id, normalizedBody, ExecutionType.Webhook, null, null, cancellationToken);
+        }
+
         private static string WrapPayloadAsObject(string rawBody)
         {
             if (string.IsNullOrWhiteSpace(rawBody))

@@ -1,7 +1,6 @@
 using Archon.Api.DependencyInjection;
 using Archon.Api.MultiTenancy;
 using Archon.Infrastructure.DependencyInjection;
-using IntegrationPlatform.Api.MultiTenancy;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Infrastructure.DependencyInjection;
 using Scalar.AspNetCore;
@@ -39,7 +38,6 @@ app.UseArchonApi();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UsePublicTenantResolution();
 app.UseSessionValidation();
 app.MapControllers();
 await app.UseArchonAccessSyncAsync();

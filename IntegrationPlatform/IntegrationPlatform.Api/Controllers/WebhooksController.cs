@@ -1,11 +1,10 @@
 using Archon.Api.Controllers;
-using IntegrationPlatform.Application.Localization;
+using Archon.Application.MultiTenancy;
+using Archon.Infrastructure.MultiTenancy;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
-using System.IO;
 
 namespace IntegrationPlatform.Api.Controllers
 {
@@ -13,22 +12,24 @@ namespace IntegrationPlatform.Api.Controllers
     [Route("api/webhooks")]
     public sealed class WebhooksController : ApiControllerBase
     {
-        private readonly IExecutionEngineService executionEngineService;
-        private new IStringLocalizer<IntegrationPlatformResource> Localizer { get; }
+        private readonly ITenantResolver tenantResolver;
 
-        public WebhooksController(IExecutionEngineService executionEngineService, IStringLocalizer<IntegrationPlatformResource> localizer)
+        public WebhooksController(ITenantResolver tenantResolver)
         {
-            this.executionEngineService = executionEngineService;
-            Localizer = localizer;
+            this.tenantResolver = tenantResolver;
         }
 
-        [HttpPost("{token}")]
-        public async Task<IActionResult> Receive(string token, CancellationToken cancellationToken)
+        [HttpPost("{tenantId}/{integrationIdentifier}")]
+        public async Task<IActionResult> Receive(string tenantId, string integrationIdentifier, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(token))
+            TenantInfo? tenant = await tenantResolver.ResolveAsync(tenantId, cancellationToken);
+
+            if (tenant is null)
             {
-                return Http400(Localizer["webhook.token.required"]);
+                return Http404("tenant.notFound");
             }
+
+            SetTenant(tenant);
 
             string rawBody;
             using (StreamReader reader = new(Request.Body))
@@ -36,9 +37,15 @@ namespace IntegrationPlatform.Api.Controllers
                 rawBody = await reader.ReadToEndAsync(cancellationToken);
             }
 
+            IExecutionEngineService executionEngineService = HttpContext.RequestServices.GetRequiredService<IExecutionEngineService>();
+
             try
             {
-                Execution execution = await executionEngineService.ExecuteWebhook(token, rawBody, cancellationToken);
+                Execution execution = await executionEngineService.ExecuteWebhookByIntegration(
+                    integrationIdentifier,
+                    rawBody,
+                    cancellationToken);
+
                 return Http200(new
                 {
                     executionId = execution.Id,
@@ -52,6 +59,15 @@ namespace IntegrationPlatform.Api.Controllers
             catch (InvalidOperationException ex)
             {
                 return Http400(Localizer[ex.Message]);
+            }
+        }
+
+        private void SetTenant(TenantInfo tenant)
+        {
+            ITenantContext tenantContext = HttpContext.RequestServices.GetRequiredService<ITenantContext>();
+            if (tenantContext is MultiTenantContext multiTenantContext)
+            {
+                multiTenantContext.SetTenant(tenant);
             }
         }
     }
