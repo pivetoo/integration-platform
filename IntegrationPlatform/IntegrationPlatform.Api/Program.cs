@@ -26,6 +26,7 @@ builder.Services.AddServicesFromAssembly(typeof(Program).Assembly);
 #region Background Jobs
 builder.Services.AddHostedService<QueueWorkerService>();
 builder.Services.AddHostedService<PipelineRoutineSchedulerService>();
+builder.Services.AddHostedService<CallbackDeliveryJob>();
 #endregion
 
 builder.Services.AddArchonAuthentication(builder.Configuration);

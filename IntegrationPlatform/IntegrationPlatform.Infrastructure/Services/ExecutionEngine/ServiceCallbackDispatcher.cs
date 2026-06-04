@@ -2,20 +2,19 @@ using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 {
+    // Enfileira o callback de uma execucao Success/Partial num outbox (CallbackDelivery). A entrega
+    // HTTP e a reentrega com retry/backoff ficam a cargo do CallbackDeliveryService/CallbackDeliveryJob,
+    // garantindo entrega duravel mesmo que o consumidor esteja indisponivel ou o processo reinicie.
     public sealed class ServiceCallbackDispatcher : IServiceCallbackDispatcher
     {
         private readonly DbContext dbContext;
-        private readonly IHttpClientFactory httpClientFactory;
 
-        public ServiceCallbackDispatcher(DbContext dbContext, IHttpClientFactory httpClientFactory)
+        public ServiceCallbackDispatcher(DbContext dbContext)
         {
             this.dbContext = dbContext;
-            this.httpClientFactory = httpClientFactory;
         }
 
         public async Task<ServiceCallbackResult> DispatchAsync(Execution execution, CancellationToken cancellationToken = default)
@@ -56,35 +55,21 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             string body = BuildCallbackBody(execution, pipeline.ServiceContract, connector);
 
-            HttpClient client = httpClientFactory.CreateClient();
-            client.Timeout = TimeSpan.FromSeconds(15);
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            CallbackDelivery delivery = new(
+                execution.Id,
+                connector.Id,
+                pipeline.ServiceContract.Identifier,
+                connector.CallbackUrl!,
+                connector.CallbackToken,
+                body,
+                now);
+            delivery.SetCreatedAt(now);
 
-            using HttpRequestMessage request = new(HttpMethod.Post, connector.CallbackUrl)
-            {
-                Content = new StringContent(body, Encoding.UTF8, "application/json")
-            };
+            dbContext.Set<CallbackDelivery>().Add(delivery);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
-            if (!string.IsNullOrWhiteSpace(connector.CallbackToken))
-            {
-                request.Headers.TryAddWithoutValidation("X-Callback-Token", connector.CallbackToken);
-            }
-
-            request.Headers.UserAgent.Add(new ProductInfoHeaderValue("IntegrationPlatform", "1.0"));
-
-            try
-            {
-                using HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
-                if (response.IsSuccessStatusCode)
-                {
-                    return new ServiceCallbackResult(true, true, $"HTTP {(int)response.StatusCode}");
-                }
-
-                return new ServiceCallbackResult(true, false, $"HTTP {(int)response.StatusCode}");
-            }
-            catch (Exception exception)
-            {
-                return new ServiceCallbackResult(true, false, exception.Message);
-            }
+            return new ServiceCallbackResult(true, true, "callback.enqueued");
         }
 
         private static string BuildCallbackBody(Execution execution, ServiceContract service, Connector connector)
