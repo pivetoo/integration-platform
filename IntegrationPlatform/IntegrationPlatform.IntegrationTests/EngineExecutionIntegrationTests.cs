@@ -112,5 +112,26 @@ namespace IntegrationPlatform.IntegrationTests
                 execution.Status.Should().Be(ExecutionStatus.Success);
             });
         }
+
+        [Test]
+        public async Task ExecutePipeline_with_sql_step_completes_successfully()
+        {
+            long connectorId = 0;
+            long pipelineId = 0;
+
+            await InScopeAsync(async serviceProvider =>
+            {
+                (connectorId, pipelineId) = await SeedSqlPipeline(serviceProvider);
+            });
+
+            await InScopeAsync(async serviceProvider =>
+            {
+                IExecutionEngineService engine = serviceProvider.GetRequiredService<IExecutionEngineService>();
+
+                Execution execution = await engine.ExecutePipeline(connectorId, pipelineId, "{}", ExecutionType.Manual);
+
+                execution.Status.Should().Be(ExecutionStatus.Success);
+            });
+        }
     }
 }

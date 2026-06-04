@@ -16,6 +16,11 @@ namespace IntegrationPlatform.IntegrationTests
     public sealed class TestHarness
     {
         public static IServiceProvider Services { get; private set; } = null!;
+        public static string DbHost { get; private set; } = string.Empty;
+        public static int DbPort { get; private set; }
+        public const string DbName = "integrationtests";
+        public const string DbUser = "testuser";
+        public const string DbPass = "testpass";
         private static PostgreSqlContainer? container;
 
         [OneTimeSetUp]
@@ -23,9 +28,15 @@ namespace IntegrationPlatform.IntegrationTests
         {
             container = new PostgreSqlBuilder()
                 .WithImage("postgres:16-alpine")
+                .WithDatabase(DbName)
+                .WithUsername(DbUser)
+                .WithPassword(DbPass)
                 .Build();
 
             await container.StartAsync();
+
+            DbHost = container.Hostname;
+            DbPort = container.GetMappedPublicPort(5432);
 
             IConfiguration configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
@@ -174,6 +185,42 @@ namespace IntegrationPlatform.IntegrationTests
             await dbContext.SaveChangesAsync();
 
             PipelineStep step = new(pipeline.Id, 1, "JS Step", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, javaScriptFunctionId: function.Id);
+            step.SetCreatedAt(now);
+            dbContext.Add(step);
+            await dbContext.SaveChangesAsync();
+
+            return (connector.Id, pipeline.Id);
+        }
+
+        // Pipeline com step SQL (ExecuteScript) apontando para o PROPRIO Postgres de teste, exercitando
+        // o PostgreSqlExecutor de verdade (sem mock). O SSRF guard nao se aplica a conexoes de banco.
+        protected static async Task<(long connectorId, long pipelineId)> SeedSqlPipeline(IServiceProvider serviceProvider)
+        {
+            DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+
+            Integration integration = new("sql-integration", "SQL Integration");
+            integration.SetCreatedAt(now);
+            dbContext.Add(integration);
+            await dbContext.SaveChangesAsync();
+
+            Connector connector = new(integration.Id, "SQL Connector");
+            connector.SetCreatedAt(now);
+            Pipeline pipeline = new(integration.Id, "sql-pipeline", "SQL Pipeline");
+            pipeline.SetCreatedAt(now);
+            DatabaseConnection databaseConnection = new("test-db", DatabaseType.PostgreSql, TestHarness.DbHost, TestHarness.DbPort, TestHarness.DbName, TestHarness.DbUser, TestHarness.DbPass);
+            databaseConnection.SetCreatedAt(now);
+            dbContext.Add(connector);
+            dbContext.Add(pipeline);
+            dbContext.Add(databaseConnection);
+            await dbContext.SaveChangesAsync();
+
+            DatabaseScript databaseScript = new(databaseConnection.Id, "test-script", "SELECT 1 AS n");
+            databaseScript.SetCreatedAt(now);
+            dbContext.Add(databaseScript);
+            await dbContext.SaveChangesAsync();
+
+            PipelineStep step = new(pipeline.Id, 1, "SQL Step", PipelineStepType.ExecuteScript, ErrorAction.Stop, databaseScriptId: databaseScript.Id);
             step.SetCreatedAt(now);
             dbContext.Add(step);
             await dbContext.SaveChangesAsync();
