@@ -28,7 +28,7 @@ este receiver escuta na porta **9877** (o Kanvas usa 9876) e usa o prefixo
   -> `/opt/integration-platform-deploy/deploy.sh`
 - `integration-platform-deploy-hook.service` — systemd do receiver do webhook. -> `/etc/systemd/system/`
 - `integration-platform-deploy-poll.service` + `integration-platform-deploy-poll.timer` — o poll (garantia). -> `/etc/systemd/system/`
-- `nginx-location.conf` — `location /deploy-hook` no vhost `integrationplatform.mainstay.com.br`.
+- `nginx-location.conf` — `location /deploy-hook` no vhost `integrations.mainstay.com.br`.
 
 ## Setup no VPS (uma vez)
 
