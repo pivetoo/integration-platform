@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Receiver de deploy do IntegrationPlatform. Escuta apenas em 127.0.0.1; o nginx publica em
-https://integrationplatform.mainstay.com.br/deploy-hook. Autentica por token (constant-time),
+https://integrations.mainstay.com.br/deploy-hook. Autentica por token (constant-time),
 recebe o docker-compose no corpo, valida, grava e roda o deploy. Sem SSH de entrada.
 Porta 9877 (o Kanvas usa 9876 no mesmo VPS)."""
 import hmac, os, subprocess, threading

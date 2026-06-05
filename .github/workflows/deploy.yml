@@ -107,7 +107,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE }}:${{ github.sha }}
           build-args: |
-            VITE_API_BASE_URL=https://integrationplatform.mainstay.com.br/api
+            VITE_API_BASE_URL=https://integrations.mainstay.com.br/api
             VITE_IDENTITY_MANAGEMENT_URL=https://auth.mainstay.com.br
             VITE_OIDC_CLIENT_ID=integration-platform-prod
           build-contexts: |
@@ -136,7 +136,7 @@ jobs:
           if curl -fsS --connect-timeout 15 --max-time 180 -X POST \
               -H "X-Deploy-Token: ${{ secrets.DEPLOY_HOOK_TOKEN }}" \
               --data-binary @system/integration-platform/deploy/docker-compose.prod.yml \
-              https://integrationplatform.mainstay.com.br/deploy-hook; then
+              https://integrations.mainstay.com.br/deploy-hook; then
             echo "Deploy acionado via webhook (instantaneo)."
           else
             echo "Webhook inacessivel (IP do runner bloqueado na borda). O poll do VPS aplica em ate ~30s."
