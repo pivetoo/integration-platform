@@ -5,6 +5,7 @@ import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, 
 import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { integrationService } from '../../../services/integrationService';
+import { integrationCategoryService } from '../../../services/integrationCategoryService';
 import type { Integration, IntegrationExportModel } from '../../../types/integration';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
 import IntegracaoFormModal from '../../../components/modals/IntegrationFormModal';
@@ -20,6 +21,8 @@ export default function Integracoes() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [categories, setCategories] = useState<IntegrationCategory[]>([]);
   const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integration[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -48,6 +51,10 @@ export default function Integracoes() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    integrationCategoryService.getActive().then(setCategories);
+  }, []);
+
   const loadIntegracoes = async () => {
     const result = await fetchIntegracoes(() =>
       integrationService.getAll({
@@ -58,9 +65,9 @@ export default function Integracoes() {
     );
     if (result) {
       const filtered = result.data.filter((i: Integration) => {
-        if (statusFilter === 'active') return i.isActive;
-        if (statusFilter === 'inactive') return !i.isActive;
-        return true;
+        const statusOk = statusFilter === 'active' ? i.isActive : statusFilter === 'inactive' ? !i.isActive : true;
+        const categoryOk = !categoryFilter || String(i.integrationCategoryId) === categoryFilter;
+        return statusOk && categoryOk;
       });
       setIntegracoes(filtered);
       setTotalCount(result.total ?? 0);
@@ -74,12 +81,12 @@ export default function Integracoes() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter, categoryFilter]);
 
   useEffect(() => {
     void loadIntegracoes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, debouncedSearch, statusFilter]);
+  }, [page, pageSize, debouncedSearch, statusFilter, categoryFilter]);
 
   const filterSections: FilterSection[] = useMemo(
     () => [
@@ -94,11 +101,19 @@ export default function Integracoes() {
         ],
         allLabel: t('common.filter.all'),
       },
+      {
+        key: 'category',
+        label: t('common.column.category'),
+        value: categoryFilter,
+        onChange: setCategoryFilter,
+        options: categories.map(c => ({ value: String(c.id), label: c.name })),
+        allLabel: t('common.filter.all'),
+      },
     ],
-    [statusFilter, t],
+    [statusFilter, categoryFilter, categories, t],
   );
 
-  const clearFilters = () => setStatusFilter('');
+  const clearFilters = () => { setStatusFilter(''); setCategoryFilter(''); };
 
   const handleAdd = () => {
     setEditingIntegracao(null);
