@@ -137,6 +137,7 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
     { value: PipelineStepType.HttpRequest.toString(), label: t('pipeline.step.type.httpRequest') },
     { value: PipelineStepType.JavaScriptFunction.toString(), label: t('pipeline.step.type.javaScriptFunction') },
     { value: PipelineStepType.ExecuteScript.toString(), label: t('pipeline.step.type.executeSqlScript') },
+    { value: PipelineStepType.SmtpSend.toString(), label: t('pipeline.step.type.smtpSend') },
   ];
   const acaoErroOptions = [
     { value: ErrorAction.Stop.toString(), label: t('pipeline.step.errorAction.stop') },

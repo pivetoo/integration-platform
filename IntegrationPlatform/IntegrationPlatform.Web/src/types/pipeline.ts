@@ -4,6 +4,7 @@ export const PipelineStepType = {
   HttpRequest: 1,
   JavaScriptFunction: 2,
   ExecuteScript: 3,
+  SmtpSend: 4,
 } as const;
 
 export type PipelineStepType = typeof PipelineStepType[keyof typeof PipelineStepType];
@@ -12,6 +13,7 @@ export const PipelineStepTypeLabels: Record<PipelineStepType, string> = {
   [PipelineStepType.HttpRequest]: 'Requisição HTTP',
   [PipelineStepType.JavaScriptFunction]: 'Função JavaScript',
   [PipelineStepType.ExecuteScript]: 'Executar Script SQL',
+  [PipelineStepType.SmtpSend]: 'Envio de E-mail (SMTP)',
 };
 
 export const ErrorAction = {
