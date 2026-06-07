@@ -413,6 +413,7 @@
   <data name="layout.menu.references" xml:space="preserve"><value>Referências</value></data>
   <data name="layout.menu.resources" xml:space="preserve"><value>Recursos</value></data>
   <data name="layout.menu.pipelineRoutines" xml:space="preserve"><value>Rotinas de Pipeline</value></data>
+  <data name="layout.menu.reports" xml:space="preserve"><value>Relatórios</value></data>
   <data name="layout.breadcrumb.home" xml:space="preserve"><value>Início</value></data>
   <data name="layout.breadcrumb.details" xml:space="preserve"><value>Detalhes</value></data>
   <data name="dashboard.title" xml:space="preserve"><value>Dashboard</value></data>
