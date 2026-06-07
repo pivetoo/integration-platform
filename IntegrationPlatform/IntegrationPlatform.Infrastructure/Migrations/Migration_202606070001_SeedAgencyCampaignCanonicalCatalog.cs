@@ -13,7 +13,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            SeedCategory("email", "E-mail", "Provedores de envio de e-mail transacional.");
+            SeedCategory("email", "Email", "Provedores de envio de e-mail transacional.");
             SeedCategory("whatsapp", "WhatsApp", "Provedores de mensageria WhatsApp.");
             SeedCategory("digital-signature", "Assinatura digital", "Provedores de coleta de assinaturas digitais.");
             SeedCategory("contas-a-receber", "Contas a receber", "Provedores de cobrança (boleto, PIX, cartão).");
