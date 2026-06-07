@@ -8,6 +8,7 @@ using IntegrationPlatform.Domain.ValueObjects;
 using IntegrationPlatform.Infrastructure.Security;
 using Jint;
 using MailKit.Net.Smtp;
+using System.Text;
 using MailKit.Security;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Localization;
@@ -171,6 +172,9 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 engine.SetValue("payload", context.PayloadData);
                 engine.SetValue("attributes", scriptAttributes);
                 engine.SetValue("result", new Dictionary<string, object?> { ["value"] = null });
+                engine.SetValue("btoa", new Func<string, string>(s => Convert.ToBase64String(Encoding.UTF8.GetBytes(s))));
+                engine.SetValue("atob", new Func<string, string>(s => Encoding.UTF8.GetString(Convert.FromBase64String(s))));
+                engine.SetValue("encodeURIComponent", new Func<string, string>(Uri.EscapeDataString));
 
                 engine.Execute(javaScriptFunction.Code);
 
