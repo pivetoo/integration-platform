@@ -84,7 +84,13 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
   const loadLogs = async (executionId: number, resetSelection = true) => {
     const result = await fetchLogs(() => executionLogService.getByExecution(executionId));
     if (result) {
-      const sorted = [...result].sort((a, b) => a.id - b.id);
+      const sorted = [...result]
+        .sort((a, b) => a.id - b.id)
+        .filter((log) => {
+          if (!log.pipelineStep) return true;
+          if (log.duration != null) return true;
+          return log.level < LogLevel.Warning;
+        });
       setLogs(sorted);
       if (resetSelection && sorted.length > 0) {
         const firstError = sorted.find((l) => l.level >= LogLevel.Error);
