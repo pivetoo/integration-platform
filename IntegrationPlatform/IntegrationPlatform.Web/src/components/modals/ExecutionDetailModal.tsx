@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Clock, AlertCircle, Info as InfoIcon, Copy, Check } from 'lucide-react';
+import { Clock, AlertCircle, Info as InfoIcon, CheckCircle2, Copy, Check } from 'lucide-react';
 import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi, useI18n } from 'archon-ui';
 import type { Execution } from '../../types/execution';
 import { ExecutionStatus } from '../../types/execution';
 import type { ExecutionLog } from '../../types/executionLog';
-import { LogLevelLabels } from '../../types/executionLog';
+import { LogLevel } from '../../types/executionLog';
 import { executionService } from '../../services/executionService';
 import { executionLogService } from '../../services/executionLogService';
 import { ExecutionStatusLabels } from '../../types/execution';
@@ -22,21 +22,7 @@ const statusVariantMap: Record<number, string> = {
   4: 'secondary',
 };
 
-const nivelLogVariantMap: Record<number, string> = {
-  1: 'secondary',
-  2: 'default',
-  3: 'warning',
-  4: 'destructive',
-};
-
-const nivelLogIconMap: Record<number, React.ReactNode> = {
-  1: <InfoIcon size={16} />,
-  2: <InfoIcon size={16} />,
-  3: <AlertCircle size={16} />,
-  4: <AlertCircle size={16} />,
-};
-
-function formatDuracao(ms?: number): string {
+function formatDuracao(ms?: number | null): string {
   if (ms == null) return '-';
   if (ms < 1000) return `${ms}ms`;
   const seconds = Math.floor(ms / 1000);
@@ -44,6 +30,14 @@ function formatDuracao(ms?: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}m ${remainingSeconds}s`;
+}
+
+function tryPrettyPrint(text: string): string {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    return text;
+  }
 }
 
 export default function ExecutionDetailModal({ open, onOpenChange, execution }: ExecutionDetailModalProps) {
@@ -54,13 +48,8 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
   const [copiedRequest, setCopiedRequest] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
 
-  const { execute: fetchExecution } = useApi<Execution>({
-    showErrorMessage: true,
-  });
-
-  const { execute: fetchLogs, loading } = useApi<ExecutionLog[]>({
-    showErrorMessage: true,
-  });
+  const { execute: fetchExecution } = useApi<Execution>({ showErrorMessage: true });
+  const { execute: fetchLogs, loading } = useApi<ExecutionLog[]>({ showErrorMessage: true });
 
   useEffect(() => {
     if (open && execution) {
@@ -78,12 +67,10 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
     if (!open || !currentExecution || currentExecution.status !== ExecutionStatus.Running) {
       return;
     }
-
     const intervalId = window.setInterval(() => {
       loadExecution(currentExecution.id);
       loadLogs(currentExecution.id, false);
     }, 3000);
-
     return () => window.clearInterval(intervalId);
   }, [open, currentExecution?.id, currentExecution?.status]);
 
@@ -97,32 +84,14 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
   const loadLogs = async (executionId: number, resetSelection = true) => {
     const result = await fetchLogs(() => executionLogService.getByExecution(executionId));
     if (result) {
-      const grouped = groupLogsByStep(result);
-      setLogs(grouped);
-      if (resetSelection && grouped.length > 0) {
-        setSelectedLog(grouped[0]);
+      const sorted = [...result].sort((a, b) => a.id - b.id);
+      setLogs(sorted);
+      if (resetSelection && sorted.length > 0) {
+        const firstError = sorted.find((l) => l.level >= LogLevel.Error);
+        const firstWithData = sorted.find((l) => l.request || l.response);
+        setSelectedLog(firstError ?? firstWithData ?? sorted[0]);
       }
     }
-  };
-
-  const groupLogsByStep = (executionLogs: ExecutionLog[]): ExecutionLog[] => {
-    const stepMap = new Map<number, ExecutionLog>();
-    const generalLogs: ExecutionLog[] = [];
-
-    executionLogs.forEach((log) => {
-      const stepId = log.pipelineStep?.id;
-
-      if (!stepId) {
-        generalLogs.push(log);
-      } else {
-        const existing = stepMap.get(stepId);
-        if (!existing || log.id > existing.id) {
-          stepMap.set(stepId, log);
-        }
-      }
-    });
-
-    return [...generalLogs, ...Array.from(stepMap.values())].sort((a, b) => a.id - b.id);
   };
 
   const handleCopyRequest = async () => {
@@ -141,18 +110,31 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
     }
   };
 
-  const statusLabels: Record<number, string> = {
-    1: t('execution.status.running'),
-    2: t('execution.status.success'),
-    3: t('execution.status.error'),
-    4: t('execution.status.partial'),
-  };
-
   const nivelLogLabels: Record<number, string> = {
     1: t('execution.log.level.debug'),
     2: t('execution.log.level.info'),
     3: t('execution.log.level.warning'),
     4: t('execution.log.level.error'),
+  };
+
+  const getLogBadge = (log: ExecutionLog): { variant: string; icon: React.ReactNode; label: string } => {
+    if (log.level === LogLevel.Error) {
+      return { variant: 'destructive', icon: <AlertCircle size={14} />, label: nivelLogLabels[LogLevel.Error] };
+    }
+    if (log.level === LogLevel.Warning) {
+      return { variant: 'warning', icon: <AlertCircle size={14} />, label: nivelLogLabels[LogLevel.Warning] };
+    }
+    if (log.pipelineStep && log.duration != null) {
+      return { variant: 'success', icon: <CheckCircle2 size={14} />, label: t('execution.log.level.success') };
+    }
+    return { variant: 'secondary', icon: <InfoIcon size={14} />, label: nivelLogLabels[LogLevel.Info] };
+  };
+
+  const statusLabels: Record<number, string> = {
+    1: t('execution.status.running'),
+    2: t('execution.status.success'),
+    3: t('execution.status.error'),
+    4: t('execution.status.partial'),
   };
 
   if (!execution || !currentExecution) return null;
@@ -196,7 +178,7 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
           <div className="flex gap-4 flex-1 min-h-0">
             <div className="w-80 border rounded-lg overflow-y-auto flex-shrink-0">
               <div className="sticky top-0 bg-background border-b p-3 font-semibold">
-                {t('pipeline.detail.stepsTitle')} ({logs.length})
+                {t('execution.detail.logsTitle')} ({logs.length})
               </div>
               {loading ? (
                 <div className="p-4 text-center text-muted-foreground">{t('common.state.loading')}</div>
@@ -204,40 +186,40 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
                 <div className="p-4 text-center text-muted-foreground">{t('execution.detail.emptyLogs')}</div>
               ) : (
                 <div className="divide-y">
-                  {logs.map((log) => (
-                    <button
-                      key={log.id}
-                      onClick={() => setSelectedLog(log)}
-                      className={`w-full text-left p-3 hover:bg-accent transition-colors ${
-                        selectedLog?.id === log.id ? 'bg-accent' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-sm truncate">
-                          {log.pipelineStep?.name || t('execution.detail.generalLog')}
-                        </span>
-                        <Badge
-                          variant={
-                            (nivelLogVariantMap[log.level] || 'outline') as
-                              | 'default'
-                              | 'warning'
-                              | 'destructive'
-                              | 'secondary'
-                          }
-                          className="ml-2 flex items-center gap-1"
-                        >
-                          {nivelLogIconMap[log.level]}
-                          {nivelLogLabels[log.level] || LogLevelLabels[log.level]}
-                        </Badge>
-                      </div>
-                      {log.duration != null && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock size={12} />
-                          {formatDuracao(log.duration)}
+                  {logs.map((log) => {
+                    const badge = getLogBadge(log);
+                    return (
+                      <button
+                        key={log.id}
+                        onClick={() => setSelectedLog(log)}
+                        className={`w-full text-left p-3 hover:bg-accent transition-colors ${selectedLog?.id === log.id ? 'bg-accent' : ''}`}
+                      >
+                        <div className="flex items-center justify-between mb-1 gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {log.pipelineStep && (
+                              <span className="text-xs font-mono text-muted-foreground shrink-0">#{log.pipelineStep.order}</span>
+                            )}
+                            <span className="font-medium text-sm truncate">
+                              {log.pipelineStep?.name || t('execution.detail.generalLog')}
+                            </span>
+                          </div>
+                          <Badge
+                            variant={badge.variant as 'default' | 'warning' | 'destructive' | 'secondary' | 'success'}
+                            className="flex items-center gap-1 shrink-0"
+                          >
+                            {badge.icon}
+                            {badge.label}
+                          </Badge>
                         </div>
-                      )}
-                    </button>
-                  ))}
+                        {log.duration != null && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock size={12} />
+                            {formatDuracao(log.duration)}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -285,10 +267,13 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
                   {selectedLog.response && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">
+                        <h3 className="font-semibold flex items-center gap-2">
                           {t('execution.detail.response')}
                           {selectedLog.httpStatusCode && (
-                            <Badge variant="outline" className="ml-2">
+                            <Badge
+                              variant={selectedLog.httpStatusCode < 400 ? 'success' : 'destructive'}
+                              className="text-xs"
+                            >
                               HTTP {selectedLog.httpStatusCode}
                             </Badge>
                           )}
@@ -310,7 +295,7 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
                           )}
                         </button>
                       </div>
-                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{selectedLog.response}</pre>
+                      <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{tryPrettyPrint(selectedLog.response)}</pre>
                     </div>
                   )}
 
@@ -323,7 +308,7 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                  {t('execution.detail.selectStep')}
+                  {t('execution.detail.selectLog')}
                 </div>
               )}
             </div>

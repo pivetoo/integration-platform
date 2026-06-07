@@ -662,6 +662,9 @@
   <data name="execution.log.level.info" xml:space="preserve"><value>Info</value></data>
   <data name="execution.log.level.warning" xml:space="preserve"><value>Alerta</value></data>
   <data name="execution.log.level.error" xml:space="preserve"><value>Erro</value></data>
+  <data name="execution.log.level.success" xml:space="preserve"><value>Sucesso</value></data>
+  <data name="execution.detail.logsTitle" xml:space="preserve"><value>Logs</value></data>
+  <data name="execution.detail.selectLog" xml:space="preserve"><value>Selecione um log para ver os detalhes</value></data>
   <data name="execution.detail.title" xml:space="preserve"><value>Detalhes da Execução</value></data>
   <data name="execution.detail.emptyLogs" xml:space="preserve"><value>Nenhum log encontrado</value></data>
   <data name="execution.detail.generalLog" xml:space="preserve"><value>Log Geral</value></data>
