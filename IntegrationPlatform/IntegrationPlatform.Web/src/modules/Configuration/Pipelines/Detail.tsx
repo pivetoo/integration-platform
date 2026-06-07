@@ -363,20 +363,28 @@ export default function PipelineDetalhe() {
                     {selectedStep.ignoreOnResponse && <Badge variant="outline">{t('pipeline.detail.ignoreReturn')}</Badge>}
                   </div>
 
-                  <div className="grid gap-3 rounded-lg border p-3 md:grid-cols-2">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('pipeline.detail.apiCall')}</p>
-                      <p className="text-sm font-medium">{selectedStep.apiCall?.name || '-'}</p>
+                  {(selectedStep.apiCall || selectedStep.javaScriptFunction || selectedStep.databaseScript) && (
+                    <div className="grid gap-3 rounded-lg border p-3">
+                      {selectedStep.apiCall && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">{t('pipeline.detail.apiCall')}</p>
+                          <p className="text-sm font-medium">{selectedStep.apiCall.name}</p>
+                        </div>
+                      )}
+                      {selectedStep.javaScriptFunction && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">{t('pipeline.detail.javaScriptFunction')}</p>
+                          <p className="text-sm font-medium">{selectedStep.javaScriptFunction.name}</p>
+                        </div>
+                      )}
+                      {selectedStep.databaseScript && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">{t('pipeline.detail.sqlScript')}</p>
+                          <p className="text-sm font-medium">{selectedStep.databaseScript.name}</p>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('pipeline.detail.javaScriptFunction')}</p>
-                      <p className="text-sm font-medium">{selectedStep.javaScriptFunction?.name || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('pipeline.detail.sqlScript')}</p>
-                      <p className="text-sm font-medium">{selectedStep.databaseScript?.name || '-'}</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </CardContent>
