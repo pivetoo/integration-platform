@@ -411,6 +411,8 @@
   <data name="layout.menu.executions" xml:space="preserve"><value>Ejecuciones</value></data>
   <data name="layout.menu.processingQueue" xml:space="preserve"><value>Cola de Integración</value></data>
   <data name="layout.menu.references" xml:space="preserve"><value>Referencias</value></data>
+  <data name="layout.menu.resources" xml:space="preserve"><value>Recursos</value></data>
+  <data name="layout.menu.pipelineRoutines" xml:space="preserve"><value>Rutinas de Pipeline</value></data>
   <data name="layout.breadcrumb.home" xml:space="preserve"><value>Inicio</value></data>
   <data name="layout.breadcrumb.details" xml:space="preserve"><value>Detalles</value></data>
   <data name="dashboard.title" xml:space="preserve"><value>Dashboard</value></data>
