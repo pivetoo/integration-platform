@@ -479,7 +479,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     try
                     {
                         using JsonDocument jsonDocument = JsonDocument.Parse(body);
-                        builder.AppendLine(JsonSerializer.Serialize(jsonDocument, new JsonSerializerOptions { WriteIndented = true }));
+                        builder.AppendLine(JsonSerializer.Serialize(jsonDocument, new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
                     }
                     catch
                     {
