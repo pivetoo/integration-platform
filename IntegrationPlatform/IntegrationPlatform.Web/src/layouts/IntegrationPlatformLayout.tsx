@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout, useAuth, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem, ModuleNavConfig } from 'archon-ui';
-import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers } from 'lucide-react';
+import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers, LayoutDashboard } from 'lucide-react';
 import logoEmpresa from '../assets/logo-empresa.png';
 
 export default function IntegrationPlatformLayout() {
@@ -21,6 +21,15 @@ export default function IntegrationPlatformLayout() {
   };
 
   const moduleNav: ModuleNavConfig = [
+    {
+      key: 'geral',
+      label: t('layout.menu.general'),
+      icon: <LayoutDashboard size={20} />,
+      group: 'op',
+      routes: [
+        { key: 'dashboard', label: t('layout.menu.dashboard'), path: '/', icon: <LayoutDashboard size={20} /> },
+      ],
+    },
     {
       key: 'integracoes',
       label: t('layout.menu.integrations'),
