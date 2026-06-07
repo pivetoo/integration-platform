@@ -651,6 +651,7 @@
   <data name="pipeline.step.type.httpRequest" xml:space="preserve"><value>Solicitud HTTP</value></data>
   <data name="pipeline.step.type.javaScriptFunction" xml:space="preserve"><value>Función JavaScript</value></data>
   <data name="pipeline.step.type.executeSqlScript" xml:space="preserve"><value>Ejecutar Script SQL</value></data>
+  <data name="pipeline.step.type.smtpSend" xml:space="preserve"><value>Envío de E-mail (SMTP)</value></data>
   <data name="pipeline.step.errorAction.stop" xml:space="preserve"><value>Detener</value></data>
   <data name="pipeline.step.errorAction.continue" xml:space="preserve"><value>Continuar</value></data>
   <data name="execution.status.running" xml:space="preserve"><value>En ejecución</value></data>

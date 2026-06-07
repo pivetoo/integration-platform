@@ -266,6 +266,7 @@ export default function PipelineDebuggerModal({
     1: t('pipeline.step.type.httpRequest'),
     2: t('pipeline.step.type.javaScriptFunction'),
     3: t('pipeline.step.type.executeSqlScript'),
+    4: t('pipeline.step.type.smtpSend'),
   };
   const acaoErroLabels: Record<number, string> = {
     1: t('pipeline.step.errorAction.stop'),
