@@ -24,6 +24,9 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             return await DbContext.Set<PipelineStep>()
                 .AsNoTracking()
+                .Include(item => item.ApiCall)
+                .Include(item => item.JavaScriptFunction)
+                .Include(item => item.DatabaseScript)
                 .OrderBy(item => item.Order)
                 .ToPagedResultAsync(request, cancellationToken);
         }

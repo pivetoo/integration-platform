@@ -16,14 +16,26 @@ namespace IntegrationPlatform.Infrastructure.Services
 
         public async Task<PagedResult<PipelineRoutine>> GetPipelineRoutines(PagedRequest request, string? search, CancellationToken cancellationToken = default)
         {
-            var query = DbContext.Set<PipelineRoutine>().AsNoTracking();
+            var query = DbContext.Set<PipelineRoutine>()
+                .AsNoTracking()
+                .Include(item => item.Connector)
+                    .ThenInclude(c => c!.Integration)
+                    .ThenInclude(i => i!.IntegrationCategory)
+                .Include(item => item.Pipeline)
+                    .ThenInclude(p => p!.Integration)
+                    .ThenInclude(i => i!.IntegrationCategory);
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var lower = search.ToLower();
-                query = query.Where(item =>
-                    (item.Connector != null && item.Connector.Name.ToLower().Contains(lower)) ||
-                    (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)));
+                return await query
+                    .Where(item =>
+                        (item.Connector != null && item.Connector.Name.ToLower().Contains(lower)) ||
+                        (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)))
+                    .OrderByDescending(item => item.CreatedAt)
+                    .ToPagedResultAsync(request, cancellationToken);
             }
+
             return await query
                 .OrderByDescending(item => item.CreatedAt)
                 .ToPagedResultAsync(request, cancellationToken);
@@ -33,6 +45,12 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             return await DbContext.Set<PipelineRoutine>()
                 .AsNoTracking()
+                .Include(item => item.Connector)
+                    .ThenInclude(c => c!.Integration)
+                    .ThenInclude(i => i!.IntegrationCategory)
+                .Include(item => item.Pipeline)
+                    .ThenInclude(p => p!.Integration)
+                    .ThenInclude(i => i!.IntegrationCategory)
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
         }
 
