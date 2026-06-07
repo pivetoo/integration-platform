@@ -13,13 +13,13 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            SeedCategory("email", "E-mail", "Provedores de envio de email transacional.");
+            SeedCategory("email", "E-mail", "Provedores de envio de e-mail transacional.");
             SeedCategory("whatsapp", "WhatsApp", "Provedores de mensageria WhatsApp.");
             SeedCategory("digital-signature", "Assinatura digital", "Provedores de coleta de assinaturas digitais.");
-            SeedCategory("contas-a-receber", "Contas a receber", "Provedores de cobranca (boleto, PIX, cartao).");
+            SeedCategory("contas-a-receber", "Contas a receber", "Provedores de cobrança (boleto, PIX, cartão).");
             SeedCategory("contas-a-pagar", "Contas a pagar", "Provedores de repasse e pagamento (PIX, TED).");
-            SeedCategory("payment", "Pagamento", "Provedores de pagamento e cobranca.");
-            SeedCategory("banking", "Conta bancaria", "Provedores de sincronizacao de saldo e extrato de contas bancarias.");
+            SeedCategory("payment", "Pagamento", "Provedores de pagamento e cobrança.");
+            SeedCategory("banking", "Conta bancária", "Provedores de sincronização de saldo e extrato de contas bancárias.");
 
             // Consolida 'messaging' -> 'whatsapp' (o que a 200006 nao conseguiu por falta da categoria)
             Execute.Sql(@"
@@ -34,16 +34,16 @@ namespace IntegrationPlatform.Infrastructure.Migrations
 
             SeedServiceContract(
                 identifier: "email.send",
-                name: "Envio de email",
-                description: "Envia um email transacional para um ou mais destinatarios.",
+                name: "Envio de e-mail",
+                description: "Envia um e-mail transacional para um ou mais destinatários.",
                 categoryIdentifier: "email",
                 inputSchema: """
                 {
-                  "to": "string[] (obrigatorio)",
+                  "to": "string[] (obrigatório)",
                   "cc": "string[]?",
                   "bcc": "string[]?",
-                  "subject": "string (obrigatorio)",
-                  "body": "string (obrigatorio)",
+                  "subject": "string (obrigatório)",
+                  "body": "string (obrigatório)",
                   "isHtml": "bool",
                   "attachments": "[{filename, contentType, contentBase64 | url}]?",
                   "replyTo": "string?",
@@ -67,7 +67,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                 categoryIdentifier: "whatsapp",
                 inputSchema: """
                 {
-                  "to": "string (E.164, obrigatorio)",
+                  "to": "string (E.164, obrigatório)",
                   "template": "{name, language, variables{}}?",
                   "body": "string?",
                   "attachments": "[{type: image|document|video, url}]?"
@@ -95,9 +95,9 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                 categoryIdentifier: "digital-signature",
                 inputSchema: """
                 {
-                  "document": "{filename, contentType, contentBase64 | url} (obrigatorio)",
-                  "signers": "[{name, email, phone?, role, signatureFields?}] (obrigatorio)",
-                  "title": "string (obrigatorio)",
+                  "document": "{filename, contentType, contentBase64 | url} (obrigatório)",
+                  "signers": "[{name, email, phone?, role, signatureFields?}] (obrigatório)",
+                  "title": "string (obrigatório)",
                   "message": "string?",
                   "deadline": "ISO date?",
                   "reminderDays": "number?"
@@ -121,16 +121,16 @@ namespace IntegrationPlatform.Infrastructure.Migrations
 
             SeedServiceContract(
                 identifier: "payment.charge.create",
-                name: "Criar cobranca",
-                description: "Emite cobranca para cliente (boleto, PIX ou cartao).",
+                name: "Criar cobrança",
+                description: "Emite cobrança para cliente (boleto, PIX ou cartão).",
                 categoryIdentifier: "contas-a-receber",
                 inputSchema: """
                 {
-                  "externalReference": "string (obrigatorio)",
-                  "amount": "number (centavos, obrigatorio)",
-                  "dueDate": "ISO date (obrigatorio)",
-                  "method": "pix | boleto | card (obrigatorio)",
-                  "payer": "{name, document, email?, phone?} (obrigatorio)",
+                  "externalReference": "string (obrigatório)",
+                  "amount": "number (centavos, obrigatório)",
+                  "dueDate": "ISO date (obrigatório)",
+                  "method": "pix | boleto | card (obrigatório)",
+                  "payer": "{name, document, email?, phone?} (obrigatório)",
                   "description": "string?"
                 }
                 """,
@@ -159,10 +159,10 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                 categoryIdentifier: "contas-a-pagar",
                 inputSchema: """
                 {
-                  "externalReference": "string (obrigatorio)",
-                  "amount": "number (centavos, obrigatorio)",
-                  "method": "pix | ted (obrigatorio)",
-                  "recipient": "{name, document, pixKey? | {bank, branch, account, accountType}} (obrigatorio)",
+                  "externalReference": "string (obrigatório)",
+                  "amount": "number (centavos, obrigatório)",
+                  "method": "pix | ted (obrigatório)",
+                  "recipient": "{name, document, pixKey? | {bank, branch, account, accountType}} (obrigatório)",
                   "description": "string?"
                 }
                 """,
