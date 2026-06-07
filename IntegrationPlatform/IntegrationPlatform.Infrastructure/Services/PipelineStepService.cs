@@ -32,6 +32,9 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             return await DbContext.Set<PipelineStep>()
                 .AsNoTracking()
+                .Include(item => item.ApiCall)
+                .Include(item => item.JavaScriptFunction)
+                .Include(item => item.DatabaseScript)
                 .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
         }
 
@@ -39,6 +42,9 @@ namespace IntegrationPlatform.Infrastructure.Services
         {
             return await DbContext.Set<PipelineStep>()
                 .AsNoTracking()
+                .Include(item => item.ApiCall)
+                .Include(item => item.JavaScriptFunction)
+                .Include(item => item.DatabaseScript)
                 .Where(item => item.PipelineId == pipelineId)
                 .OrderBy(item => item.Order)
                 .ToListAsync(cancellationToken);
