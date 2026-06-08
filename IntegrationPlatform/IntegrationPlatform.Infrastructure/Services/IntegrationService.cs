@@ -19,13 +19,21 @@ namespace IntegrationPlatform.Infrastructure.Services
             Localizer = localizer;
         }
 
-        public async Task<PagedResult<Integration>> GetIntegrations(PagedRequest request, string? search, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<Integration>> GetIntegrations(PagedRequest request, string? search, long? categoryId, bool? isActive, CancellationToken cancellationToken = default)
         {
             var query = QueryWithDetails();
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var lower = search.ToLower();
                 query = query.Where(item => item.Name.ToLower().Contains(lower) || (item.Identifier != null && item.Identifier.ToLower().Contains(lower)));
+            }
+            if (categoryId.HasValue)
+            {
+                query = query.Where(item => item.IntegrationCategoryId == categoryId.Value);
+            }
+            if (isActive.HasValue)
+            {
+                query = query.Where(item => item.IsActive == isActive.Value);
             }
             return await query
                 .OrderBy(item => item.Name)

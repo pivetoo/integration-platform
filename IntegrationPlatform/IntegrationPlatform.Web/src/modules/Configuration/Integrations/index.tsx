@@ -62,15 +62,12 @@ export default function Integracoes() {
         page,
         pageSize,
         search: debouncedSearch || undefined,
+        categoryId: categoryFilter ? Number(categoryFilter) : undefined,
+        isActive: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
       }),
     );
     if (result) {
-      const filtered = result.data.filter((i: Integration) => {
-        const statusOk = statusFilter === 'active' ? i.isActive : statusFilter === 'inactive' ? !i.isActive : true;
-        const categoryOk = !categoryFilter || String(i.integrationCategoryId) === categoryFilter;
-        return statusOk && categoryOk;
-      });
-      setIntegracoes(filtered);
+      setIntegracoes(result.data);
       setTotalCount(result.total ?? 0);
     }
   };

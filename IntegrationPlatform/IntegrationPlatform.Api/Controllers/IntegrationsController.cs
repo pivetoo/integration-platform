@@ -26,9 +26,9 @@ namespace IntegrationPlatform.Api.Controllers
 
         [RequireAccess("integrations.get.description")]
         [GetEndpoint]
-        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] PagedRequest request, [FromQuery] string? search, [FromQuery] long? categoryId, [FromQuery] bool? isActive, CancellationToken cancellationToken)
         {
-            PagedResult<Integration> result = await integrationService.GetIntegrations(request, search, cancellationToken);
+            PagedResult<Integration> result = await integrationService.GetIntegrations(request, search, categoryId, isActive, cancellationToken);
             return Http200(new PagedResult<IntegrationContract>
             {
                 Items = result.Items.Select(MapIntegration).ToArray(),

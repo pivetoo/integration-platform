@@ -7,8 +7,12 @@ const BASE_URL = '/Integrations';
 export const integrationService = {
   getAll: async (params?: PaginationParams): Promise<PaginatedResult<Integration>> => {
     const query = buildPaginationQuery(params);
-    const searchParam = params?.search ? `${query ? '&' : '?'}search=${encodeURIComponent(params.search)}` : '';
-    const response = await httpClient.get<Integration[]>(`${BASE_URL}/Get${query}${searchParam}`);
+    const extra: string[] = [];
+    if (params?.search) { extra.push(`search=${encodeURIComponent(params.search)}`); }
+    if (params?.categoryId !== undefined) { extra.push(`categoryId=${params.categoryId}`); }
+    if (params?.isActive !== undefined) { extra.push(`isActive=${params.isActive}`); }
+    const extraParam = extra.length > 0 ? `${query ? '&' : '?'}${extra.join('&')}` : '';
+    const response = await httpClient.get<Integration[]>(`${BASE_URL}/Get${query}${extraParam}`);
 
     return {
       data: response.data ?? [],

@@ -3,6 +3,8 @@ export interface PaginationParams {
   pageSize?: number
   search?: string
   orderBy?: string
+  categoryId?: number
+  isActive?: boolean
 }
 
 export interface PaginatedResult<T> {
