@@ -136,7 +136,7 @@ export default function CategoriasIntegracao() {
         <span className="inline-flex items-center gap-2">
           <span className="font-medium">{value}</span>
           {record.isSystem && (
-            <Badge variant="outline" className="text-xs">{t('integration.category.list.systemBadge')}</Badge>
+            <Badge variant="secondary" className="text-xs">{t('integration.category.list.systemBadge')}</Badge>
           )}
         </span>
       ),
