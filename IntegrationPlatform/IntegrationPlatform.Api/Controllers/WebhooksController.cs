@@ -1,5 +1,6 @@
 using Archon.Api.Controllers;
 using IntegrationPlatform.Application.Services;
+using IntegrationPlatform.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,17 +41,6 @@ namespace IntegrationPlatform.Api.Controllers
             {
                 return Http400(Localizer[ex.Message]);
             }
-        }
-
-        [HttpGet("{tenantId}/{integrationIdentifier}")]
-        public IActionResult Challenge([FromQuery(Name = "hub.challenge")] string? hubChallenge)
-        {
-            if (string.IsNullOrWhiteSpace(hubChallenge))
-            {
-                return Http400("hub.challenge.required");
-            }
-
-            return Ok(hubChallenge);
         }
     }
 }
