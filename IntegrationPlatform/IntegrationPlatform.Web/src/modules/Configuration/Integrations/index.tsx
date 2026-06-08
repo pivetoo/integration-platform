@@ -9,6 +9,7 @@ import { integrationCategoryService } from '../../../services/integrationCategor
 import type { Integration, IntegrationExportModel } from '../../../types/integration';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
 import IntegracaoFormModal from '../../../components/modals/IntegrationFormModal';
+import DetailsButton from '../../../components/DetailsButton';
 import { parseJsonSafe } from '../../../utils/json';
 
 export default function Integracoes() {
@@ -230,6 +231,15 @@ export default function Integracoes() {
         <Badge variant={value ? 'success' : 'destructive'}>
           {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      title: '',
+      dataIndex: undefined,
+      width: 110,
+      render: (_: unknown, record: Integration) => (
+        <DetailsButton onClick={(e) => { e.stopPropagation(); navigate(`/integracoes/${record.id}`); }} />
       ),
     },
   ];

@@ -391,6 +391,7 @@
   <data name="common.status.active" xml:space="preserve"><value>Active</value></data>
   <data name="common.status.inactive" xml:space="preserve"><value>Inactive</value></data>
   <data name="common.action.open" xml:space="preserve"><value>Open</value></data>
+  <data name="common.action.details" xml:space="preserve"><value>Details</value></data>
   <data name="common.action.delete" xml:space="preserve"><value>Delete</value></data>
   <data name="common.action.cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="common.action.export" xml:space="preserve"><value>Export</value></data>

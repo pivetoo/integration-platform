@@ -7,6 +7,7 @@ import { connectorService } from '../../../services/connectorService';
 import type { Conector } from '../../../types/connector';
 import type { Integration } from '../../../types/integration';
 import ConectorFormModal from '../../../components/modals/ConnectorFormModal';
+import DetailsButton from '../../../components/DetailsButton';
 
 export default function Conectores() {
   const { t } = useI18n();
@@ -139,6 +140,15 @@ export default function Conectores() {
         <Badge variant={value ? 'success' : 'destructive'}>
           {value ? t('common.boolean.yes') : t('common.boolean.no')}
         </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      title: '',
+      dataIndex: undefined,
+      width: 110,
+      render: (_: unknown, record: Conector) => (
+        <DetailsButton onClick={(e) => { e.stopPropagation(); navigate(`/conectores/${record.id}`); }} />
       ),
     },
   ];
