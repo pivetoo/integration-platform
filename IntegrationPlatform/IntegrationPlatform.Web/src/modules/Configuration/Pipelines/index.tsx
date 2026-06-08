@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
 import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
 import type { DataTableColumn, FilterSection } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
@@ -8,6 +7,7 @@ import { pipelineService } from '../../../services/pipelineService';
 import type { Pipeline } from '../../../types/pipeline';
 import type { Integration } from '../../../types/integration';
 import PipelineFormModal from '../../../components/modals/PipelineFormModal';
+import DetailsButton from '../../../components/DetailsButton';
 
 export default function Pipelines() {
   const { t } = useI18n();
@@ -146,18 +146,12 @@ export default function Pipelines() {
       ),
     },
     {
-      key: 'acoes',
-      title: t('common.column.actions'),
-      width: 130,
-      render: (_value, pipeline: Pipeline) => (
-        <button
-          type="button"
-          onClick={() => navigate(`/pipelines/${pipeline.id}`)}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-        >
-          <ExternalLink size={14} />
-          {t('common.action.open')}
-        </button>
+      key: 'actions',
+      title: '',
+      dataIndex: undefined,
+      width: 110,
+      render: (_: unknown, record: Pipeline) => (
+        <DetailsButton onClick={(e) => { e.stopPropagation(); navigate(`/pipelines/${record.id}`); }} />
       ),
     },
   ];
