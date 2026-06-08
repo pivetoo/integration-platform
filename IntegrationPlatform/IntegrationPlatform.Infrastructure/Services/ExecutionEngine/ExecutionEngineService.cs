@@ -1,3 +1,4 @@
+using Archon.Application.MultiTenancy;
 using IntegrationPlatform.Application.Models;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
@@ -21,14 +22,16 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
         private readonly DbContext dbContext;
         private readonly IStepExecutorService stepExecutorService;
         private readonly IServiceCallbackDispatcher serviceCallbackDispatcher;
+        private readonly ITenantContext tenantContext;
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
         private readonly ILogger<ExecutionEngineService> logger;
 
-        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger)
+        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, ITenantContext tenantContext, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger)
         {
             this.dbContext = dbContext;
             this.stepExecutorService = stepExecutorService;
             this.serviceCallbackDispatcher = serviceCallbackDispatcher;
+            this.tenantContext = tenantContext;
             Localizer = localizer;
             this.logger = logger;
         }
@@ -51,7 +54,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             dbContext.Set<Execution>().Add(execution);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData);
+            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId);
             List<ExecutionLog> logs = [];
             Dictionary<string, object?> stepOutputs = [];
             int nextOutputIndex = 1;
@@ -151,7 +154,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             dbContext.Set<Execution>().Add(execution);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData);
+            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId);
             List<PipelineStep> activeSteps = pipeline.Steps
                 .Where(step => step.IsActive)
                 .OrderBy(step => step.Order)
@@ -431,7 +434,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return pipeline ?? throw new KeyNotFoundException(Localizer["pipeline.notFound"]);
         }
 
-        private static PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, Dictionary<string, object> payloadData)
+        private static PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, Dictionary<string, object> payloadData, string? tenantId)
         {
             PipelineExecutionContext context = new()
             {
@@ -440,6 +443,11 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 Execution = execution,
                 PayloadData = payloadData
             };
+
+            if (!string.IsNullOrWhiteSpace(tenantId))
+            {
+                context.StepVariables["tenantId"] = tenantId;
+            }
 
             foreach (ConnectorAttributeValue attribute in connector.AttributeValues)
             {
