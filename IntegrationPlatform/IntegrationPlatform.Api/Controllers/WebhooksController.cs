@@ -1,6 +1,5 @@
 using Archon.Api.Controllers;
 using IntegrationPlatform.Application.Services;
-using IntegrationPlatform.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +42,6 @@ namespace IntegrationPlatform.Api.Controllers
             }
         }
 
-        // Verificacao estilo Meta/WhatsApp: echo do hub.challenge.
         [HttpGet("{tenantId}/{integrationIdentifier}")]
         public IActionResult Challenge([FromQuery(Name = "hub.challenge")] string? hubChallenge)
         {
