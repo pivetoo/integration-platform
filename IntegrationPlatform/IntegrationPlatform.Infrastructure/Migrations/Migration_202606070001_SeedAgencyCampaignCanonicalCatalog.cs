@@ -4,8 +4,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations
 {
     // Converge categorias e service contracts para o conjunto canonico que o AgencyCampaign assume
     // (IntegrationIntents + IntegrationCategoryIdentifier). Idempotente: cria o que falta, no-op onde existe.
-    // Corrige tres lacunas das migrations historicas num tenant novo:
-    //  - 'banking' era semeado (180001) e apagado (200006);
+    // Corrige duas lacunas das migrations historicas num tenant novo:
     //  - 'contas-a-receber'/'contas-a-pagar' nunca eram criadas, entao os contratos de pagamento nao entravam;
     //  - 'whatsapp' nunca era criado, deixando 'messaging.send'/'messaging' em vez de 'whatsapp.send'/'whatsapp'.
     [Migration(202606070001)]
@@ -19,7 +18,6 @@ namespace IntegrationPlatform.Infrastructure.Migrations
             SeedCategory("contas-a-receber", "Contas a receber", "Provedores de cobrança (boleto, PIX, cartão).");
             SeedCategory("contas-a-pagar", "Contas a pagar", "Provedores de repasse e pagamento (PIX, TED).");
             SeedCategory("payment", "Pagamento", "Provedores de pagamento e cobrança.");
-            SeedCategory("banking", "Conta bancária", "Provedores de sincronização de saldo e extrato de contas bancárias.");
 
             // Consolida 'messaging' -> 'whatsapp' (o que a 200006 nao conseguiu por falta da categoria)
             Execute.Sql(@"
