@@ -35,6 +35,11 @@ export const serviceContractService = {
   getByIdentifier: async (identifier: string) =>
     httpClient.get<ServiceContract>(`${BASE_URL}/by-identifier/${encodeURIComponent(identifier)}`),
 
+  getByIntegration: async (integrationId: number) => {
+    const response = await httpClient.get<ServiceContract[]>(`${BASE_URL}/by-integration/${integrationId}`);
+    return response.data ?? [];
+  },
+
   create: async (data: CreateServiceContractRequest) =>
     httpClient.post<ServiceContract>(`${BASE_URL}/Create`, {
       identifier: data.identifier,

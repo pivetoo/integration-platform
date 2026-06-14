@@ -866,4 +866,15 @@
   <data name="serviceContract.form.inputSchema" xml:space="preserve"><value>Schema de entrada</value></data>
   <data name="serviceContract.form.outputSchema" xml:space="preserve"><value>Schema de saída</value></data>
   <data name="serviceContract.form.callbackSchema" xml:space="preserve"><value>Schema do callback</value></data>
+  <data name="integration.serviceContracts.title" xml:space="preserve"><value>Contratos de serviço</value></data>
+  <data name="integration.serviceContracts.description" xml:space="preserve"><value>Operações (contratos de serviço) que esta integração atende.</value></data>
+  <data name="integration.serviceContracts.empty" xml:space="preserve"><value>Nenhum contrato vinculado a esta integração.</value></data>
+  <data name="integration.serviceContracts.selectPlaceholder" xml:space="preserve"><value>Selecione um contrato para vincular</value></data>
+  <data name="integration.serviceContracts.noneAvailable" xml:space="preserve"><value>Nenhum contrato disponível nesta categoria</value></data>
+  <data name="integration.serviceContracts.bindAction" xml:space="preserve"><value>Vincular</value></data>
+  <data name="integration.serviceContracts.bound" xml:space="preserve"><value>Contrato vinculado à integração.</value></data>
+  <data name="integration.serviceContracts.unbound" xml:space="preserve"><value>Vínculo removido.</value></data>
+  <data name="integration.serviceContracts.unbindTitle" xml:space="preserve"><value>Remover vínculo</value></data>
+  <data name="integration.serviceContracts.unbindDescription" xml:space="preserve"><value>Remover o vínculo do contrato "{0}" desta integração?</value></data>
+  <data name="integration.serviceContracts.unbindConfirm" xml:space="preserve"><value>Remover vínculo</value></data>
 </root>

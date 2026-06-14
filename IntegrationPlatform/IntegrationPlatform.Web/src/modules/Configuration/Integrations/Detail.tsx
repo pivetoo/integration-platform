@@ -9,6 +9,7 @@ import { TipoCampoLabels } from '../../../types/integrationAttribute';
 import type { IntegracaoAtributo } from '../../../types/integrationAttribute';
 import IntegracaoFormModal from '../../../components/modals/IntegrationFormModal';
 import IntegracaoAtributoFormModal from '../../../components/modals/IntegrationAttributeFormModal';
+import ServiceContractsSection from './ServiceContractsSection';
 
 export default function IntegracaoDetalhe() {
   const { t } = useI18n();
@@ -209,6 +210,10 @@ export default function IntegracaoDetalhe() {
             </div>
           )}
         </div>
+
+        {integracao && (
+          <ServiceContractsSection integrationId={integracaoId} integrationCategoryId={integracao.integrationCategoryId} />
+        )}
       </div>
 
       <ConfirmModal

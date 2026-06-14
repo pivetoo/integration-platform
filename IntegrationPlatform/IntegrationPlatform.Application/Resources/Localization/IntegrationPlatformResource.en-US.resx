@@ -866,4 +866,15 @@
   <data name="serviceContract.form.inputSchema" xml:space="preserve"><value>Input schema</value></data>
   <data name="serviceContract.form.outputSchema" xml:space="preserve"><value>Output schema</value></data>
   <data name="serviceContract.form.callbackSchema" xml:space="preserve"><value>Callback schema</value></data>
+  <data name="integration.serviceContracts.title" xml:space="preserve"><value>Service contracts</value></data>
+  <data name="integration.serviceContracts.description" xml:space="preserve"><value>Operations (service contracts) this integration fulfills.</value></data>
+  <data name="integration.serviceContracts.empty" xml:space="preserve"><value>No contracts bound to this integration.</value></data>
+  <data name="integration.serviceContracts.selectPlaceholder" xml:space="preserve"><value>Select a contract to bind</value></data>
+  <data name="integration.serviceContracts.noneAvailable" xml:space="preserve"><value>No contracts available in this category</value></data>
+  <data name="integration.serviceContracts.bindAction" xml:space="preserve"><value>Bind</value></data>
+  <data name="integration.serviceContracts.bound" xml:space="preserve"><value>Contract bound to the integration.</value></data>
+  <data name="integration.serviceContracts.unbound" xml:space="preserve"><value>Binding removed.</value></data>
+  <data name="integration.serviceContracts.unbindTitle" xml:space="preserve"><value>Remove binding</value></data>
+  <data name="integration.serviceContracts.unbindDescription" xml:space="preserve"><value>Remove the binding of contract "{0}" from this integration?</value></data>
+  <data name="integration.serviceContracts.unbindConfirm" xml:space="preserve"><value>Remove binding</value></data>
 </root>
