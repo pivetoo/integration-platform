@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout, useAuth, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem, ModuleNavConfig } from 'archon-ui';
-import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers, LayoutDashboard, FileBarChart2 } from 'lucide-react';
+import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers, LayoutDashboard, FileBarChart2, ScrollText } from 'lucide-react';
 import logoEmpresa from '../assets/logo-empresa.png';
 
 export default function IntegrationPlatformLayout() {
@@ -37,6 +37,7 @@ export default function IntegrationPlatformLayout() {
       group: 'op',
       routes: [
         { key: 'categorias', label: t('layout.menu.categories'), path: '/categorias', icon: <FolderTree size={20} /> },
+        { key: 'contratos-servico', label: t('layout.menu.serviceContracts'), path: '/contratos-servico', icon: <ScrollText size={20} /> },
         { key: 'integracoes', label: t('layout.menu.integrations'), path: '/integracoes', icon: <GitBranch size={20} /> },
         { key: 'conectores', label: t('layout.menu.connectors'), path: '/conectores', icon: <Plug2 size={20} /> },
       ],
@@ -92,6 +93,7 @@ export default function IntegrationPlatformLayout() {
     const routeMap: Record<string, string> = {
       '/integracoes': t('layout.menu.integrations'),
       '/categorias': t('layout.menu.categories'),
+      '/contratos-servico': t('layout.menu.serviceContracts'),
       '/conectores': t('layout.menu.connectors'),
       '/chamadas-api': t('layout.menu.apiCalls'),
       '/funcoes-javascript': t('layout.menu.javaScriptFunctions'),

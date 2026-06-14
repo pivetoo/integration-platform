@@ -841,4 +841,29 @@
   <data name="serviceExecution.enqueued" xml:space="preserve"><value>Execução do contrato de serviço enfileirada com sucesso.</value></data>
   <data name="execution.callback.delivered" xml:space="preserve"><value>Callback entregue ao consumer: {0}</value></data>
   <data name="execution.callback.failed" xml:space="preserve"><value>Falha ao entregar callback ao consumer: {0}</value></data>
+  <data name="layout.menu.serviceContracts" xml:space="preserve"><value>Contratos de serviço</value></data>
+  <data name="serviceContract.list.title" xml:space="preserve"><value>Contratos de serviço</value></data>
+  <data name="serviceContract.list.systemBadge" xml:space="preserve"><value>Sistema</value></data>
+  <data name="serviceContract.list.removed" xml:space="preserve"><value>Contrato de serviço removido.</value></data>
+  <data name="serviceContract.list.deleteTitle" xml:space="preserve"><value>Remover contratos de serviço</value></data>
+  <data name="serviceContract.list.deleteDescription" xml:space="preserve"><value>Remover {0} contrato(s) de serviço? Esta ação não pode ser desfeita.</value></data>
+  <data name="serviceContract.list.deleteSystemBlockedTitle" xml:space="preserve"><value>Contrato de sistema</value></data>
+  <data name="serviceContract.list.deleteSystemBlocked" xml:space="preserve"><value>Contratos de sistema não podem ser removidos.</value></data>
+  <data name="serviceContract.column.identifier" xml:space="preserve"><value>Identificador</value></data>
+  <data name="serviceContract.column.category" xml:space="preserve"><value>Categoria</value></data>
+  <data name="serviceContract.column.callback" xml:space="preserve"><value>Callback</value></data>
+  <data name="serviceContract.callback.yes" xml:space="preserve"><value>Sim</value></data>
+  <data name="serviceContract.callback.no" xml:space="preserve"><value>Não</value></data>
+  <data name="serviceContract.form.createTitle" xml:space="preserve"><value>Novo contrato de serviço</value></data>
+  <data name="serviceContract.form.editTitle" xml:space="preserve"><value>Editar contrato de serviço</value></data>
+  <data name="serviceContract.form.systemBadge" xml:space="preserve"><value>Sistema</value></data>
+  <data name="serviceContract.form.identifier" xml:space="preserve"><value>Identificador</value></data>
+  <data name="serviceContract.form.identifierHint" xml:space="preserve"><value>Identificador único e estável (ex: receivable.charge.create).</value></data>
+  <data name="serviceContract.form.identifierSystemHint" xml:space="preserve"><value>Identificador de sistema não pode ser alterado.</value></data>
+  <data name="serviceContract.form.category" xml:space="preserve"><value>Categoria</value></data>
+  <data name="serviceContract.form.categoryPlaceholder" xml:space="preserve"><value>Selecione a categoria</value></data>
+  <data name="serviceContract.form.hasCallback" xml:space="preserve"><value>Possui callback</value></data>
+  <data name="serviceContract.form.inputSchema" xml:space="preserve"><value>Schema de entrada</value></data>
+  <data name="serviceContract.form.outputSchema" xml:space="preserve"><value>Schema de saída</value></data>
+  <data name="serviceContract.form.callbackSchema" xml:space="preserve"><value>Schema do callback</value></data>
 </root>

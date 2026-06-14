@@ -841,4 +841,29 @@
   <data name="serviceExecution.enqueued" xml:space="preserve"><value>Service contract execution enqueued successfully.</value></data>
   <data name="execution.callback.delivered" xml:space="preserve"><value>Callback delivered to consumer: {0}</value></data>
   <data name="execution.callback.failed" xml:space="preserve"><value>Failed to deliver callback to consumer: {0}</value></data>
+  <data name="layout.menu.serviceContracts" xml:space="preserve"><value>Service contracts</value></data>
+  <data name="serviceContract.list.title" xml:space="preserve"><value>Service contracts</value></data>
+  <data name="serviceContract.list.systemBadge" xml:space="preserve"><value>System</value></data>
+  <data name="serviceContract.list.removed" xml:space="preserve"><value>Service contract removed.</value></data>
+  <data name="serviceContract.list.deleteTitle" xml:space="preserve"><value>Remove service contracts</value></data>
+  <data name="serviceContract.list.deleteDescription" xml:space="preserve"><value>Remove {0} service contract(s)? This action cannot be undone.</value></data>
+  <data name="serviceContract.list.deleteSystemBlockedTitle" xml:space="preserve"><value>System contract</value></data>
+  <data name="serviceContract.list.deleteSystemBlocked" xml:space="preserve"><value>System contracts cannot be removed.</value></data>
+  <data name="serviceContract.column.identifier" xml:space="preserve"><value>Identifier</value></data>
+  <data name="serviceContract.column.category" xml:space="preserve"><value>Category</value></data>
+  <data name="serviceContract.column.callback" xml:space="preserve"><value>Callback</value></data>
+  <data name="serviceContract.callback.yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="serviceContract.callback.no" xml:space="preserve"><value>No</value></data>
+  <data name="serviceContract.form.createTitle" xml:space="preserve"><value>New service contract</value></data>
+  <data name="serviceContract.form.editTitle" xml:space="preserve"><value>Edit service contract</value></data>
+  <data name="serviceContract.form.systemBadge" xml:space="preserve"><value>System</value></data>
+  <data name="serviceContract.form.identifier" xml:space="preserve"><value>Identifier</value></data>
+  <data name="serviceContract.form.identifierHint" xml:space="preserve"><value>Unique, stable identifier (e.g. receivable.charge.create).</value></data>
+  <data name="serviceContract.form.identifierSystemHint" xml:space="preserve"><value>System identifier cannot be changed.</value></data>
+  <data name="serviceContract.form.category" xml:space="preserve"><value>Category</value></data>
+  <data name="serviceContract.form.categoryPlaceholder" xml:space="preserve"><value>Select the category</value></data>
+  <data name="serviceContract.form.hasCallback" xml:space="preserve"><value>Has callback</value></data>
+  <data name="serviceContract.form.inputSchema" xml:space="preserve"><value>Input schema</value></data>
+  <data name="serviceContract.form.outputSchema" xml:space="preserve"><value>Output schema</value></data>
+  <data name="serviceContract.form.callbackSchema" xml:space="preserve"><value>Callback schema</value></data>
 </root>

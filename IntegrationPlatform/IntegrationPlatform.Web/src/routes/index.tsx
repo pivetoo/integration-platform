@@ -5,6 +5,7 @@ import Dashboard from '../modules/Dashboard';
 import Integrations from '../modules/Configuration/Integrations';
 import IntegrationDetail from '../modules/Configuration/Integrations/Detail';
 import IntegrationCategories from '../modules/Configuration/IntegrationCategories';
+import ServiceContracts from '../modules/Configuration/ServiceContracts';
 import Connectors from '../modules/Configuration/Connectors';
 import ConnectorDetail from '../modules/Configuration/Connectors/Detail';
 import Pipelines from '../modules/Configuration/Pipelines';
@@ -55,6 +56,7 @@ function AppRoutes() {
           <Route path="integracoes" element={<Integrations />} />
           <Route path="integracoes/:id" element={<IntegrationDetail />} />
           <Route path="categorias" element={<IntegrationCategories />} />
+          <Route path="contratos-servico" element={<ServiceContracts />} />
           <Route path="conectores" element={<Connectors />} />
           <Route path="conectores/:id" element={<ConnectorDetail />} />
           <Route path="chamadas-api" element={<ApiCalls />} />
