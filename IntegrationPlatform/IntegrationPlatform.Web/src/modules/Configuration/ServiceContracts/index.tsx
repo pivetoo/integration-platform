@@ -59,7 +59,7 @@ export default function ServiceContracts() {
       }),
     );
     if (result) {
-      const filtered = result.data.filter((contract) => {
+      const filtered = result.data.filter((contract: ServiceContract) => {
         if (statusFilter === 'active') return contract.isActive;
         if (statusFilter === 'inactive') return !contract.isActive;
         return true;
