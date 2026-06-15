@@ -1,4 +1,6 @@
 using Archon.Application.MultiTenancy;
+using ArchonIntegrationService = Archon.Application.Services.IIntegrationService;
+using ArchonIntegration = Archon.Application.Integrations.Integration;
 using IntegrationPlatform.Application.Models;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
@@ -19,19 +21,26 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
         private static readonly ConcurrentDictionary<string, DebugSessionState> DebugSessions = [];
         private static readonly HashSet<string> EnvelopeKeys = new(StringComparer.OrdinalIgnoreCase) { "result", "data", "response", "value" };
 
+        // Nome da integracao Archon (integrations/integrationparameters) que carrega config por tenant
+        // injetada pelo IdM no onboarding (ex.: CallbackSecret). Simetrico a integracao "integration-platform"
+        // que o AgencyCampaign mantem do seu lado. Seus parametros ficam disponiveis na interpolacao do pipeline.
+        private const string TenantConfigIntegrationName = "agency-campaign";
+
         private readonly DbContext dbContext;
         private readonly IStepExecutorService stepExecutorService;
         private readonly IServiceCallbackDispatcher serviceCallbackDispatcher;
         private readonly ITenantContext tenantContext;
+        private readonly ArchonIntegrationService integrationService;
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
         private readonly ILogger<ExecutionEngineService> logger;
 
-        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, ITenantContext tenantContext, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger)
+        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, ITenantContext tenantContext, ArchonIntegrationService integrationService, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger)
         {
             this.dbContext = dbContext;
             this.stepExecutorService = stepExecutorService;
             this.serviceCallbackDispatcher = serviceCallbackDispatcher;
             this.tenantContext = tenantContext;
+            this.integrationService = integrationService;
             Localizer = localizer;
             this.logger = logger;
         }
@@ -54,7 +63,8 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             dbContext.Set<Execution>().Add(execution);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId);
+            ArchonIntegration? tenantConfig = await integrationService.GetByNameAsync(TenantConfigIntegrationName, cancellationToken);
+            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId, tenantConfig);
             List<ExecutionLog> logs = [];
             Dictionary<string, object?> stepOutputs = [];
             int nextOutputIndex = 1;
@@ -154,7 +164,8 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             dbContext.Set<Execution>().Add(execution);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId);
+            ArchonIntegration? tenantConfig = await integrationService.GetByNameAsync(TenantConfigIntegrationName, cancellationToken);
+            PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId, tenantConfig);
             List<PipelineStep> activeSteps = pipeline.Steps
                 .Where(step => step.IsActive)
                 .OrderBy(step => step.Order)
@@ -434,7 +445,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return pipeline ?? throw new KeyNotFoundException(Localizer["pipeline.notFound"]);
         }
 
-        private static PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, Dictionary<string, object> payloadData, string? tenantId)
+        private static PipelineExecutionContext BuildContext(Connector connector, Pipeline pipeline, Execution execution, Dictionary<string, object> payloadData, string? tenantId, ArchonIntegration? tenantConfig)
         {
             PipelineExecutionContext context = new()
             {
@@ -459,7 +470,36 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
             }
 
+            ApplyTenantParameters(context, tenantConfig);
+
             return context;
+        }
+
+        // Mescla os parametros de integracao do tenant (config Archon injetada pelo IdM no onboarding) no
+        // contexto de interpolacao, sem sobrescrever atributos do conector ja presentes (o conector e mais
+        // especifico). Segredos (issecret) entram em SensitiveAttributeFields para nao vazar no escopo do
+        // passo JavaScript do usuario. Ficam disponiveis no template como {{Chave}} (ex.: {{CallbackSecret}}).
+        internal static void ApplyTenantParameters(PipelineExecutionContext context, ArchonIntegration? tenantConfig)
+        {
+            if (tenantConfig is null)
+            {
+                return;
+            }
+
+            foreach (Archon.Application.Integrations.IntegrationParameter parameter in tenantConfig.Parameters)
+            {
+                if (context.ConnectorAttributes.ContainsKey(parameter.Key))
+                {
+                    continue;
+                }
+
+                context.ConnectorAttributes[parameter.Key] = parameter.Value;
+
+                if (parameter.IsSecret)
+                {
+                    context.SensitiveAttributeFields.Add(parameter.Key);
+                }
+            }
         }
 
         private async Task PersistResults(Execution execution, List<ExecutionLog> logs, ProcessingQueue? queueItem, ExecutionStatus finalStatus, string? lastError, CancellationToken cancellationToken)

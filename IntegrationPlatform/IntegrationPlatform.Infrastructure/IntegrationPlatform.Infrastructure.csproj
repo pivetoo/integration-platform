@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="IntegrationPlatform.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Jint" Version="4.5.0" />
     <PackageReference Include="MailKit" Version="4.9.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
