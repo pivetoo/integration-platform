@@ -22,7 +22,8 @@ namespace IntegrationPlatform.Infrastructure.Services
                 var lower = search.ToLower();
                 query = query.Where(item =>
                     (item.Connector != null && item.Connector.Name.ToLower().Contains(lower)) ||
-                    (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)));
+                    (item.Pipeline != null && item.Pipeline.Name.ToLower().Contains(lower)) ||
+                    (item.InputData != null && item.InputData.ToLower().Contains(lower)));
             }
             return await query
                 .OrderByDescending(item => item.StartedAt)
