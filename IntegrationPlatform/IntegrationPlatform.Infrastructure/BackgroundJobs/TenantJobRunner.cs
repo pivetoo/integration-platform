@@ -1,3 +1,4 @@
+using System.Globalization;
 using Archon.Application.MultiTenancy;
 using Archon.Infrastructure.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +27,16 @@ namespace IntegrationPlatform.Infrastructure.BackgroundJobs
             this.logger = logger;
         }
 
+        private static readonly CultureInfo DefaultCulture = new("pt-BR");
+
         public async Task RunForAllTenants(Func<IServiceProvider, CancellationToken, Task> action, CancellationToken cancellationToken)
         {
+            // Fora de um request HTTP nao ha RequestLocalization, entao a thread roda em cultura
+            // invariante e o IStringLocalizer cai no recurso neutro (inexistente), devolvendo a
+            // chave crua nos logs. Fixar a cultura padrao garante a traducao das mensagens de execucao.
+            CultureInfo.CurrentCulture = DefaultCulture;
+            CultureInfo.CurrentUICulture = DefaultCulture;
+
             foreach (KeyValuePair<string, TenantDatabaseOption> entry in tenantDatabaseOptions.TenantDatabases)
             {
                 if (string.IsNullOrWhiteSpace(entry.Value.ConnectionString))
