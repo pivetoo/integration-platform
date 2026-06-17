@@ -81,19 +81,10 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                     .OnTable("pipeline")
                     .OnColumn("servicecontractid").Ascending();
             }
-
-            // Categoria 'messaging' (legado): seed condicional mantido em SQL.
-            Execute.Sql(@"
-                INSERT INTO integrationcategory (identifier, name, description, isactive, issystem, createdat, updatedat)
-                SELECT 'messaging', 'Mensageria', 'Provedores de envio de mensagens (WhatsApp, SMS).', true, true, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc'
-                WHERE NOT EXISTS (SELECT 1 FROM integrationcategory WHERE identifier = 'messaging');
-            ");
         }
 
         public override void Down()
         {
-            Execute.Sql("DELETE FROM integrationcategory WHERE identifier = 'messaging' AND issystem = true;");
-
             if (Schema.Table("pipeline").Column("servicecontractid").Exists())
             {
                 Delete.Index("ix_pipeline_servicecontractid").OnTable("pipeline");
