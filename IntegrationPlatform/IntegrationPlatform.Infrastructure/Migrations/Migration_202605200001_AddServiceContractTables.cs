@@ -7,49 +7,82 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            Execute.Sql(@"
-                CREATE TABLE IF NOT EXISTS servicecontract (
-                    id BIGSERIAL PRIMARY KEY,
-                    identifier VARCHAR(120) NOT NULL,
-                    name VARCHAR(200) NOT NULL,
-                    description VARCHAR(500) NULL,
-                    integrationcategoryid BIGINT NOT NULL REFERENCES integrationcategory(id),
-                    inputschema TEXT NULL,
-                    outputschema TEXT NULL,
-                    hascallback BOOLEAN NOT NULL DEFAULT false,
-                    callbackschema TEXT NULL,
-                    isactive BOOLEAN NOT NULL DEFAULT true,
-                    issystem BOOLEAN NOT NULL DEFAULT false,
-                    createdat TIMESTAMP NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-                    updatedat TIMESTAMP NULL
-                );
-            ");
+            if (!Schema.Table("servicecontract").Exists())
+            {
+                Create.Table("servicecontract")
+                    .WithColumn("id").AsInt64().PrimaryKey().Identity()
+                    .WithColumn("identifier").AsString(120).NotNullable()
+                    .WithColumn("name").AsString(200).NotNullable()
+                    .WithColumn("description").AsString(500).Nullable()
+                    .WithColumn("integrationcategoryid").AsInt64().NotNullable()
+                    .WithColumn("inputschema").AsString(int.MaxValue).Nullable()
+                    .WithColumn("outputschema").AsString(int.MaxValue).Nullable()
+                    .WithColumn("hascallback").AsBoolean().NotNullable().WithDefaultValue(false)
+                    .WithColumn("callbackschema").AsString(int.MaxValue).Nullable()
+                    .WithColumn("isactive").AsBoolean().NotNullable().WithDefaultValue(true)
+                    .WithColumn("issystem").AsBoolean().NotNullable().WithDefaultValue(false)
+                    .WithColumn("createdat").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime)
+                    .WithColumn("updatedat").AsDateTime().Nullable();
 
-            Execute.Sql("CREATE UNIQUE INDEX IF NOT EXISTS ux_servicecontract_identifier ON servicecontract(identifier);");
-            Execute.Sql("CREATE INDEX IF NOT EXISTS ix_servicecontract_integrationcategoryid ON servicecontract(integrationcategoryid);");
+                Create.ForeignKey("fk_servicecontract_integrationcategory")
+                    .FromTable("servicecontract").ForeignColumn("integrationcategoryid")
+                    .ToTable("integrationcategory").PrimaryColumn("id");
 
-            Execute.Sql(@"
-                CREATE TABLE IF NOT EXISTS integrationservicecontract (
-                    id BIGSERIAL PRIMARY KEY,
-                    integrationid BIGINT NOT NULL REFERENCES integration(id),
-                    servicecontractid BIGINT NOT NULL REFERENCES servicecontract(id),
-                    isactive BOOLEAN NOT NULL DEFAULT true,
-                    createdat TIMESTAMP NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-                    updatedat TIMESTAMP NULL
-                );
-            ");
+                Create.Index("ux_servicecontract_identifier")
+                    .OnTable("servicecontract")
+                    .OnColumn("identifier").Ascending()
+                    .WithOptions().Unique();
 
-            Execute.Sql("CREATE UNIQUE INDEX IF NOT EXISTS ux_integrationservicecontract_pair ON integrationservicecontract(integrationid, servicecontractid);");
-            Execute.Sql("CREATE INDEX IF NOT EXISTS ix_integrationservicecontract_integrationid ON integrationservicecontract(integrationid);");
-            Execute.Sql("CREATE INDEX IF NOT EXISTS ix_integrationservicecontract_servicecontractid ON integrationservicecontract(servicecontractid);");
+                Create.Index("ix_servicecontract_integrationcategoryid")
+                    .OnTable("servicecontract")
+                    .OnColumn("integrationcategoryid").Ascending();
+            }
 
-            Execute.Sql(@"
-                ALTER TABLE pipeline
-                    ADD COLUMN IF NOT EXISTS servicecontractid BIGINT NULL REFERENCES servicecontract(id);
-            ");
+            if (!Schema.Table("integrationservicecontract").Exists())
+            {
+                Create.Table("integrationservicecontract")
+                    .WithColumn("id").AsInt64().PrimaryKey().Identity()
+                    .WithColumn("integrationid").AsInt64().NotNullable()
+                    .WithColumn("servicecontractid").AsInt64().NotNullable()
+                    .WithColumn("isactive").AsBoolean().NotNullable().WithDefaultValue(true)
+                    .WithColumn("createdat").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime)
+                    .WithColumn("updatedat").AsDateTime().Nullable();
 
-            Execute.Sql("CREATE INDEX IF NOT EXISTS ix_pipeline_servicecontractid ON pipeline(servicecontractid);");
+                Create.ForeignKey("fk_integrationservicecontract_integration")
+                    .FromTable("integrationservicecontract").ForeignColumn("integrationid")
+                    .ToTable("integration").PrimaryColumn("id");
 
+                Create.ForeignKey("fk_integrationservicecontract_servicecontract")
+                    .FromTable("integrationservicecontract").ForeignColumn("servicecontractid")
+                    .ToTable("servicecontract").PrimaryColumn("id");
+
+                Create.Index("ux_integrationservicecontract_pair")
+                    .OnTable("integrationservicecontract")
+                    .OnColumn("integrationid").Ascending()
+                    .OnColumn("servicecontractid").Ascending()
+                    .WithOptions().Unique();
+
+                Create.Index("ix_integrationservicecontract_integrationid")
+                    .OnTable("integrationservicecontract")
+                    .OnColumn("integrationid").Ascending();
+
+                Create.Index("ix_integrationservicecontract_servicecontractid")
+                    .OnTable("integrationservicecontract")
+                    .OnColumn("servicecontractid").Ascending();
+            }
+
+            if (!Schema.Table("pipeline").Column("servicecontractid").Exists())
+            {
+                Alter.Table("pipeline")
+                    .AddColumn("servicecontractid").AsInt64().Nullable()
+                        .ForeignKey("fk_pipeline_servicecontract", "servicecontract", "id");
+
+                Create.Index("ix_pipeline_servicecontractid")
+                    .OnTable("pipeline")
+                    .OnColumn("servicecontractid").Ascending();
+            }
+
+            // Categoria 'messaging' (legado): seed condicional mantido em SQL.
             Execute.Sql(@"
                 INSERT INTO integrationcategory (identifier, name, description, isactive, issystem, createdat, updatedat)
                 SELECT 'messaging', 'Mensageria', 'Provedores de envio de mensagens (WhatsApp, SMS).', true, true, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc'
@@ -59,19 +92,23 @@ namespace IntegrationPlatform.Infrastructure.Migrations
 
         public override void Down()
         {
-            Execute.Sql("DROP INDEX IF EXISTS ix_pipeline_servicecontractid;");
-            Execute.Sql("ALTER TABLE pipeline DROP COLUMN IF EXISTS servicecontractid;");
-
-            Execute.Sql("DROP INDEX IF EXISTS ix_integrationservicecontract_servicecontractid;");
-            Execute.Sql("DROP INDEX IF EXISTS ix_integrationservicecontract_integrationid;");
-            Execute.Sql("DROP INDEX IF EXISTS ux_integrationservicecontract_pair;");
-            Execute.Sql("DROP TABLE IF EXISTS integrationservicecontract;");
-
-            Execute.Sql("DROP INDEX IF EXISTS ix_servicecontract_integrationcategoryid;");
-            Execute.Sql("DROP INDEX IF EXISTS ux_servicecontract_identifier;");
-            Execute.Sql("DROP TABLE IF EXISTS servicecontract;");
-
             Execute.Sql("DELETE FROM integrationcategory WHERE identifier = 'messaging' AND issystem = true;");
+
+            if (Schema.Table("pipeline").Column("servicecontractid").Exists())
+            {
+                Delete.Index("ix_pipeline_servicecontractid").OnTable("pipeline");
+                Delete.Column("servicecontractid").FromTable("pipeline");
+            }
+
+            if (Schema.Table("integrationservicecontract").Exists())
+            {
+                Delete.Table("integrationservicecontract");
+            }
+
+            if (Schema.Table("servicecontract").Exists())
+            {
+                Delete.Table("servicecontract");
+            }
         }
     }
 }
