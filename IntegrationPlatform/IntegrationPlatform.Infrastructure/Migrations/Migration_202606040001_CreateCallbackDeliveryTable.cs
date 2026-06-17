@@ -7,32 +7,37 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            Execute.Sql(@"
-                CREATE TABLE IF NOT EXISTS callbackdelivery (
-                    id BIGSERIAL PRIMARY KEY,
-                    executionid BIGINT NOT NULL,
-                    connectorid BIGINT NOT NULL,
-                    serviceidentifier VARCHAR(120) NOT NULL,
-                    callbackurl VARCHAR(2000) NOT NULL,
-                    callbacktoken VARCHAR(255) NULL,
-                    payload TEXT NOT NULL,
-                    status INT NOT NULL DEFAULT 1,
-                    attempts INT NOT NULL DEFAULT 0,
-                    nextattemptat TIMESTAMPTZ NULL,
-                    deliveredat TIMESTAMPTZ NULL,
-                    lasterror TEXT NULL,
-                    createdat TIMESTAMPTZ NOT NULL DEFAULT now(),
-                    updatedat TIMESTAMPTZ NULL
-                );
-            ");
+            if (!Schema.Table("callbackdelivery").Exists())
+            {
+                Create.Table("callbackdelivery")
+                    .WithColumn("id").AsInt64().PrimaryKey().Identity()
+                    .WithColumn("executionid").AsInt64().NotNullable()
+                    .WithColumn("connectorid").AsInt64().NotNullable()
+                    .WithColumn("serviceidentifier").AsString(120).NotNullable()
+                    .WithColumn("callbackurl").AsString(2000).NotNullable()
+                    .WithColumn("callbacktoken").AsString(255).Nullable()
+                    .WithColumn("payload").AsString(int.MaxValue).NotNullable()
+                    .WithColumn("status").AsInt32().NotNullable().WithDefaultValue(1)
+                    .WithColumn("attempts").AsInt32().NotNullable().WithDefaultValue(0)
+                    .WithColumn("nextattemptat").AsDateTimeOffset().Nullable()
+                    .WithColumn("deliveredat").AsDateTimeOffset().Nullable()
+                    .WithColumn("lasterror").AsString(int.MaxValue).Nullable()
+                    .WithColumn("createdat").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
+                    .WithColumn("updatedat").AsDateTimeOffset().Nullable();
 
-            Execute.Sql("CREATE INDEX IF NOT EXISTS ix_callbackdelivery_status_nextattemptat ON callbackdelivery(status, nextattemptat);");
+                Create.Index("ix_callbackdelivery_status_nextattemptat")
+                    .OnTable("callbackdelivery")
+                    .OnColumn("status").Ascending()
+                    .OnColumn("nextattemptat").Ascending();
+            }
         }
 
         public override void Down()
         {
-            Execute.Sql("DROP INDEX IF EXISTS ix_callbackdelivery_status_nextattemptat;");
-            Execute.Sql("DROP TABLE IF EXISTS callbackdelivery;");
+            if (Schema.Table("callbackdelivery").Exists())
+            {
+                Delete.Table("callbackdelivery");
+            }
         }
     }
 }
