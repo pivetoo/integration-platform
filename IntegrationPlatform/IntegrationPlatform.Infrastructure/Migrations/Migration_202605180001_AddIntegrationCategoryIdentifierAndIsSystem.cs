@@ -7,28 +7,45 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            Execute.Sql(@"
-                ALTER TABLE integrationcategory
-                    ADD COLUMN IF NOT EXISTS identifier VARCHAR(80) NULL,
-                    ADD COLUMN IF NOT EXISTS issystem BOOLEAN NOT NULL DEFAULT false;
-            ");
+            if (!Schema.Table("integrationcategory").Column("identifier").Exists())
+            {
+                Alter.Table("integrationcategory")
+                    .AddColumn("identifier").AsString(80).Nullable();
+            }
 
-            Execute.Sql(@"
-                ALTER TABLE integrationcategory
-                    ALTER COLUMN identifier SET NOT NULL;
-            ");
+            if (!Schema.Table("integrationcategory").Column("issystem").Exists())
+            {
+                Alter.Table("integrationcategory")
+                    .AddColumn("issystem").AsBoolean().NotNullable().WithDefaultValue(false);
+            }
 
-            Execute.Sql("CREATE UNIQUE INDEX IF NOT EXISTS ux_integrationcategory_identifier ON integrationcategory(identifier);");
+            Alter.Table("integrationcategory")
+                .AlterColumn("identifier").AsString(80).NotNullable();
+
+            if (!Schema.Table("integrationcategory").Index("ux_integrationcategory_identifier").Exists())
+            {
+                Create.Index("ux_integrationcategory_identifier")
+                    .OnTable("integrationcategory")
+                    .OnColumn("identifier").Unique();
+            }
         }
 
         public override void Down()
         {
-            Execute.Sql("DROP INDEX IF EXISTS ux_integrationcategory_identifier;");
-            Execute.Sql(@"
-                ALTER TABLE integrationcategory
-                    DROP COLUMN IF EXISTS issystem,
-                    DROP COLUMN IF EXISTS identifier;
-            ");
+            if (Schema.Table("integrationcategory").Index("ux_integrationcategory_identifier").Exists())
+            {
+                Delete.Index("ux_integrationcategory_identifier").OnTable("integrationcategory");
+            }
+
+            if (Schema.Table("integrationcategory").Column("issystem").Exists())
+            {
+                Delete.Column("issystem").FromTable("integrationcategory");
+            }
+
+            if (Schema.Table("integrationcategory").Column("identifier").Exists())
+            {
+                Delete.Column("identifier").FromTable("integrationcategory");
+            }
         }
     }
 }
