@@ -9,8 +9,6 @@ namespace IntegrationPlatform.Infrastructure.Migrations
         {
             Alter.Table("pipeline")
                 .AddColumn("istestpipeline").AsBoolean().NotNullable().WithDefaultValue(false);
-
-            Execute.Sql("UPDATE pipeline SET istestpipeline = true WHERE identifier LIKE '%-test-connection'");
         }
 
         public override void Down()
