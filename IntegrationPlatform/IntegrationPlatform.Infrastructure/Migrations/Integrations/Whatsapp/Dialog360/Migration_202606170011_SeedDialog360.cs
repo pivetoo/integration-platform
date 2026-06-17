@@ -10,7 +10,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Di
     {
         public override void Up()
         {
-            SeedIntegration("360dialog", "360dialog", "BSP oficial da Meta. API compativel com WhatsApp Business API on-premise/cloud.", "whatsapp", "https://logos.hunter.io/360dialog.com", supportsWebhook: false);
+            SeedIntegration("360dialog", "360dialog", "BSP oficial da Meta. API compatível com WhatsApp Business API on-premise/cloud.", "whatsapp", "https://logos.hunter.io/360dialog.com", supportsWebhook: false);
 
             SeedAttribute("360dialog", "api_key", "API Key (D360-API-KEY)", FieldType.Text, required: true, order: 1, group: "Autenticação", sensitive: true, description: "API key do channel 360dialog.");
             SeedAttribute("360dialog", "base_url", "URL base da API", FieldType.Text, required: true, order: 2, group: "Endpoints", hidden: true, description: "Endpoint waba-v2.360dialog.io ou hub.360dialog.io.", placeholder: "https://waba-v2.360dialog.io", defaultValue: "https://waba-v2.360dialog.io");
@@ -63,7 +63,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Di
 
             SeedPipeline("360dialog", "360dialog-enviar-mensagem", "Enviar mensagem", "POST /messages com header D360-API-KEY.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.enviar");
             SeedPipeline("360dialog", "360dialog-enviar-template", "Enviar template aprovado", "Envia template HSM aprovado pela Meta.", isDefault: false, isTestPipeline: false, contractIdentifier: null);
-            SeedPipeline("360dialog", "360dialog-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("360dialog", "360dialog-testar-conexao", "Testar conexão", "Pipeline de validação de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
             SeedStep("360dialog-enviar-mensagem", 1, "POST /messages (texto)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog - Enviar mensagem");
             SeedStep("360dialog-enviar-template", 1, "POST /messages (template)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog - Enviar template");

@@ -13,8 +13,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Resen
             SeedIntegration("resend", "Resend", "Envio de email via API Resend (https://resend.com).", "email", "https://logos.hunter.io/resend.com", supportsWebhook: false);
 
             SeedAttribute("resend", "api_key", "API Key", FieldType.Text, required: true, order: 1, group: "Autenticação", sensitive: true, description: "API key (re_xxxx) gerada no Resend.", placeholder: "re_xxxx...");
-            SeedAttribute("resend", "base_url", "URL base da API", FieldType.Text, required: true, order: 2, group: "Endpoints", hidden: true, description: "Endpoint padrao: https://api.resend.com.", placeholder: "https://api.resend.com", defaultValue: "https://api.resend.com/emails");
-            SeedAttribute("resend", "from_email", "Email remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Email com dominio verificado no Resend.", placeholder: "no-reply@empresa.com");
+            SeedAttribute("resend", "base_url", "URL base da API", FieldType.Text, required: true, order: 2, group: "Endpoints", hidden: true, description: "Endpoint padrão: https://api.resend.com.", placeholder: "https://api.resend.com", defaultValue: "https://api.resend.com/emails");
+            SeedAttribute("resend", "from_email", "Email remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Email com domínio verificado no Resend.", placeholder: "no-reply@empresa.com");
             SeedAttribute("resend", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Empresa");
 
             BindContract("resend", "email.enviar");
@@ -59,10 +59,10 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Resen
                   attachments: items.map(function(a) { return { filename: a.filename, path: a.url || a.path }; })
                 };
                 """,
-                description: "Converte attachments do payload canonico (filename,url) para o formato Resend (filename,path).");
+                description: "Converte attachments do payload canônico (filename,url) para o formato Resend (filename,path).");
 
             SeedPipeline("resend", "resend-enviar-email", "Enviar email", "POST /emails com body JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
-            SeedPipeline("resend", "resend-testar-conexao", "Testar conexao", "Pipeline executado pelo botao Testar do AgencyCampaign para validar credenciais. Em providers de email/whatsapp, envia mensagem de teste; em pagamento, valida sandbox.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("resend", "resend-testar-conexao", "Testar conexão", "Pipeline executado pelo botão Testar do AgencyCampaign para validar credenciais. Em providers de email/whatsapp, envia mensagem de teste; em pagamento, valida sandbox.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
             SeedStep("resend-enviar-email", 0, "Adapt attachments para Resend", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "resend-preparar-anexos", ignoreOnResponse: true);
             SeedStep("resend-enviar-email", 1, "POST /emails", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Resend - Enviar email");

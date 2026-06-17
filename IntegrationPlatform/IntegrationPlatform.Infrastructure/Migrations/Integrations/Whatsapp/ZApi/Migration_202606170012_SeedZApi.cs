@@ -10,12 +10,12 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.ZA
     {
         public override void Up()
         {
-            SeedIntegration("z-api", "Z-API", "Provider brasileiro nao-oficial baseado em WhatsApp Web (https://z-api.io).", "whatsapp", "https://logos.hunter.io/z-api.io", supportsWebhook: false);
+            SeedIntegration("z-api", "Z-API", "Provider brasileiro não-oficial baseado em WhatsApp Web (https://z-api.io).", "whatsapp", "https://logos.hunter.io/z-api.io", supportsWebhook: false);
 
-            SeedAttribute("z-api", "instance_id", "Instance ID", FieldType.Text, required: true, order: 1, group: "Identificação", description: "ID da instancia configurada na Z-API.");
-            SeedAttribute("z-api", "instance_token", "Instance Token", FieldType.Text, required: true, order: 2, group: "Autenticação", sensitive: true, description: "Token da instancia.");
+            SeedAttribute("z-api", "instance_id", "Instance ID", FieldType.Text, required: true, order: 1, group: "Identificação", description: "ID da instância configurada na Z-API.");
+            SeedAttribute("z-api", "instance_token", "Instance Token", FieldType.Text, required: true, order: 2, group: "Autenticação", sensitive: true, description: "Token da instância.");
             SeedAttribute("z-api", "client_token", "Client Token (header)", FieldType.Text, required: true, order: 3, group: "Autenticação", sensitive: true, description: "Client-Token usado no header (Account Security).");
-            SeedAttribute("z-api", "base_url", "URL base da API", FieldType.Text, required: true, order: 4, group: "Endpoints", hidden: true, description: "Endpoint padrao: https://api.z-api.io.", placeholder: "https://api.z-api.io", defaultValue: "https://api.z-api.io");
+            SeedAttribute("z-api", "base_url", "URL base da API", FieldType.Text, required: true, order: 4, group: "Endpoints", hidden: true, description: "Endpoint padrão: https://api.z-api.io.", placeholder: "https://api.z-api.io", defaultValue: "https://api.z-api.io");
 
             BindContract("z-api", "whatsapp.enviar");
 
@@ -28,7 +28,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.ZA
                 """{"phone": "{{ to }}", "message": "Teste de integração Mainstay via Z-API."}""");
 
             SeedPipeline("z-api", "z-api-enviar-mensagem", "Enviar mensagem", "POST /instances/{id}/token/{token}/send-text.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.enviar");
-            SeedPipeline("z-api", "z-api-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("z-api", "z-api-testar-conexao", "Testar conexão", "Pipeline de validação de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
             SeedStep("z-api-enviar-mensagem", 1, "Enviar mensagem de texto", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Z-API: Send Text Message");
             SeedStep("z-api-testar-conexao", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Z-API: Enviar mensagem de teste");

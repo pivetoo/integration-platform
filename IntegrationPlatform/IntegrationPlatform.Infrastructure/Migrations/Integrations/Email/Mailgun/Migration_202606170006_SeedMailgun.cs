@@ -13,9 +13,9 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Mailg
             SeedIntegration("mailgun", "Mailgun", "Envio de email via API Mailgun.", "email", "https://logos.hunter.io/mailgun.com", supportsWebhook: false);
 
             SeedAttribute("mailgun", "api_key", "API Key (Private)", FieldType.Text, required: true, order: 1, group: "Autenticação", sensitive: true, description: "Private API key (key-xxxx) da conta Mailgun.", placeholder: "key-xxxx...");
-            SeedAttribute("mailgun", "domain", "Domain (sandbox ou proprio)", FieldType.Text, required: true, order: 2, group: "Endpoints", description: "Dominio configurado no Mailgun para enviar emails.", placeholder: "mg.empresa.com");
-            SeedAttribute("mailgun", "region", "Regiao", FieldType.Text, required: true, order: 3, group: "Endpoints", description: "us (default) ou eu. Define endpoint base.", placeholder: "us");
-            SeedAttribute("mailgun", "from_email", "Email remetente", FieldType.Text, required: true, order: 4, group: "Remetente", description: "Email com dominio verificado no Mailgun.", placeholder: "no-reply@mg.empresa.com");
+            SeedAttribute("mailgun", "domain", "Domain (sandbox ou próprio)", FieldType.Text, required: true, order: 2, group: "Endpoints", description: "Domínio configurado no Mailgun para enviar emails.", placeholder: "mg.empresa.com");
+            SeedAttribute("mailgun", "region", "Região", FieldType.Text, required: true, order: 3, group: "Endpoints", description: "us (default) ou eu. Define endpoint base.", placeholder: "us");
+            SeedAttribute("mailgun", "from_email", "Email remetente", FieldType.Text, required: true, order: 4, group: "Remetente", description: "Email com domínio verificado no Mailgun.", placeholder: "no-reply@mg.empresa.com");
             SeedAttribute("mailgun", "from_name", "Nome remetente", FieldType.Text, required: false, order: 5, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Kanvas");
             SeedAttribute("mailgun", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 6, group: "Webhook", hidden: true, description: "URL para receber eventos.", placeholder: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback");
             SeedAttribute("mailgun", "target_secret", "Secret do callback", FieldType.Text, required: false, order: 7, group: "Webhook", sensitive: true, hidden: true, description: "Secret enviado no header X-Webhook-Secret.");
@@ -83,7 +83,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Mailg
                 description: "Monta Authorization Basic, URL do endpoint e body form-encoded para Mailgun");
 
             SeedPipeline("mailgun", "mailgun-enviar-email", "Enviar email", "POST /v3/{domain}/messages form-encoded.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
-            SeedPipeline("mailgun", "mailgun-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("mailgun", "mailgun-testar-conexao", "Testar conexão", "Pipeline de validação de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
             SeedStep("mailgun-enviar-email", 1, "Montar auth e body", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "mailgun-montar-requisicao");
             SeedStep("mailgun-enviar-email", 2, "POST /v3/{domain}/messages", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Mailgun - Enviar e-mail");

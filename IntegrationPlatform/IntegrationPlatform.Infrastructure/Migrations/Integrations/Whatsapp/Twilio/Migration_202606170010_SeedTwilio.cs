@@ -14,8 +14,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Tw
 
             SeedAttribute("twilio-whatsapp", "account_sid", "Account SID", FieldType.Text, required: true, order: 1, group: "Autenticação", description: "SID da conta Twilio.", placeholder: "AC...");
             SeedAttribute("twilio-whatsapp", "auth_token", "Auth Token", FieldType.Text, required: true, order: 2, group: "Autenticação", sensitive: true, description: "Auth token correspondente.");
-            SeedAttribute("twilio-whatsapp", "from_number", "Numero remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Numero WhatsApp (formato whatsapp:+5511...).", placeholder: "whatsapp:+5511999999999");
-            SeedAttribute("twilio-whatsapp", "base_url", "URL base da API", FieldType.Text, required: true, order: 4, group: "Endpoints", hidden: true, description: "Endpoint padrao: https://api.twilio.com/2010-04-01.", placeholder: "https://api.twilio.com/2010-04-01", defaultValue: "https://api.twilio.com/2010-04-01");
+            SeedAttribute("twilio-whatsapp", "from_number", "Número remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Número WhatsApp (formato whatsapp:+5511...).", placeholder: "whatsapp:+5511999999999");
+            SeedAttribute("twilio-whatsapp", "base_url", "URL base da API", FieldType.Text, required: true, order: 4, group: "Endpoints", hidden: true, description: "Endpoint padrão: https://api.twilio.com/2010-04-01.", placeholder: "https://api.twilio.com/2010-04-01", defaultValue: "https://api.twilio.com/2010-04-01");
 
             BindContract("twilio-whatsapp", "whatsapp.enviar");
 
@@ -93,11 +93,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Tw
 
             SeedPipeline("twilio-whatsapp", "twilio-whatsapp-enviar-mensagem", "Enviar mensagem", "POST Messages.json com From/To/Body.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.enviar");
             SeedPipeline("twilio-whatsapp", "twilio-whatsapp-enviar-template", "Enviar template aprovado", "Envia template via Content API + Messages.", isDefault: false, isTestPipeline: false, contractIdentifier: null);
-            SeedPipeline("twilio-whatsapp", "twilio-whatsapp-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("twilio-whatsapp", "twilio-whatsapp-testar-conexao", "Testar conexão", "Pipeline de validação de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("twilio-whatsapp-enviar-mensagem", 1, "Montar autenticacao e corpo", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "twilio-montar-envio");
+            SeedStep("twilio-whatsapp-enviar-mensagem", 1, "Montar autenticação e corpo", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "twilio-montar-envio");
             SeedStep("twilio-whatsapp-enviar-mensagem", 2, "Enviar mensagem via Twilio", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Twilio: Send WhatsApp Message");
-            SeedStep("twilio-whatsapp-enviar-template", 1, "Montar autenticacao e corpo do template", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "twilio-montar-template");
+            SeedStep("twilio-whatsapp-enviar-template", 1, "Montar autenticação e corpo do template", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "twilio-montar-template");
             SeedStep("twilio-whatsapp-enviar-template", 2, "Enviar template via Twilio", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Twilio: Send WhatsApp Template");
             SeedStep("twilio-whatsapp-testar-conexao", 1, "Montar autenticação e corpo da mensagem", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "twilio-montar-teste");
             SeedStep("twilio-whatsapp-testar-conexao", 2, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Twilio: Send WhatsApp Message");

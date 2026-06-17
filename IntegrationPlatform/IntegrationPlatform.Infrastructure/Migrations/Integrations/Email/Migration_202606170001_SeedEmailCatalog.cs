@@ -15,7 +15,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email
             SeedContract(
                 identifier: "email.enviar",
                 name: "Envio de email",
-                description: "Envia um e-mail transacional para um ou mais destinatarios.",
+                description: "Envia um e-mail transacional para um ou mais destinatários.",
                 categoryIdentifier: "email",
                 inputSchema: """
                 {
