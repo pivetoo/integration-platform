@@ -1,6 +1,7 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlatform.Api.Contracts;
 using IntegrationPlatform.Api.Contracts.Execution;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
@@ -99,7 +100,7 @@ namespace IntegrationPlatform.Api.Controllers
             Execution execution = await executionEngineService.ExecutePipeline(
                 request.ConnectorId,
                 request.PipelineId,
-                request.InputData,
+                request.InputData.ToRawInputData(),
                 ExecutionType.Manual,
                 cancellationToken: cancellationToken);
 
@@ -119,7 +120,7 @@ namespace IntegrationPlatform.Api.Controllers
             Execution execution = await executionEngineService.ExecutePipeline(
                 request.ConnectorId,
                 request.PipelineId,
-                request.InputData,
+                request.InputData.ToRawInputData(),
                 ExecutionType.Manual,
                 initialStepId: request.InitialStepId,
                 cancellationToken: cancellationToken);
@@ -140,7 +141,7 @@ namespace IntegrationPlatform.Api.Controllers
             var session = await executionEngineService.StartDebugPipeline(
                 request.ConnectorId,
                 request.PipelineId,
-                request.InputData,
+                request.InputData.ToRawInputData(),
                 request.InitialStepId,
                 cancellationToken);
 

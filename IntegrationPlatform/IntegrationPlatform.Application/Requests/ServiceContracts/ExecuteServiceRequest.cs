@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace IntegrationPlatform.Application.Requests.ServiceContracts
 {
@@ -7,7 +8,7 @@ namespace IntegrationPlatform.Application.Requests.ServiceContracts
         [Required]
         public long ConnectorId { get; set; }
 
-        public string? InputData { get; set; }
+        public JsonElement? InputData { get; set; }
     }
 
     public sealed class EnqueueServiceRequest
@@ -15,7 +16,7 @@ namespace IntegrationPlatform.Application.Requests.ServiceContracts
         [Required]
         public long ConnectorId { get; set; }
 
-        public string? InputData { get; set; }
+        public JsonElement? InputData { get; set; }
 
         public int Priority { get; set; } = 5;
 

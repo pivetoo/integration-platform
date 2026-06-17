@@ -1,5 +1,6 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
+using IntegrationPlatform.Api.Contracts;
 using IntegrationPlatform.Api.Contracts.Execution;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Requests.ServiceContracts;
@@ -38,7 +39,7 @@ namespace IntegrationPlatform.Api.Controllers
                 return Http400(Localizer["serviceContract.identifier.required"]);
             }
 
-            Execution execution = await serviceExecutionService.ExecuteService(identifier, request.ConnectorId, request.InputData, cancellationToken);
+            Execution execution = await serviceExecutionService.ExecuteService(identifier, request.ConnectorId, request.InputData.ToRawInputData(), cancellationToken);
             return Http200(DebugPipelineResultContract.FromExecution(execution));
         }
 
@@ -57,7 +58,7 @@ namespace IntegrationPlatform.Api.Controllers
                 return Http400(Localizer["serviceContract.identifier.required"]);
             }
 
-            ProcessingQueue queue = await serviceExecutionService.EnqueueService(identifier, request.ConnectorId, request.InputData, request.Priority, request.ScheduledFor, cancellationToken);
+            ProcessingQueue queue = await serviceExecutionService.EnqueueService(identifier, request.ConnectorId, request.InputData.ToRawInputData(), request.Priority, request.ScheduledFor, cancellationToken);
             return Http200(queue, Localizer["serviceExecution.enqueued"]);
         }
     }

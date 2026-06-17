@@ -1,6 +1,7 @@
 using Archon.Api.Attributes;
 using Archon.Api.Controllers;
 using Archon.Core.Pagination;
+using IntegrationPlatform.Api.Contracts;
 using IntegrationPlatform.Api.Contracts.ProcessingQueues;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
@@ -74,7 +75,7 @@ namespace IntegrationPlatform.Api.Controllers
             ProcessingQueue item = await executionService.EnqueuePipeline(
                 request.ConnectorId,
                 request.PipelineId,
-                request.Payload,
+                request.Payload.ToRawInputData(),
                 request.Priority,
                 cancellationToken);
             ProcessingQueue? queue = await processingQueueService.GetProcessingQueueById(item.Id, cancellationToken);

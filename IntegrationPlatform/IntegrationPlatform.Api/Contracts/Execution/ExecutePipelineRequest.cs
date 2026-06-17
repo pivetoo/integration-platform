@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace IntegrationPlatform.Api.Contracts.Execution
 {
@@ -10,6 +11,6 @@ namespace IntegrationPlatform.Api.Contracts.Execution
         [Range(1, long.MaxValue)]
         public long PipelineId { get; set; }
 
-        public string? InputData { get; set; }
+        public JsonElement? InputData { get; set; }
     }
 }

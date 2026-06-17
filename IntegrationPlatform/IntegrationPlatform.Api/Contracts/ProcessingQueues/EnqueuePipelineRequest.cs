@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace IntegrationPlatform.Api.Contracts.ProcessingQueues
 {
@@ -10,7 +11,7 @@ namespace IntegrationPlatform.Api.Contracts.ProcessingQueues
         [Range(1, long.MaxValue)]
         public long PipelineId { get; set; }
 
-        public string? Payload { get; set; }
+        public JsonElement? Payload { get; set; }
 
         public int Priority { get; set; }
     }
