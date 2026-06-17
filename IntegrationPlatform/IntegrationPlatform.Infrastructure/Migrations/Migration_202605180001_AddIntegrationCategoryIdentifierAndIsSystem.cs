@@ -14,38 +14,6 @@ namespace IntegrationPlatform.Infrastructure.Migrations
             ");
 
             Execute.Sql(@"
-                UPDATE integrationcategory
-                SET identifier = 'payment', issystem = true
-                WHERE identifier IS NULL AND LOWER(name) IN ('pagamento', 'pagamentos', 'payment', 'payments');
-            ");
-
-            Execute.Sql(@"
-                UPDATE integrationcategory
-                SET identifier = 'digital-signature', issystem = true
-                WHERE identifier IS NULL AND LOWER(name) IN ('assinatura digital', 'assinatura', 'digital signature', 'signature', 'firma digital');
-            ");
-
-            Execute.Sql(@"
-                UPDATE integrationcategory
-                SET identifier = 'email', issystem = true
-                WHERE identifier IS NULL AND LOWER(name) IN ('e-mail', 'email', 'correo electronico', 'correo electrónico');
-            ");
-
-            Execute.Sql(@"
-                UPDATE integrationcategory
-                SET identifier = TRIM(BOTH '-' FROM REGEXP_REPLACE(LOWER(name), '[^a-z0-9]+', '-', 'g'))
-                WHERE identifier IS NULL;
-            ");
-
-            Execute.Sql(@"
-                UPDATE integrationcategory
-                SET identifier = identifier || '-' || id
-                WHERE identifier IN (
-                    SELECT identifier FROM integrationcategory GROUP BY identifier HAVING COUNT(*) > 1
-                );
-            ");
-
-            Execute.Sql(@"
                 ALTER TABLE integrationcategory
                     ALTER COLUMN identifier SET NOT NULL;
             ");
