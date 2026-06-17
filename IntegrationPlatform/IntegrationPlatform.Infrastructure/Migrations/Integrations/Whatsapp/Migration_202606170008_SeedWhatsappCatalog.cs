@@ -3,7 +3,7 @@ using IntegrationPlatform.Infrastructure.Migrations.Integrations;
 
 namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp
 {
-    // Catalogo do modulo Whatsapp: categoria 'whatsapp' + contract 'whatsapp.enviar' (com callback).
+    // Catalogo do modulo Whatsapp: categoria 'whatsapp' + contract 'whatsapp.enviar' (fire-and-forget; sem callback por enquanto).
     // Compartilhados pelas integracoes de whatsapp (cada uma na sua pasta). Roda antes delas (versao menor).
     [Migration(202606170008)]
     public sealed class Migration_202606170008_SeedWhatsappCatalog : IntegrationSeedMigration
@@ -32,14 +32,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp
                   "status": "queued | sent | rejected"
                 }
                 """,
-                hasCallback: true,
-                callbackSchema: """
-                {
-                  "providerMessageId": "string",
-                  "status": "sent | delivered | read | failed",
-                  "error": "{code, message}?"
-                }
-                """);
+                hasCallback: false,
+                callbackSchema: null);
         }
 
         public override void Down()
