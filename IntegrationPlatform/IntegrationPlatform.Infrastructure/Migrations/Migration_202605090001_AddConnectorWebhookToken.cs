@@ -10,8 +10,6 @@ namespace IntegrationPlatform.Infrastructure.Migrations
             Alter.Table("connector")
                 .AddColumn("webhooktoken").AsString(64).Nullable();
 
-            Execute.Sql("UPDATE connector SET webhooktoken = REPLACE(gen_random_uuid()::text, '-', '') WHERE webhooktoken IS NULL");
-
             Create.Index("ix_connector_webhooktoken")
                 .OnTable("connector")
                 .OnColumn("webhooktoken").Unique();
