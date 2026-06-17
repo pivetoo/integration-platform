@@ -21,8 +21,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                     .WithColumn("callbackschema").AsString(int.MaxValue).Nullable()
                     .WithColumn("isactive").AsBoolean().NotNullable().WithDefaultValue(true)
                     .WithColumn("issystem").AsBoolean().NotNullable().WithDefaultValue(false)
-                    .WithColumn("createdat").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime)
-                    .WithColumn("updatedat").AsDateTime().Nullable();
+                    .WithColumn("createdat").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
+                    .WithColumn("updatedat").AsDateTimeOffset().Nullable();
 
                 Create.ForeignKey("fk_servicecontract_integrationcategory")
                     .FromTable("servicecontract").ForeignColumn("integrationcategoryid")
@@ -45,8 +45,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations
                     .WithColumn("integrationid").AsInt64().NotNullable()
                     .WithColumn("servicecontractid").AsInt64().NotNullable()
                     .WithColumn("isactive").AsBoolean().NotNullable().WithDefaultValue(true)
-                    .WithColumn("createdat").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime)
-                    .WithColumn("updatedat").AsDateTime().Nullable();
+                    .WithColumn("createdat").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
+                    .WithColumn("updatedat").AsDateTimeOffset().Nullable();
 
                 Create.ForeignKey("fk_integrationservicecontract_integration")
                     .FromTable("integrationservicecontract").ForeignColumn("integrationid")
