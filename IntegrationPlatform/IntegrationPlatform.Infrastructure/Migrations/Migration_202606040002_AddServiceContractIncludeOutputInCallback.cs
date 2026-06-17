@@ -7,15 +7,19 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            Execute.Sql(@"
-                ALTER TABLE servicecontract
-                    ADD COLUMN IF NOT EXISTS includeoutputincallback BOOLEAN NOT NULL DEFAULT false;
-            ");
+            if (!Schema.Table("servicecontract").Column("includeoutputincallback").Exists())
+            {
+                Alter.Table("servicecontract")
+                    .AddColumn("includeoutputincallback").AsBoolean().NotNullable().WithDefaultValue(false);
+            }
         }
 
         public override void Down()
         {
-            Execute.Sql("ALTER TABLE servicecontract DROP COLUMN IF EXISTS includeoutputincallback;");
+            if (Schema.Table("servicecontract").Column("includeoutputincallback").Exists())
+            {
+                Delete.Column("includeoutputincallback").FromTable("servicecontract");
+            }
         }
     }
 }
