@@ -2,11 +2,16 @@ using FluentMigrator;
 
 namespace IntegrationPlatform.Infrastructure.Migrations
 {
-    [Migration(202604030002)]
-    public sealed class Migration_202604030002_CreateIntegrationPlatformTables : Migration
+    [Migration(202604030001)]
+    public sealed class Migration_202604030001_CreateIntegrationPlatformTables : Migration
     {
         public override void Up()
         {
+            if (Schema.Table("integrationcategory").Exists())
+            {
+                return;
+            }
+
             Create.Table("integrationcategory")
                 .WithColumn("id").AsInt64().PrimaryKey().Identity()
                 .WithColumn("name").AsString(100).NotNullable()
@@ -319,6 +324,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations
 
         public override void Down()
         {
+            if (!Schema.Table("integrationcategory").Exists())
+            {
+                return;
+            }
+
             Delete.Table("pipelineroutine");
             Delete.Table("reference");
             Delete.Table("executionlog");
