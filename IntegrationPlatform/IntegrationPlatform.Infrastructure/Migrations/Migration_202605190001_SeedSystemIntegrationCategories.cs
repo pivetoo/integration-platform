@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace IntegrationPlatform.Infrastructure.Migrations
 {
-    // Garante que as categorias de sistema (payment, email, digital-signature) existam num banco LIMPO.
+    // Garante que as categorias de sistema (email, digital-signature) existam num banco LIMPO.
     // Sem isso, a migration 202605200001 (seed de service contracts) falha ao referenciar a categoria
     // 'email'/'digital-signature' inexistente (integrationcategoryid NULL viola NOT NULL), abortando toda
     // a cadeia de migrations. A 202605180001 so faz UPDATE em categorias ja existentes (por nome), o que
@@ -14,7 +14,6 @@ namespace IntegrationPlatform.Infrastructure.Migrations
     {
         public override void Up()
         {
-            SeedCategory("payment", "Pagamento", "Provedores de pagamento e cobranca.");
             SeedCategory("email", "E-mail", "Provedores de envio de email transacional.");
             SeedCategory("digital-signature", "Assinatura digital", "Provedores de coleta de assinaturas digitais.");
         }

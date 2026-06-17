@@ -51,17 +51,10 @@ namespace IntegrationPlatform.Infrastructure.Migrations
             ");
 
             Execute.Sql("CREATE UNIQUE INDEX IF NOT EXISTS ux_integrationcategory_identifier ON integrationcategory(identifier);");
-
-            Execute.Sql(@"
-                INSERT INTO integrationcategory (identifier, name, description, isactive, issystem, createdat, updatedat)
-                SELECT 'banking', 'Conta bancária', 'Provedores de sincronização de saldo e extrato de contas bancárias.', true, true, NOW() AT TIME ZONE 'utc', NOW() AT TIME ZONE 'utc'
-                WHERE NOT EXISTS (SELECT 1 FROM integrationcategory WHERE identifier = 'banking');
-            ");
         }
 
         public override void Down()
         {
-            Execute.Sql("DELETE FROM integrationcategory WHERE identifier = 'banking' AND issystem = true;");
             Execute.Sql("DROP INDEX IF EXISTS ux_integrationcategory_identifier;");
             Execute.Sql(@"
                 ALTER TABLE integrationcategory
