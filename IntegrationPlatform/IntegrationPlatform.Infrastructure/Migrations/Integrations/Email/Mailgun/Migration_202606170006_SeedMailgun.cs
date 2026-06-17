@@ -20,7 +20,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Mailg
             SeedAttribute("mailgun", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 6, group: "Webhook", hidden: true, description: "URL para receber eventos.", placeholder: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback");
             SeedAttribute("mailgun", "target_secret", "Secret do callback", FieldType.Text, required: false, order: 7, group: "Webhook", sensitive: true, hidden: true, description: "Secret enviado no header X-Webhook-Secret.");
 
-            BindContract("mailgun", "email.send");
+            BindContract("mailgun", "email.enviar");
 
             SeedApiCall("Mailgun - Enviar e-mail", HttpMethodType.Post, "{{ mg_url }}",
                 """
@@ -31,7 +31,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Mailg
                 """,
                 "{{ mg_body }}");
 
-            SeedJsFunction("mailgun-build-request",
+            SeedJsFunction("mailgun-montar-requisicao",
                 """
                 // Entrada:
                 //   payload:    { to?, subject?, htmlBody?, textBody?, cc?, bcc?, replyTo? }
@@ -82,13 +82,13 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Mailg
                 """,
                 description: "Monta Authorization Basic, URL do endpoint e body form-encoded para Mailgun");
 
-            SeedPipeline("mailgun", "mailgun-send-email", "Enviar email", "POST /v3/{domain}/messages form-encoded.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.send");
-            SeedPipeline("mailgun", "mailgun-test-connection", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("mailgun", "mailgun-enviar-email", "Enviar email", "POST /v3/{domain}/messages form-encoded.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
+            SeedPipeline("mailgun", "mailgun-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("mailgun-send-email", 1, "Montar auth e body", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "mailgun-build-request");
-            SeedStep("mailgun-send-email", 2, "POST /v3/{domain}/messages", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Mailgun - Enviar e-mail");
-            SeedStep("mailgun-test-connection", 1, "Montar auth e body (teste)", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "mailgun-build-request");
-            SeedStep("mailgun-test-connection", 2, "POST /v3/{domain}/messages (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Mailgun - Enviar e-mail");
+            SeedStep("mailgun-enviar-email", 1, "Montar auth e body", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "mailgun-montar-requisicao");
+            SeedStep("mailgun-enviar-email", 2, "POST /v3/{domain}/messages", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Mailgun - Enviar e-mail");
+            SeedStep("mailgun-testar-conexao", 1, "Montar auth e body (teste)", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "mailgun-montar-requisicao");
+            SeedStep("mailgun-testar-conexao", 2, "POST /v3/{domain}/messages (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Mailgun - Enviar e-mail");
         }
 
         public override void Down()

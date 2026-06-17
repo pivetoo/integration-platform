@@ -3,7 +3,7 @@ using IntegrationPlatform.Infrastructure.Migrations.Integrations;
 
 namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp
 {
-    // Catalogo do modulo Whatsapp: categoria 'whatsapp' + contract 'whatsapp.send' (com callback).
+    // Catalogo do modulo Whatsapp: categoria 'whatsapp' + contract 'whatsapp.enviar' (com callback).
     // Compartilhados pelas integracoes de whatsapp (cada uma na sua pasta). Roda antes delas (versao menor).
     [Migration(202606170008)]
     public sealed class Migration_202606170008_SeedWhatsappCatalog : IntegrationSeedMigration
@@ -13,7 +13,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp
             SeedCategory("whatsapp", "WhatsApp", "Provedores de mensageria WhatsApp.");
 
             SeedContract(
-                identifier: "whatsapp.send",
+                identifier: "whatsapp.enviar",
                 name: "Envio de mensagem WhatsApp",
                 description: "Envia mensagem via WhatsApp.",
                 categoryIdentifier: "whatsapp",

@@ -15,7 +15,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Di
             SeedAttribute("360dialog", "api_key", "API Key (D360-API-KEY)", FieldType.Text, required: true, order: 1, group: "Autenticação", sensitive: true, description: "API key do channel 360dialog.");
             SeedAttribute("360dialog", "base_url", "URL base da API", FieldType.Text, required: true, order: 2, group: "Endpoints", hidden: true, description: "Endpoint waba-v2.360dialog.io ou hub.360dialog.io.", placeholder: "https://waba-v2.360dialog.io", defaultValue: "https://waba-v2.360dialog.io");
 
-            BindContract("360dialog", "whatsapp.send");
+            BindContract("360dialog", "whatsapp.enviar");
 
             SeedApiCall("360dialog - Enviar mensagem", HttpMethodType.Post, "{{ base_url }}/messages",
                 """
@@ -61,13 +61,13 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Di
                 """{"D360-API-KEY": "{{ api_key }}", "Content-Type": "application/json"}""",
                 """{"messaging_product":"whatsapp","to":"{{ to }}","type":"text","text":{"preview_url":false,"body":"Teste de integração Mainstay via 360dialog."}}""");
 
-            SeedPipeline("360dialog", "360dialog-send-message", "Enviar mensagem", "POST /messages com header D360-API-KEY.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.send");
-            SeedPipeline("360dialog", "360dialog-send-template", "Enviar template aprovado", "Envia template HSM aprovado pela Meta.", isDefault: false, isTestPipeline: false, contractIdentifier: null);
-            SeedPipeline("360dialog", "360dialog-test-connection", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("360dialog", "360dialog-enviar-mensagem", "Enviar mensagem", "POST /messages com header D360-API-KEY.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.enviar");
+            SeedPipeline("360dialog", "360dialog-enviar-template", "Enviar template aprovado", "Envia template HSM aprovado pela Meta.", isDefault: false, isTestPipeline: false, contractIdentifier: null);
+            SeedPipeline("360dialog", "360dialog-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("360dialog-send-message", 1, "POST /messages (texto)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog - Enviar mensagem");
-            SeedStep("360dialog-send-template", 1, "POST /messages (template)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog - Enviar template");
-            SeedStep("360dialog-test-connection", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog: Enviar mensagem de teste");
+            SeedStep("360dialog-enviar-mensagem", 1, "POST /messages (texto)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog - Enviar mensagem");
+            SeedStep("360dialog-enviar-template", 1, "POST /messages (template)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog - Enviar template");
+            SeedStep("360dialog-testar-conexao", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "360dialog: Enviar mensagem de teste");
         }
 
         public override void Down()

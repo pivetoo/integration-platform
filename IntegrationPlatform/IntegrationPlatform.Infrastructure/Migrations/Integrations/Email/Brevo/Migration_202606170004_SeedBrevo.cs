@@ -17,7 +17,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Brevo
             SeedAttribute("brevo", "from_email", "Email remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Email do remetente (dominio autenticado no Brevo).", placeholder: "noreply@empresa.com");
             SeedAttribute("brevo", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Mainstay");
 
-            BindContract("brevo", "email.send");
+            BindContract("brevo", "email.enviar");
 
             SeedApiCall("Brevo - Enviar e-mail", HttpMethodType.Post, "{{ base_url }}/v3/smtp/email",
                 """{"api-key": "{{ api_key }}", "content-type": "application/json", "accept": "application/json"}""",
@@ -27,11 +27,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Brevo
                 """{"api-key": "{{ api_key }}", "content-type": "application/json", "accept": "application/json"}""",
                 """{"sender": {"name": "{{ from_name }}", "email": "{{ from_email }}"}, "to": [{"email": "{{ to }}"}], "subject": "Teste de integracao Mainstay", "htmlContent": "<p>Este e um email de teste enviado pelo Mainstay para validar a integracao com o Brevo.</p>"}""");
 
-            SeedPipeline("brevo", "brevo-send-email", "Enviar email", "POST /v3/smtp/email com body em JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.send");
-            SeedPipeline("brevo", "brevo-test-connection", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("brevo", "brevo-enviar-email", "Enviar email", "POST /v3/smtp/email com body em JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
+            SeedPipeline("brevo", "brevo-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("brevo-send-email", 1, "POST /v3/smtp/email", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Brevo - Enviar e-mail");
-            SeedStep("brevo-test-connection", 1, "POST /v3/smtp/email (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Brevo - Testar conexao");
+            SeedStep("brevo-enviar-email", 1, "POST /v3/smtp/email", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Brevo - Enviar e-mail");
+            SeedStep("brevo-testar-conexao", 1, "POST /v3/smtp/email (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Brevo - Testar conexao");
         }
 
         public override void Down()

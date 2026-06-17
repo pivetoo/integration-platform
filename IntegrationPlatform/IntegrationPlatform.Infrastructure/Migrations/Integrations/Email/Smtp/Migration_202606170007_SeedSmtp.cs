@@ -21,13 +21,13 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Smtp
             SeedAttribute("smtp", "from_name", "Nome remetente", FieldType.Text, required: false, order: 6, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Kanvas");
             SeedAttribute("smtp", "enable_ssl", "Habilitar SSL/TLS", FieldType.Boolean, required: true, order: 7, group: "Servidor", description: "true/false. Use true em portas 587/465.", placeholder: "true");
 
-            BindContract("smtp", "email.send");
+            BindContract("smtp", "email.enviar");
 
-            SeedPipeline("smtp", "smtp-send-email", "Enviar email", "Envia e-mail via protocolo SMTP.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.send");
-            SeedPipeline("smtp", "smtp-test-connection", "Testar conexao", "Envia e-mail de teste via SMTP para validar credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("smtp", "smtp-enviar-email", "Enviar email", "Envia e-mail via protocolo SMTP.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
+            SeedPipeline("smtp", "smtp-testar-conexao", "Testar conexao", "Envia e-mail de teste via SMTP para validar credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("smtp-send-email", 1, "Enviar e-mail via SMTP", PipelineStepType.SmtpSend, ErrorAction.Stop);
-            SeedStep("smtp-test-connection", 1, "Enviar e-mail de teste via SMTP", PipelineStepType.SmtpSend, ErrorAction.Stop);
+            SeedStep("smtp-enviar-email", 1, "Enviar e-mail via SMTP", PipelineStepType.SmtpSend, ErrorAction.Stop);
+            SeedStep("smtp-testar-conexao", 1, "Enviar e-mail de teste via SMTP", PipelineStepType.SmtpSend, ErrorAction.Stop);
         }
 
         public override void Down()

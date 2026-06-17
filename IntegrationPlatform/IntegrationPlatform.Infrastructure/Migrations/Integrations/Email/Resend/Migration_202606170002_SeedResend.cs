@@ -17,7 +17,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Resen
             SeedAttribute("resend", "from_email", "Email remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Email com dominio verificado no Resend.", placeholder: "no-reply@empresa.com");
             SeedAttribute("resend", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Empresa");
 
-            BindContract("resend", "email.send");
+            BindContract("resend", "email.enviar");
 
             SeedApiCall("Resend - Enviar email", HttpMethodType.Post, "{{ base_url }}",
                 """
@@ -52,7 +52,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Resen
                 }
                 """);
 
-            SeedJsFunction("resend-prepare-attachments",
+            SeedJsFunction("resend-preparar-anexos",
                 """
                 const items = Array.isArray(payload.attachments) ? payload.attachments : [];
                 result.value = {
@@ -61,12 +61,12 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Resen
                 """,
                 description: "Converte attachments do payload canonico (filename,url) para o formato Resend (filename,path).");
 
-            SeedPipeline("resend", "resend-send-email", "Enviar email", "POST /emails com body JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.send");
-            SeedPipeline("resend", "resend-test-connection", "Testar conexao", "Pipeline executado pelo botao Testar do AgencyCampaign para validar credenciais. Em providers de email/whatsapp, envia mensagem de teste; em pagamento, valida sandbox.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("resend", "resend-enviar-email", "Enviar email", "POST /emails com body JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
+            SeedPipeline("resend", "resend-testar-conexao", "Testar conexao", "Pipeline executado pelo botao Testar do AgencyCampaign para validar credenciais. Em providers de email/whatsapp, envia mensagem de teste; em pagamento, valida sandbox.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("resend-send-email", 0, "Adapt attachments para Resend", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "resend-prepare-attachments", ignoreOnResponse: true);
-            SeedStep("resend-send-email", 1, "POST /emails", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Resend - Enviar email");
-            SeedStep("resend-test-connection", 1, "POST /emails", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Resend - Testar conexão");
+            SeedStep("resend-enviar-email", 0, "Adapt attachments para Resend", PipelineStepType.JavaScriptFunction, ErrorAction.Stop, jsFunction: "resend-preparar-anexos", ignoreOnResponse: true);
+            SeedStep("resend-enviar-email", 1, "POST /emails", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Resend - Enviar email");
+            SeedStep("resend-testar-conexao", 1, "POST /emails", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Resend - Testar conexão");
         }
 
         public override void Down()

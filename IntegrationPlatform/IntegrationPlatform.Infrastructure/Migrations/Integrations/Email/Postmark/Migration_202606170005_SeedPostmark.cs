@@ -18,7 +18,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Postm
             SeedAttribute("postmark", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Kanvas");
             SeedAttribute("postmark", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 5, group: "Webhook", hidden: true, description: "URL para receber webhooks de eventos.", placeholder: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback");
 
-            BindContract("postmark", "email.send");
+            BindContract("postmark", "email.enviar");
 
             SeedApiCall("Postmark - Enviar e-mail", HttpMethodType.Post, "{{ base_url }}/email",
                 """
@@ -55,11 +55,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Postm
                 }
                 """);
 
-            SeedPipeline("postmark", "postmark-send-email", "Enviar email", "POST /email com body em JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.send");
-            SeedPipeline("postmark", "postmark-test-connection", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("postmark", "postmark-enviar-email", "Enviar email", "POST /email com body em JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
+            SeedPipeline("postmark", "postmark-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("postmark-send-email", 1, "POST /email", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Postmark - Enviar e-mail");
-            SeedStep("postmark-test-connection", 1, "POST /email (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Postmark - Testar conexão");
+            SeedStep("postmark-enviar-email", 1, "POST /email", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Postmark - Enviar e-mail");
+            SeedStep("postmark-testar-conexao", 1, "POST /email (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Postmark - Testar conexão");
         }
 
         public override void Down()

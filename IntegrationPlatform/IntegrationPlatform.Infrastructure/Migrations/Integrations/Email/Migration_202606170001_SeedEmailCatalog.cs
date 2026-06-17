@@ -3,7 +3,7 @@ using IntegrationPlatform.Infrastructure.Migrations.Integrations;
 
 namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email
 {
-    // Catalogo do modulo Email: categoria 'email' + contract 'email.send'.
+    // Catalogo do modulo Email: categoria 'email' + contract 'email.enviar'.
     // Compartilhados pelas integracoes de email (cada uma na sua pasta). Roda antes delas (versao menor).
     [Migration(202606170001)]
     public sealed class Migration_202606170001_SeedEmailCatalog : IntegrationSeedMigration
@@ -13,7 +13,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email
             SeedCategory("email", "Email", "Provedores de envio de e-mail transacional.");
 
             SeedContract(
-                identifier: "email.send",
+                identifier: "email.enviar",
                 name: "Envio de email",
                 description: "Envia um e-mail transacional para um ou mais destinatarios.",
                 categoryIdentifier: "email",

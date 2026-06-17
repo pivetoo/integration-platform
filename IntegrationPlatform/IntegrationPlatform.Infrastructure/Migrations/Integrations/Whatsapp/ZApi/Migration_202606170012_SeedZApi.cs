@@ -17,7 +17,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.ZA
             SeedAttribute("z-api", "client_token", "Client Token (header)", FieldType.Text, required: true, order: 3, group: "Autenticação", sensitive: true, description: "Client-Token usado no header (Account Security).");
             SeedAttribute("z-api", "base_url", "URL base da API", FieldType.Text, required: true, order: 4, group: "Endpoints", hidden: true, description: "Endpoint padrao: https://api.z-api.io.", placeholder: "https://api.z-api.io", defaultValue: "https://api.z-api.io");
 
-            BindContract("z-api", "whatsapp.send");
+            BindContract("z-api", "whatsapp.enviar");
 
             SeedApiCall("Z-API: Send Text Message", HttpMethodType.Post, "{{ base_url }}/instances/{{ instance_id }}/token/{{ instance_token }}/send-text",
                 """{"Client-Token": "{{ client_token }}", "Content-Type": "application/json"}""",
@@ -27,11 +27,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.ZA
                 """{"Client-Token": "{{ client_token }}", "Content-Type": "application/json"}""",
                 """{"phone": "{{ to }}", "message": "Teste de integração Mainstay via Z-API."}""");
 
-            SeedPipeline("z-api", "z-api-send-message", "Enviar mensagem", "POST /instances/{id}/token/{token}/send-text.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.send");
-            SeedPipeline("z-api", "z-api-test-connection", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("z-api", "z-api-enviar-mensagem", "Enviar mensagem", "POST /instances/{id}/token/{token}/send-text.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.enviar");
+            SeedPipeline("z-api", "z-api-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("z-api-send-message", 1, "Enviar mensagem de texto", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Z-API: Send Text Message");
-            SeedStep("z-api-test-connection", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Z-API: Enviar mensagem de teste");
+            SeedStep("z-api-enviar-mensagem", 1, "Enviar mensagem de texto", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Z-API: Send Text Message");
+            SeedStep("z-api-testar-conexao", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Z-API: Enviar mensagem de teste");
         }
 
         public override void Down()

@@ -16,7 +16,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Ev
             SeedAttribute("evolution-api", "api_key", "API Key (Global ou Instance)", FieldType.Text, required: true, order: 2, group: "Autenticação", sensitive: true, description: "API key configurada no servidor.");
             SeedAttribute("evolution-api", "instance_name", "Instance name", FieldType.Text, required: true, order: 3, group: "Identificação", description: "Nome da instancia/sessao na Evolution.");
 
-            BindContract("evolution-api", "whatsapp.send");
+            BindContract("evolution-api", "whatsapp.enviar");
 
             SeedApiCall("Evolution API - Enviar mensagem", HttpMethodType.Post, "{{ base_url }}/message/sendText/{{ instance_name }}",
                 """
@@ -36,11 +36,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Whatsapp.Ev
                 """{"apikey": "{{ api_key }}", "Content-Type": "application/json"}""",
                 """{"number": "{{ to }}", "text": "Teste de integração Mainstay via Evolution API."}""");
 
-            SeedPipeline("evolution-api", "evolution-send-message", "Enviar mensagem", "POST /message/sendText/{instance}.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.send");
-            SeedPipeline("evolution-api", "evolution-api-test-connection", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("evolution-api", "evolution-api-enviar-mensagem", "Enviar mensagem", "POST /message/sendText/{instance}.", isDefault: true, isTestPipeline: false, contractIdentifier: "whatsapp.enviar");
+            SeedPipeline("evolution-api", "evolution-api-testar-conexao", "Testar conexao", "Pipeline de validacao de credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("evolution-send-message", 1, "POST /message/sendText/{instance}", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Evolution API - Enviar mensagem");
-            SeedStep("evolution-api-test-connection", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Evolution API: Enviar mensagem de teste");
+            SeedStep("evolution-api-enviar-mensagem", 1, "POST /message/sendText/{instance}", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Evolution API - Enviar mensagem");
+            SeedStep("evolution-api-testar-conexao", 1, "Enviar mensagem de teste", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "Evolution API: Enviar mensagem de teste");
         }
 
         public override void Down()

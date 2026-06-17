@@ -17,7 +17,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Sendg
             SeedAttribute("sendgrid", "from_email", "Email remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Email verificado no SendGrid.", placeholder: "no-reply@empresa.com");
             SeedAttribute("sendgrid", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Empresa");
 
-            BindContract("sendgrid", "email.send");
+            BindContract("sendgrid", "email.enviar");
 
             SeedApiCall("SendGrid - Enviar e-mail", HttpMethodType.Post, "{{ base_url }}/v3/mail/send",
                 """
@@ -75,11 +75,11 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Sendg
                 }
                 """);
 
-            SeedPipeline("sendgrid", "sendgrid-send-email", "Enviar email", "POST /v3/mail/send com body em JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.send");
-            SeedPipeline("sendgrid", "sendgrid-test-connection", "Testar conexao", "Pipeline executado pelo botao Testar do AgencyCampaign para validar credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
+            SeedPipeline("sendgrid", "sendgrid-enviar-email", "Enviar email", "POST /v3/mail/send com body em JSON.", isDefault: true, isTestPipeline: false, contractIdentifier: "email.enviar");
+            SeedPipeline("sendgrid", "sendgrid-testar-conexao", "Testar conexao", "Pipeline executado pelo botao Testar do AgencyCampaign para validar credenciais.", isDefault: false, isTestPipeline: true, contractIdentifier: null);
 
-            SeedStep("sendgrid-send-email", 1, "POST /v3/mail/send", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "SendGrid - Enviar e-mail");
-            SeedStep("sendgrid-test-connection", 1, "POST /v3/mail/send (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "SendGrid - Testar conexão");
+            SeedStep("sendgrid-enviar-email", 1, "POST /v3/mail/send", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "SendGrid - Enviar e-mail");
+            SeedStep("sendgrid-testar-conexao", 1, "POST /v3/mail/send (teste)", PipelineStepType.HttpRequest, ErrorAction.Stop, apiCall: "SendGrid - Testar conexão");
         }
 
         public override void Down()
