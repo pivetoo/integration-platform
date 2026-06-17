@@ -68,7 +68,8 @@ namespace IntegrationPlatform.Infrastructure.Services
                 request.ApiCallId,
                 request.JavaScriptFunctionId,
                 request.DatabaseScriptId,
-                request.IgnoreOnResponse);
+                request.IgnoreOnResponse,
+                request.RunOnError);
 
             bool success = await Insert(cancellationToken, step);
             if (!success)
@@ -107,7 +108,8 @@ namespace IntegrationPlatform.Infrastructure.Services
                 request.JavaScriptFunctionId,
                 request.DatabaseScriptId,
                 request.IsActive,
-                request.IgnoreOnResponse);
+                request.IgnoreOnResponse,
+                request.RunOnError);
 
             PipelineStep? result = await Update(step, cancellationToken);
             if (result is null)

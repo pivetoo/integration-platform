@@ -27,5 +27,7 @@ namespace IntegrationPlatform.Application.Requests.PipelineSteps
         public long? DatabaseScriptId { get; set; }
 
         public bool IgnoreOnResponse { get; set; }
+
+        public bool RunOnError { get; set; }
     }
 }

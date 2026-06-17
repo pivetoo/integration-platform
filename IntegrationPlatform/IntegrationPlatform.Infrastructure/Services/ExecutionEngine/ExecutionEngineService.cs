@@ -72,10 +72,15 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             bool hasFailure = false;
             bool stopped = false;
 
-            List<PipelineStep> activeSteps = pipeline.Steps
+            List<PipelineStep> allActiveSteps = pipeline.Steps
                 .Where(step => step.IsActive)
                 .OrderBy(step => step.Order)
                 .ToList();
+
+            // Steps marcados com RunOnError rodam SOMENTE no passo de tratamento de erro (ex.: callback de
+            // falha pro Mainstay). Ficam de fora do fluxo normal.
+            List<PipelineStep> errorSteps = allActiveSteps.Where(step => step.RunOnError).ToList();
+            List<PipelineStep> activeSteps = allActiveSteps.Where(step => !step.RunOnError).ToList();
 
             if (initialStepId.HasValue)
             {
@@ -134,6 +139,21 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
             }
 
+            if (stopped && errorSteps.Count > 0)
+            {
+                // Passo de tratamento de erro: roda os steps RunOnError expondo {{errorMessage}}. Nao altera
+                // o finalStatus (a execucao permanece Error) — serve so para notificar/compensar a falha.
+                context.StepVariables["errorMessage"] = context.LastError ?? string.Empty;
+
+                foreach (PipelineStep errorStep in errorSteps)
+                {
+                    AddLog(logs, execution, errorStep, LogLevelType.Info, Localizer["execution.log.step.executing", errorStep.Name, errorStep.Type]);
+
+                    PipelineStepExecutionResult errorResult = await stepExecutorService.Execute(errorStep, context, cancellationToken);
+                    AddResultLog(logs, execution, errorStep, errorResult);
+                }
+            }
+
             stopwatch.Stop();
 
             ExecutionStatus finalStatus = stopped
@@ -167,7 +187,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             ArchonIntegration? tenantConfig = await integrationService.GetByNameAsync(TenantConfigIntegrationName, cancellationToken);
             PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId, tenantConfig);
             List<PipelineStep> activeSteps = pipeline.Steps
-                .Where(step => step.IsActive)
+                .Where(step => step.IsActive && !step.RunOnError)
                 .OrderBy(step => step.Order)
                 .ToList();
 

@@ -52,6 +52,7 @@ export interface PipelineStep {
   errorAction: ErrorAction;
   isActive: boolean;
   ignoreOnResponse?: boolean;
+  runOnError?: boolean;
 }
 
 export interface CreatePipelineRequest {
@@ -81,6 +82,7 @@ export interface CreatePipelineStepRequest {
   errorAction: ErrorAction;
   isActive: boolean;
   ignoreOnResponse?: boolean;
+  runOnError?: boolean;
 }
 
 export interface UpdatePipelineStepRequest {
@@ -94,4 +96,5 @@ export interface UpdatePipelineStepRequest {
   errorAction: ErrorAction;
   isActive: boolean;
   ignoreOnResponse?: boolean;
+  runOnError?: boolean;
 }

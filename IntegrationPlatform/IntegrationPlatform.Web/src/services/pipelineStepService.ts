@@ -22,6 +22,7 @@ export const pipelineStepService = {
       databaseScriptId: data.databaseScriptId,
       errorAction: data.errorAction,
       ignoreOnResponse: data.ignoreOnResponse ?? false,
+      runOnError: data.runOnError ?? false,
     });
   },
 
@@ -37,6 +38,7 @@ export const pipelineStepService = {
       errorAction: data.errorAction,
       isActive: data.isActive,
       ignoreOnResponse: data.ignoreOnResponse ?? false,
+      runOnError: data.runOnError ?? false,
     });
   },
 

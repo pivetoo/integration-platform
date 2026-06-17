@@ -29,5 +29,7 @@ namespace IntegrationPlatform.Application.Requests.PipelineSteps
         public bool IsActive { get; set; } = true;
 
         public bool IgnoreOnResponse { get; set; }
+
+        public bool RunOnError { get; set; }
     }
 }

@@ -23,6 +23,8 @@ namespace IntegrationPlatform.Api.Contracts.PipelineSteps
 
         public bool IgnoreOnResponse { get; init; }
 
+        public bool RunOnError { get; init; }
+
         public PipelineContract? Pipeline { get; init; }
 
         public PipelineStepReferenceContract? ApiCall { get; init; }
@@ -41,6 +43,7 @@ namespace IntegrationPlatform.Api.Contracts.PipelineSteps
             ErrorAction = item.ErrorAction,
             IsActive = item.IsActive,
             IgnoreOnResponse = item.IgnoreOnResponse,
+            RunOnError = item.RunOnError,
             Pipeline = item.Pipeline == null
                 ? null
                 : new PipelineContract

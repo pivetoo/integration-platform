@@ -652,6 +652,7 @@
   <data name="pipeline.step.form.loadingDatabaseScripts" xml:space="preserve"><value>Carregando scripts...</value></data>
   <data name="pipeline.step.form.databaseScriptPlaceholder" xml:space="preserve"><value>Selecione um script</value></data>
   <data name="pipeline.step.form.ignoreOnApiReturn" xml:space="preserve"><value>Ignorar no retorno da API</value></data>
+  <data name="pipeline.step.form.runOnError" xml:space="preserve"><value>Executar somente em caso de erro</value></data>
   <data name="pipeline.step.type.httpRequest" xml:space="preserve"><value>Requisição HTTP</value></data>
   <data name="pipeline.step.type.javaScriptFunction" xml:space="preserve"><value>Função JavaScript</value></data>
   <data name="pipeline.step.type.executeSqlScript" xml:space="preserve"><value>Executar Script SQL</value></data>

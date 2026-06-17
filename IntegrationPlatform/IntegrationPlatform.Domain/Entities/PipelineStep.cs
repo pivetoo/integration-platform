@@ -35,13 +35,15 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IgnoreOnResponse { get; private set; }
 
+        public bool RunOnError { get; private set; }
+
         public IReadOnlyCollection<ExecutionLog> ExecutionLogs => executionLogs.AsReadOnly();
 
         private PipelineStep()
         {
         }
 
-        public PipelineStep(long pipelineId, int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId = null, long? javaScriptFunctionId = null, long? databaseScriptId = null, bool ignoreOnResponse = false)
+        public PipelineStep(long pipelineId, int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId = null, long? javaScriptFunctionId = null, long? databaseScriptId = null, bool ignoreOnResponse = false, bool runOnError = false)
         {
             if (pipelineId <= 0)
             {
@@ -59,9 +61,10 @@ namespace IntegrationPlatform.Domain.Entities
             DatabaseScriptId = databaseScriptId;
             ErrorAction = errorAction;
             IgnoreOnResponse = ignoreOnResponse;
+            RunOnError = runOnError;
         }
 
-        public void Update(int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId, long? javaScriptFunctionId, long? databaseScriptId, bool isActive, bool ignoreOnResponse)
+        public void Update(int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId, long? javaScriptFunctionId, long? databaseScriptId, bool isActive, bool ignoreOnResponse, bool runOnError = false)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
@@ -74,6 +77,7 @@ namespace IntegrationPlatform.Domain.Entities
             ErrorAction = errorAction;
             IsActive = isActive;
             IgnoreOnResponse = ignoreOnResponse;
+            RunOnError = runOnError;
         }
     }
 }

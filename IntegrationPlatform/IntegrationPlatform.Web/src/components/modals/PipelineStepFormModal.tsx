@@ -34,6 +34,7 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
     errorAction: ErrorAction.Stop,
     isActive: true,
     ignoreOnResponse: false,
+    runOnError: false,
   });
   const [formData, setFormData] = useState<CreatePipelineStepRequest>(createInitialFormData);
   const [chamadas, setChamadas] = useState<ApiCall[]>([]);
@@ -80,6 +81,7 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
         errorAction: step.errorAction,
         isActive: step.isActive,
         ignoreOnResponse: !!step.ignoreOnResponse,
+        runOnError: !!step.runOnError,
       });
     } else {
       setFormData(createInitialFormData());
@@ -290,6 +292,15 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
                 onCheckedChange={(checked) => handleChange('ignoreOnResponse', !!checked)}
               />
               <label htmlFor="ignoreOnResponse" className="text-sm font-medium">{t('pipeline.step.form.ignoreOnApiReturn')}</label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="runOnError"
+                checked={!!formData.runOnError}
+                onCheckedChange={(checked) => handleChange('runOnError', !!checked)}
+              />
+              <label htmlFor="runOnError" className="text-sm font-medium">{t('pipeline.step.form.runOnError')}</label>
             </div>
           </div>
 
