@@ -9,6 +9,7 @@ namespace IntegrationPlatform.Domain.ValueObjects
         Boolean = 5,
         Date = 6,
         DateTime = 7,
-        List = 8
+        List = 8,
+        File = 9
     }
 }

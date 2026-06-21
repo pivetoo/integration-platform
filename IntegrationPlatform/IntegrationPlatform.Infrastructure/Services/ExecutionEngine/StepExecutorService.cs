@@ -23,11 +23,13 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
     public sealed class StepExecutorService : IStepExecutorService
     {
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly ICertificateHttpClientProvider certificateHttpClientProvider;
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
 
-        public StepExecutorService(IHttpClientFactory httpClientFactory, IStringLocalizer<IntegrationPlatformResource> localizer)
+        public StepExecutorService(IHttpClientFactory httpClientFactory, ICertificateHttpClientProvider certificateHttpClientProvider, IStringLocalizer<IntegrationPlatformResource> localizer)
         {
             this.httpClientFactory = httpClientFactory;
+            this.certificateHttpClientProvider = certificateHttpClientProvider;
             Localizer = localizer;
         }
 
@@ -91,8 +93,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
 
                 string requestInfo = await SerializeRequest(request);
-                HttpClient client = httpClientFactory.CreateClient("outbound");
-                client.Timeout = TimeSpan.FromSeconds(60);
+                HttpClient client = ResolveHttpClient(context);
                 using HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
 
                 string responseBody;
@@ -141,6 +142,21 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     Error = exception.Message
                 };
             }
+        }
+
+        // Resolve o HttpClient do step HTTP: usa o certificado cliente (mTLS) quando o conector tem um .pfx
+        // configurado (client_cert_pfx); senao usa o client compartilhado "outbound" (comportamento padrao).
+        private HttpClient ResolveHttpClient(PipelineExecutionContext context)
+        {
+            string? certPfx = context.ConnectorAttributes.GetValueOrDefault("client_cert_pfx");
+            if (string.IsNullOrWhiteSpace(certPfx))
+            {
+                HttpClient client = httpClientFactory.CreateClient("outbound");
+                client.Timeout = TimeSpan.FromSeconds(60);
+                return client;
+            }
+
+            return certificateHttpClientProvider.GetClient(certPfx, context.ConnectorAttributes.GetValueOrDefault("client_cert_password"));
         }
 
         private PipelineStepExecutionResult ExecuteJavaScript(PipelineStep step, PipelineExecutionContext context)
