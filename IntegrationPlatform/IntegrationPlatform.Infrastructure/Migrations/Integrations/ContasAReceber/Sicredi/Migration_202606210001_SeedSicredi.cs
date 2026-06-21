@@ -96,9 +96,9 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.ContasARece
                 var method = (payload.method == null ? "" : ("" + payload.method)).toLowerCase();
                 var juros = Number(payload.interestMonthlyPercent) || 0;
                 var jurosFrag = juros > 0 ? (',"juros":' + juros + ',"tipoJuros":"PERCENTUAL"') : "";
-                var cep = (payload.payerCep == null ? "" : ("" + payload.payerCep)).replace(/\D/g, "") || "91000000";
+                var cep = (payload.payerCep == null ? "" : ("" + payload.payerCep)).replace(/\D/g, "");
                 var street = payload.payerStreet || "";
-                var endereco = street ? (street + (payload.payerNumber ? (", " + payload.payerNumber) : "")) : "Rua Teste 100";
+                var endereco = street + (payload.payerNumber ? (", " + payload.payerNumber) : "");
                 result.value = {
                   dataVencimento: due,
                   documento: doc,
@@ -106,8 +106,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.ContasARece
                   tipoCobranca: (method === "pix" ? "HIBRIDO" : "NORMAL"),
                   jurosFrag: jurosFrag,
                   cep: cep,
-                  cidade: (payload.payerCity || "Porto Alegre"),
-                  uf: (payload.payerState || "RS"),
+                  cidade: (payload.payerCity || ""),
+                  uf: (payload.payerState || ""),
                   endereco: endereco
                 };
                 """,
