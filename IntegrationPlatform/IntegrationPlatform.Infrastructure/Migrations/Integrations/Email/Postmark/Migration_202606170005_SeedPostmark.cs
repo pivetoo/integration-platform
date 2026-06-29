@@ -15,8 +15,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Postm
             SeedAttribute("postmark", "server_token", "Server Token", FieldType.Text, required: true, order: 1, group: "Autenticação", sensitive: true, description: "Token do server (Server > API Tokens). Cada server tem o seu.");
             SeedAttribute("postmark", "base_url", "URL base da API", FieldType.Text, required: true, order: 2, group: "Endpoints", hidden: true, description: "Endpoint padrão: https://api.postmarkapp.com.", placeholder: "https://api.postmarkapp.com", defaultValue: "https://api.postmarkapp.com");
             SeedAttribute("postmark", "from_email", "Email remetente", FieldType.Text, required: true, order: 3, group: "Remetente", description: "Endereço com Sender Signature aprovada.", placeholder: "no-reply@empresa.com");
-            SeedAttribute("postmark", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Kanvas");
-            SeedAttribute("postmark", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 5, group: "Webhook", hidden: true, description: "URL para receber webhooks de eventos.", placeholder: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback");
+            SeedAttribute("postmark", "from_name", "Nome remetente", FieldType.Text, required: false, order: 4, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Mainstay");
+            SeedAttribute("postmark", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 5, group: "Webhook", hidden: true, description: "URL para receber webhooks de eventos.", placeholder: "https://agencias.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://agencias.mainstay.com.br/api/EmailEvents/Callback");
 
             BindContract("postmark", "email.enviar");
 

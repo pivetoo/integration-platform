@@ -16,8 +16,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.Email.Mailg
             SeedAttribute("mailgun", "domain", "Domain (sandbox ou próprio)", FieldType.Text, required: true, order: 2, group: "Endpoints", description: "Domínio configurado no Mailgun para enviar emails.", placeholder: "mg.empresa.com");
             SeedAttribute("mailgun", "region", "Região", FieldType.Text, required: true, order: 3, group: "Endpoints", description: "us (default) ou eu. Define endpoint base.", placeholder: "us");
             SeedAttribute("mailgun", "from_email", "Email remetente", FieldType.Text, required: true, order: 4, group: "Remetente", description: "Email com domínio verificado no Mailgun.", placeholder: "no-reply@mg.empresa.com");
-            SeedAttribute("mailgun", "from_name", "Nome remetente", FieldType.Text, required: false, order: 5, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Kanvas");
-            SeedAttribute("mailgun", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 6, group: "Webhook", hidden: true, description: "URL para receber eventos.", placeholder: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://kanvas.mainstay.com.br/api/EmailEvents/Callback");
+            SeedAttribute("mailgun", "from_name", "Nome remetente", FieldType.Text, required: false, order: 5, group: "Remetente", description: "Nome exibido no campo From.", placeholder: "Mainstay");
+            SeedAttribute("mailgun", "target_callback_url", "URL de callback", FieldType.Text, required: false, order: 6, group: "Webhook", hidden: true, description: "URL para receber eventos.", placeholder: "https://agencias.mainstay.com.br/api/EmailEvents/Callback", defaultValue: "https://agencias.mainstay.com.br/api/EmailEvents/Callback");
             SeedAttribute("mailgun", "target_secret", "Secret do callback", FieldType.Text, required: false, order: 7, group: "Webhook", sensitive: true, hidden: true, description: "Secret enviado no header X-Webhook-Secret.");
 
             BindContract("mailgun", "email.enviar");
