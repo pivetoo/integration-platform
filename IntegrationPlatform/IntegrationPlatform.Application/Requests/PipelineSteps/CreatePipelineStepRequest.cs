@@ -29,5 +29,8 @@ namespace IntegrationPlatform.Application.Requests.PipelineSteps
         public bool IgnoreOnResponse { get; set; }
 
         public bool RunOnError { get; set; }
+
+        [StringLength(1000)]
+        public string? RunCondition { get; set; }
     }
 }

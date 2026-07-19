@@ -53,6 +53,7 @@ export interface PipelineStep {
   isActive: boolean;
   ignoreOnResponse?: boolean;
   runOnError?: boolean;
+  runCondition?: string;
 }
 
 export interface CreatePipelineRequest {
@@ -83,6 +84,7 @@ export interface CreatePipelineStepRequest {
   isActive: boolean;
   ignoreOnResponse?: boolean;
   runOnError?: boolean;
+  runCondition?: string;
 }
 
 export interface UpdatePipelineStepRequest {
@@ -97,4 +99,5 @@ export interface UpdatePipelineStepRequest {
   isActive: boolean;
   ignoreOnResponse?: boolean;
   runOnError?: boolean;
+  runCondition?: string;
 }

@@ -102,6 +102,12 @@
   <data name="execution.log.step.continueAfterError" xml:space="preserve">
     <value>Error en la etapa '{0}', continuando la ejecución: {1}</value>
   </data>
+  <data name="execution.log.step.skippedByCondition" xml:space="preserve">
+    <value>Etapa '{0}' omitida: la condición de ejecución evaluó como falso.</value>
+  </data>
+  <data name="step.condition.invalid" xml:space="preserve">
+    <value>Condición de ejecución inválida: {0}</value>
+  </data>
   <data name="execution.log.step.executing" xml:space="preserve">
     <value>Ejecutando la etapa '{0}' (Tipo: {1}).</value>
   </data>
@@ -652,6 +658,8 @@
   <data name="pipeline.step.form.loadingDatabaseScripts" xml:space="preserve"><value>Cargando scripts...</value></data>
   <data name="pipeline.step.form.databaseScriptPlaceholder" xml:space="preserve"><value>Seleccione un script</value></data>
   <data name="pipeline.step.form.ignoreOnApiReturn" xml:space="preserve"><value>Ignorar en el retorno de la API</value></data>
+  <data name="pipeline.step.form.runCondition" xml:space="preserve"><value>Condición de ejecución (JavaScript)</value></data>
+  <data name="pipeline.step.form.runCondition.help" xml:space="preserve"><value>Expresión booleana evaluada antes de la etapa (alcance: variables, payload, attributes). Vacío = siempre se ejecuta; falso = etapa omitida.</value></data>
   <data name="pipeline.step.form.runOnError" xml:space="preserve"><value>Ejecutar solo en caso de error</value></data>
   <data name="pipeline.step.type.httpRequest" xml:space="preserve"><value>Solicitud HTTP</value></data>
   <data name="pipeline.step.type.javaScriptFunction" xml:space="preserve"><value>Función JavaScript</value></data>

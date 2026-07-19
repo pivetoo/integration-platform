@@ -107,6 +107,32 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     break;
                 }
 
+                StepConditionResult condition = StepConditionEvaluator.Evaluate(step.RunCondition, context);
+                if (!condition.ShouldRun)
+                {
+                    if (condition.Error is null)
+                    {
+                        AddLog(logs, execution, step, LogLevelType.Info, Localizer["execution.log.step.skippedByCondition", step.Name]);
+                        continue;
+                    }
+
+                    hasFailure = true;
+                    context.HasError = true;
+                    context.LastError = Localizer["step.condition.invalid", condition.Error].Value;
+
+                    if (step.ErrorAction == ErrorAction.Stop)
+                    {
+                        stopped = true;
+                        AddLog(logs, execution, step, LogLevelType.Error, Localizer["execution.log.pipeline.stoppedDueToError", step.Name, context.LastError]);
+                    }
+                    else
+                    {
+                        AddLog(logs, execution, step, LogLevelType.Warning, Localizer["execution.log.step.continueAfterError", step.Name, context.LastError]);
+                    }
+
+                    continue;
+                }
+
                 AddLog(logs, execution, step, LogLevelType.Info, Localizer["execution.log.step.executing", step.Name, step.Type]);
 
                 PipelineStepExecutionResult result = await stepExecutorService.Execute(step, context, cancellationToken);
@@ -147,6 +173,19 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
                 foreach (PipelineStep errorStep in errorSteps)
                 {
+                    // No passo de tratamento de erro uma condicao invalida nao muda o desfecho (a execucao
+                    // ja esta em Error); ela apenas pula o step com log de aviso.
+                    StepConditionResult errorCondition = StepConditionEvaluator.Evaluate(errorStep.RunCondition, context);
+                    if (!errorCondition.ShouldRun)
+                    {
+                        LogLevelType level = errorCondition.Error is null ? LogLevelType.Info : LogLevelType.Warning;
+                        string message = errorCondition.Error is null
+                            ? Localizer["execution.log.step.skippedByCondition", errorStep.Name]
+                            : Localizer["execution.log.step.continueAfterError", errorStep.Name, Localizer["step.condition.invalid", errorCondition.Error].Value];
+                        AddLog(logs, execution, errorStep, level, message);
+                        continue;
+                    }
+
                     AddLog(logs, execution, errorStep, LogLevelType.Info, Localizer["execution.log.step.executing", errorStep.Name, errorStep.Type]);
 
                     PipelineStepExecutionResult errorResult = await stepExecutorService.Execute(errorStep, context, cancellationToken);
@@ -254,6 +293,71 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             PipelineStep step = state.ActiveSteps[state.CurrentIndex];
             List<ExecutionLog> logs = [];
+
+            StepConditionResult condition = StepConditionEvaluator.Evaluate(step.RunCondition, state.Context);
+            if (!condition.ShouldRun && condition.Error is null)
+            {
+                AddLog(logs, state.Execution, step, LogLevelType.Info, Localizer["execution.log.step.skippedByCondition", step.Name]);
+                await InsertLogs(logs, cancellationToken);
+
+                state.CurrentIndex++;
+                bool finished = state.CurrentIndex >= state.ActiveSteps.Count;
+                PipelineStep? next = !finished ? state.ActiveSteps[state.CurrentIndex] : null;
+
+                return new ExecuteNextDebugStepResult
+                {
+                    DebugSessionId = state.SessionId,
+                    ExecutionId = state.Execution.Id,
+                    ExecutedStep = false,
+                    ExecutedStepId = step.Id,
+                    ExecutedStepName = step.Name,
+                    Success = true,
+                    FinishedFlow = finished,
+                    RemainingSteps = finished ? 0 : state.ActiveSteps.Count - state.CurrentIndex,
+                    NextStepId = next?.Id,
+                    NextStepName = next?.Name,
+                    Message = Localizer["execution.log.step.skippedByCondition", step.Name].Value
+                };
+            }
+
+            if (!condition.ShouldRun)
+            {
+                state.HasFailure = true;
+                state.Context.HasError = true;
+                state.Context.LastError = Localizer["step.condition.invalid", condition.Error!].Value;
+
+                if (step.ErrorAction == ErrorAction.Stop)
+                {
+                    state.Stopped = true;
+                    AddLog(logs, state.Execution, step, LogLevelType.Error, Localizer["execution.log.pipeline.stoppedDueToError", step.Name, state.Context.LastError]);
+                }
+                else
+                {
+                    AddLog(logs, state.Execution, step, LogLevelType.Warning, Localizer["execution.log.step.continueAfterError", step.Name, state.Context.LastError]);
+                }
+
+                await InsertLogs(logs, cancellationToken);
+
+                state.CurrentIndex++;
+                bool finishedAfterError = state.Stopped || state.CurrentIndex >= state.ActiveSteps.Count;
+                PipelineStep? nextAfterError = !finishedAfterError ? state.ActiveSteps[state.CurrentIndex] : null;
+
+                return new ExecuteNextDebugStepResult
+                {
+                    DebugSessionId = state.SessionId,
+                    ExecutionId = state.Execution.Id,
+                    ExecutedStep = false,
+                    ExecutedStepId = step.Id,
+                    ExecutedStepName = step.Name,
+                    Success = false,
+                    InterruptedByError = state.Stopped,
+                    FinishedFlow = finishedAfterError,
+                    RemainingSteps = finishedAfterError ? 0 : state.ActiveSteps.Count - state.CurrentIndex,
+                    NextStepId = nextAfterError?.Id,
+                    NextStepName = nextAfterError?.Name,
+                    Message = state.Context.LastError
+                };
+            }
 
             AddLog(logs, state.Execution, step, LogLevelType.Info, Localizer["execution.log.step.executing", step.Name, step.Type]);
 

@@ -23,6 +23,7 @@ export const pipelineStepService = {
       errorAction: data.errorAction,
       ignoreOnResponse: data.ignoreOnResponse ?? false,
       runOnError: data.runOnError ?? false,
+      runCondition: data.runCondition?.trim() || undefined,
     });
   },
 
@@ -39,6 +40,7 @@ export const pipelineStepService = {
       isActive: data.isActive,
       ignoreOnResponse: data.ignoreOnResponse ?? false,
       runOnError: data.runOnError ?? false,
+      runCondition: data.runCondition?.trim() || undefined,
     });
   },
 

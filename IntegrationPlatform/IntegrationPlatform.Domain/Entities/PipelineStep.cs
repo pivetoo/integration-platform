@@ -37,13 +37,15 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool RunOnError { get; private set; }
 
+        public string? RunCondition { get; private set; }
+
         public IReadOnlyCollection<ExecutionLog> ExecutionLogs => executionLogs.AsReadOnly();
 
         private PipelineStep()
         {
         }
 
-        public PipelineStep(long pipelineId, int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId = null, long? javaScriptFunctionId = null, long? databaseScriptId = null, bool ignoreOnResponse = false, bool runOnError = false)
+        public PipelineStep(long pipelineId, int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId = null, long? javaScriptFunctionId = null, long? databaseScriptId = null, bool ignoreOnResponse = false, bool runOnError = false, string? runCondition = null)
         {
             if (pipelineId <= 0)
             {
@@ -62,9 +64,10 @@ namespace IntegrationPlatform.Domain.Entities
             ErrorAction = errorAction;
             IgnoreOnResponse = ignoreOnResponse;
             RunOnError = runOnError;
+            RunCondition = NormalizeRunCondition(runCondition);
         }
 
-        public void Update(int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId, long? javaScriptFunctionId, long? databaseScriptId, bool isActive, bool ignoreOnResponse, bool runOnError = false)
+        public void Update(int order, string name, PipelineStepType type, ErrorAction errorAction, long? apiCallId, long? javaScriptFunctionId, long? databaseScriptId, bool isActive, bool ignoreOnResponse, bool runOnError = false, string? runCondition = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
@@ -78,6 +81,12 @@ namespace IntegrationPlatform.Domain.Entities
             IsActive = isActive;
             IgnoreOnResponse = ignoreOnResponse;
             RunOnError = runOnError;
+            RunCondition = NormalizeRunCondition(runCondition);
+        }
+
+        private static string? NormalizeRunCondition(string? runCondition)
+        {
+            return string.IsNullOrWhiteSpace(runCondition) ? null : runCondition.Trim();
         }
     }
 }

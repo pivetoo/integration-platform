@@ -17,6 +17,10 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
             builder.Property(entity => entity.RunOnError)
                 .HasColumnName("runonerror");
 
+            builder.Property(entity => entity.RunCondition)
+                .HasColumnName("runcondition")
+                .HasMaxLength(1000);
+
             builder.HasOne(entity => entity.Pipeline)
                 .WithMany(entity => entity.Steps)
                 .HasForeignKey(entity => entity.PipelineId);

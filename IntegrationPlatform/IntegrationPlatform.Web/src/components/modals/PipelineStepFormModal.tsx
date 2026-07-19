@@ -35,6 +35,7 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
     isActive: true,
     ignoreOnResponse: false,
     runOnError: false,
+    runCondition: '',
   });
   const [formData, setFormData] = useState<CreatePipelineStepRequest>(createInitialFormData);
   const [chamadas, setChamadas] = useState<ApiCall[]>([]);
@@ -82,6 +83,7 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
         isActive: step.isActive,
         ignoreOnResponse: !!step.ignoreOnResponse,
         runOnError: !!step.runOnError,
+        runCondition: step.runCondition ?? '',
       });
     } else {
       setFormData(createInitialFormData());
@@ -273,6 +275,17 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
                 </Select>
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t('pipeline.step.form.runCondition')}</label>
+            <Input
+              value={formData.runCondition ?? ''}
+              onChange={(event) => handleChange('runCondition', event.target.value)}
+              placeholder="!variables.existingCustomerId"
+              maxLength={1000}
+            />
+            <p className="text-xs text-muted-foreground">{t('pipeline.step.form.runCondition.help')}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-6">
