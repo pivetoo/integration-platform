@@ -479,7 +479,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return await ExecutePipeline(connector.Id, pipeline.Id, inputDataJson, type, null, null, cancellationToken);
         }
 
-        public async Task<Execution> ExecuteWebhookByIntegration(string integrationIdentifier, string rawBody, CancellationToken cancellationToken = default)
+        public async Task<Execution> ExecuteWebhookByIntegration(string integrationIdentifier, string rawBody, string? webhookContext = null, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(integrationIdentifier);
 
@@ -516,7 +516,23 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             string normalizedBody = WrapPayloadAsObject(rawBody);
 
+            if (!string.IsNullOrWhiteSpace(webhookContext))
+            {
+                normalizedBody = InjectWebhookContext(normalizedBody, webhookContext);
+            }
+
             return await ExecutePipeline(connector.Id, pipeline.Id, normalizedBody, ExecutionType.Webhook, null, null, cancellationToken);
+        }
+
+        // Provedores que nao ecoam identificador proprio no payload (ex.: postback da D4Sign) carregam a
+        // correlacao no proprio path do webhook (/api/webhooks/{tenant}/{integracao}/{contexto}); o contexto
+        // entra no payload como "webhookContext" para os steps do pipeline.
+        internal static string InjectWebhookContext(string normalizedBody, string webhookContext)
+        {
+            Dictionary<string, object>? fields = JsonSerializer.Deserialize<Dictionary<string, object>>(normalizedBody);
+            fields ??= [];
+            fields["webhookContext"] = webhookContext;
+            return JsonSerializer.Serialize(fields);
         }
 
         private string WrapPayloadAsObject(string rawBody)

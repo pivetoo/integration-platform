@@ -17,20 +17,35 @@ namespace IntegrationPlatform.Api.Controllers
             this.webhookReceiverService = webhookReceiverService;
         }
 
-        [HttpPost("{tenantId}/{integrationIdentifier}")]
-        public async Task<IActionResult> Receive(string tenantId, string integrationIdentifier, CancellationToken cancellationToken)
+        // O segmento opcional {context} carrega correlacao para provedores que nao ecoam identificador
+        // proprio no payload (ex.: postback da D4Sign); chega ao pipeline como payload.webhookContext.
+        [HttpPost("{tenantId}/{integrationIdentifier}/{context?}")]
+        public async Task<IActionResult> Receive(string tenantId, string integrationIdentifier, string? context, CancellationToken cancellationToken)
         {
             if (!await webhookReceiverService.ResolveTenantAsync(tenantId, cancellationToken))
             {
                 return Http404("tenant.notFound");
             }
 
-            string rawBody = await webhookReceiverService.ReadBodyAsync(Request.Body, cancellationToken);
+            string rawBody;
+            if (Request.HasFormContentType)
+            {
+                // Provedores como a D4Sign enviam o postback em form-data; normaliza para JSON
+                // para o pipeline consumir os campos como payload.*.
+                IFormCollection form = await Request.ReadFormAsync(cancellationToken);
+                Dictionary<string, string> fields = form.Keys.ToDictionary(key => key, key => form[key].ToString());
+                rawBody = System.Text.Json.JsonSerializer.Serialize(fields);
+            }
+            else
+            {
+                rawBody = await webhookReceiverService.ReadBodyAsync(Request.Body, cancellationToken);
+            }
+
             IExecutionEngineService executionEngineService = HttpContext.RequestServices.GetRequiredService<IExecutionEngineService>();
 
             try
             {
-                Execution execution = await executionEngineService.ExecuteWebhookByIntegration(integrationIdentifier, rawBody, cancellationToken);
+                Execution execution = await executionEngineService.ExecuteWebhookByIntegration(integrationIdentifier, rawBody, context, cancellationToken);
                 return Http200(new { executionId = execution.Id, status = execution.Status.ToString() });
             }
             catch (KeyNotFoundException ex)
