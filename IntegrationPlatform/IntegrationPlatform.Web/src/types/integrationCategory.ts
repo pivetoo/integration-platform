@@ -12,7 +12,7 @@ export interface IntegrationCategory {
 export const IntegrationCategoryIdentifier = {
   Payment: 'payment',
   Banking: 'banking',
-  DigitalSignature: 'digital-signature',
+  DigitalSignature: 'assinatura-digital',
   Email: 'email',
 } as const;
 
