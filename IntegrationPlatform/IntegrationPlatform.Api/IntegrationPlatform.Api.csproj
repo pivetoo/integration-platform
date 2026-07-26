@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\frameworks\archon-framework\Archon\Archon.Api\Archon.Api.csproj" />
-    <ProjectReference Include="..\..\..\..\frameworks\archon-framework\Archon\Archon.Infrastructure\Archon.Infrastructure.csproj" />
+    <ProjectReference Include="$(ArchonProjectsPath)/Archon.Api\Archon.Api.csproj" />
+    <ProjectReference Include="$(ArchonProjectsPath)/Archon.Infrastructure\Archon.Infrastructure.csproj" />
     <ProjectReference Include="..\IntegrationPlatform.Application\IntegrationPlatform.Application.csproj" />
     <ProjectReference Include="..\IntegrationPlatform.Infrastructure\IntegrationPlatform.Infrastructure.csproj" />
   </ItemGroup>
