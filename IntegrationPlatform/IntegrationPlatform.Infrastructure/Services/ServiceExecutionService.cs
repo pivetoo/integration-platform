@@ -78,6 +78,19 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException("connector.notFound");
             }
 
+            // Desativar conector ou integracao e kill switch, nao filtro de catalogo: sem esta guarda a
+            // integracao inativa some das listagens mas o consumidor continua disparando chamada real ao
+            // provedor pelo contrato de servico.
+            if (!connector.IsActive)
+            {
+                throw new InvalidOperationException("connector.notActive");
+            }
+
+            if (connector.Integration is null || !connector.Integration.IsActive)
+            {
+                throw new InvalidOperationException("integration.notActive");
+            }
+
             bool integrationSupportsService = await dbContext.Set<IntegrationServiceContract>()
                 .AsNoTracking()
                 .AnyAsync(item =>

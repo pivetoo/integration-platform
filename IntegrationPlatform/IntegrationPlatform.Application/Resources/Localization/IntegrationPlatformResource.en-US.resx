@@ -21,6 +21,12 @@
   <data name="connector.notFound" xml:space="preserve">
     <value>Connector not found.</value>
   </data>
+  <data name="connector.notActive" xml:space="preserve">
+    <value>Inactive connector: execution was blocked.</value>
+  </data>
+  <data name="integration.notActive" xml:space="preserve">
+    <value>Inactive integration: execution was blocked.</value>
+  </data>
   <data name="connector.updated" xml:space="preserve">
     <value>Connector updated successfully.</value>
   </data>

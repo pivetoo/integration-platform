@@ -90,6 +90,23 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 .AsTracking()
                 .FirstAsync(current => current.Id == processingQueueId, cancellationToken);
 
+            // Kill switch tardio: o item pode ter sido enfileirado antes de o conector/integracao ser
+            // desativado. Antes de executar, reconfere; se estiver inativo, falha o item em vez de disparar
+            // chamada real ao provedor. A execucao manual/debug do proprio IP nao passa por aqui, entao
+            // continua sendo possivel testar uma integracao desligada.
+            Connector? connector = await dbContext.Set<Connector>()
+                .AsNoTracking()
+                .Include(current => current.Integration)
+                .FirstOrDefaultAsync(current => current.Id == item.ConnectorId, cancellationToken);
+
+            if (connector is null || !connector.IsActive || connector.Integration is null || !connector.Integration.IsActive)
+            {
+                item.Fail("Conector ou integracao inativa: execucao bloqueada.", DateTimeOffset.UtcNow);
+                item.SetUpdatedAt(DateTimeOffset.UtcNow);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                return;
+            }
+
             try
             {
                 await executionEngineService.ExecutePipeline(

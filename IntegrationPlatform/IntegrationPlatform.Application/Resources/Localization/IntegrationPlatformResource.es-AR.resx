@@ -21,6 +21,12 @@
   <data name="connector.notFound" xml:space="preserve">
     <value>Conector no encontrado.</value>
   </data>
+  <data name="connector.notActive" xml:space="preserve">
+    <value>Conector inactivo: la ejecución fue bloqueada.</value>
+  </data>
+  <data name="integration.notActive" xml:space="preserve">
+    <value>Integración inactiva: la ejecución fue bloqueada.</value>
+  </data>
   <data name="connector.updated" xml:space="preserve">
     <value>Conector actualizado correctamente.</value>
   </data>
