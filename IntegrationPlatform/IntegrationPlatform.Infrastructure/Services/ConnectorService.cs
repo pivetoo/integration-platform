@@ -84,8 +84,70 @@ namespace IntegrationPlatform.Infrastructure.Services
             }
 
             await PopulateHiddenAttributeValues(connector.Id, request.IntegrationId, cancellationToken);
+            await EnsureCategoryHasDefault(connector.Id, request.IntegrationId, cancellationToken);
 
             return await GetConnectorById(connector.Id, cancellationToken) ?? connector;
+        }
+
+        // Primeira conta da categoria vira a padrao sozinha: o cliente nao precisa conhecer o conceito
+        // enquanto tiver uma conta so.
+        private async Task EnsureCategoryHasDefault(long connectorId, long integrationId, CancellationToken cancellationToken)
+        {
+            long? categoryId = await DbContext.Set<Integration>()
+                .AsNoTracking()
+                .Where(item => item.Id == integrationId)
+                .Select(item => item.IntegrationCategoryId)
+                .FirstAsync(cancellationToken);
+
+            if (categoryId is null)
+            {
+                return;
+            }
+
+            bool hasDefault = await DbContext.Set<Connector>()
+                .AsNoTracking()
+                .AnyAsync(item => item.IsDefault && item.Integration.IntegrationCategoryId == categoryId, cancellationToken);
+
+            if (hasDefault)
+            {
+                return;
+            }
+
+            Connector? created = await DbContext.Set<Connector>()
+                .AsTracking()
+                .FirstOrDefaultAsync(item => item.Id == connectorId, cancellationToken);
+
+            created?.SetDefault(true);
+            await DbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<Connector> SetDefaultConnector(long id, CancellationToken cancellationToken = default)
+        {
+            Connector? connector = await DbContext.Set<Connector>()
+                .AsTracking()
+                .Include(item => item.Integration)
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            if (connector is null)
+            {
+                throw new InvalidOperationException("connector.notFound");
+            }
+
+            long? categoryId = connector.Integration.IntegrationCategoryId;
+            List<Connector> siblings = await DbContext.Set<Connector>()
+                .AsTracking()
+                .Where(item => item.Id != id && item.IsDefault && item.Integration.IntegrationCategoryId == categoryId)
+                .ToListAsync(cancellationToken);
+
+            foreach (Connector sibling in siblings)
+            {
+                sibling.SetDefault(false);
+            }
+
+            connector.SetDefault(true);
+            await DbContext.SaveChangesAsync(cancellationToken);
+
+            return await GetConnectorById(id, cancellationToken) ?? connector;
         }
 
         private async Task PopulateHiddenAttributeValues(long connectorId, long integrationId, CancellationToken cancellationToken)

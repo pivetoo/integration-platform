@@ -16,6 +16,8 @@ namespace IntegrationPlatform.Api.Contracts.Connectors
 
         public bool IsActive { get; init; }
 
+        public bool IsDefault { get; init; }
+
         public string? WebhookToken { get; init; }
 
         public DateTimeOffset CreatedAt { get; init; }
@@ -31,6 +33,7 @@ namespace IntegrationPlatform.Api.Contracts.Connectors
             IntegrationId = item.IntegrationId,
             Name = item.Name,
             IsActive = item.IsActive,
+            IsDefault = item.IsDefault,
             WebhookToken = item.WebhookToken,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,

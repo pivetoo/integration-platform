@@ -17,6 +17,9 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
+            builder.Property(entity => entity.IsDefault)
+                .IsRequired();
+
             builder.Property(entity => entity.WebhookToken)
                 .HasMaxLength(64);
 

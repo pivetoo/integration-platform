@@ -20,6 +20,10 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsActive { get; private set; } = true;
 
+        // Conta padrao da CATEGORIA (email, whatsapp...): e a que os sistemas consumidores usam quando o
+        // fluxo nao escolhe uma conta especifica. No maximo uma por categoria (ConnectorService garante).
+        public bool IsDefault { get; private set; }
+
         public string? WebhookToken { get; private set; }
 
         public string? CallbackUrl { get; private set; }
@@ -82,6 +86,11 @@ namespace IntegrationPlatform.Domain.Entities
             {
                 WebhookToken = GenerateWebhookToken();
             }
+        }
+
+        public void SetDefault(bool isDefault)
+        {
+            IsDefault = isDefault;
         }
 
         public void RegenerateWebhookToken()

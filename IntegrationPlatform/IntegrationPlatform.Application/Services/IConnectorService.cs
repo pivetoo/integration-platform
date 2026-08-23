@@ -20,5 +20,8 @@ namespace IntegrationPlatform.Application.Services
         Task<Connector> CreateConnector(CreateConnectorRequest request, CancellationToken cancellationToken = default);
 
         Task<Connector> UpdateConnector(long id, UpdateConnectorRequest request, CancellationToken cancellationToken = default);
+
+        // Torna o conector a conta padrao da categoria dele (desmarca as demais da mesma categoria).
+        Task<Connector> SetDefaultConnector(long id, CancellationToken cancellationToken = default);
     }
 }

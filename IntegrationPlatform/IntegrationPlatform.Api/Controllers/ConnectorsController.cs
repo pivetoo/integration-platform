@@ -105,6 +105,14 @@ namespace IntegrationPlatform.Api.Controllers
             return Http200(MapConnector(connector), Localizer["connector.updated"]);
         }
 
+        [RequireAccess]
+        [PostEndpoint("{id:long}/set-default")]
+        public async Task<IActionResult> SetDefault(long id, CancellationToken cancellationToken)
+        {
+            Connector connector = await connectorService.SetDefaultConnector(id, cancellationToken);
+            return Http200(MapConnector(connector), Localizer["connector.updated"]);
+        }
+
         [RequireAccess("connectors.delete.description")]
         [DeleteEndpoint("{id:long}")]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
