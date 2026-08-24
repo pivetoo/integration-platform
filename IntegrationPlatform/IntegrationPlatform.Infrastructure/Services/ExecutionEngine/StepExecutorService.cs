@@ -421,7 +421,13 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
             }
 
-            return new StringContent(body, Encoding.UTF8, contentType);
+            StringContent content = new(body, Encoding.UTF8, contentType);
+            // StringContent(body, Encoding, mediaType) sempre anexa "; charset=utf-8" ao header
+            // Content-Type - comportamento padrao do HttpClient. APIs estritas com JSON:API (ex.:
+            // ClickSign v3) devolvem 415 se o Content-Type tiver qualquer parametro alem do media
+            // type puro. Content-Type sem charset e valido e aceito por praticamente todo servidor.
+            content.Headers.ContentType!.CharSet = null;
+            return content;
         }
 
         private static string GetContentType(HttpRequestMessage request)
