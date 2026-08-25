@@ -50,8 +50,7 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.ContasARece
                 function ob(v){if(v==null){return null;}if(typeof v.ToString==='function'){try{return JSON.parse(v.ToString());}catch(e){return null;}}return v;}
                 var headers=ob(payload.webhookHeaders)||{};
                 var receivedToken=s(headers['asaas-access-token']);
-                var expectedToken=s(variables.webhook_auth_token);
-                if(!expectedToken||receivedToken!==expectedToken){throw new Error('Token de webhook Asaas invalido ou ausente.');}
+                if(!secretEquals('webhook_auth_token',receivedToken)){throw new Error('Token de webhook Asaas invalido ou ausente.');}
                 var evt=s(payload.event);
                 var pay=ob(payload.payment)||{};
                 var eventType='';

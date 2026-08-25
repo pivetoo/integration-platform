@@ -15,6 +15,7 @@ using Microsoft.Extensions.Localization;
 using MimeKit;
 using Npgsql;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -191,6 +192,14 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 engine.SetValue("btoa", new Func<string, string>(s => Convert.ToBase64String(Encoding.UTF8.GetBytes(s))));
                 engine.SetValue("atob", new Func<string, string>(s => Encoding.UTF8.GetString(Convert.FromBase64String(s))));
                 engine.SetValue("encodeURIComponent", new Func<string, string>(Uri.EscapeDataString));
+                // Compara um atributo SENSIVEL do conector (ex.: webhook_auth_token) contra um valor recebido
+                // sem nunca expor o segredo em si ao escopo do JS - "attributes"/"variables" ja filtram
+                // SensitiveAttributeFields de proposito (nao vazar segredo pro passo do usuario); esta e a
+                // unica forma de um step validar um segredo (ex.: token de webhook do provedor).
+                engine.SetValue("secretEquals", new Func<string, string, bool>((field, candidate) =>
+                    context.ConnectorAttributes.TryGetValue(field ?? string.Empty, out string? expected)
+                    && !string.IsNullOrEmpty(expected)
+                    && CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expected), Encoding.UTF8.GetBytes(candidate ?? string.Empty))));
 
                 engine.Execute(javaScriptFunction.Code);
 
