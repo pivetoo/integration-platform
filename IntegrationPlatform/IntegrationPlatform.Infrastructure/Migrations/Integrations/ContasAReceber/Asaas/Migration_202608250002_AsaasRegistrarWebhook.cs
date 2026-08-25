@@ -57,11 +57,13 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations.ContasARece
                 if(evt==='PAYMENT_RECEIVED'||evt==='PAYMENT_CONFIRMED'){eventType='paid';}
                 else if(evt==='PAYMENT_DELETED'){eventType='cancelled';}
                 else {eventType='updated';}
+                var financialEntryId=s(pay.externalReference);
                 result.value={
                   acEventType:eventType,
                   chargeId:s(pay.id),
-                  financialEntryId:s(pay.externalReference),
-                  amountPaid:Number(pay.value)||0,
+                  financialEntryId:financialEntryId,
+                  callbackToken:s(variables.tenantId)+'~'+financialEntryId,
+                  amountPaid:s(pay.value),
                   paidAt:(pay.clientPaymentDate||pay.paymentDate||null)
                 };
                 """,
