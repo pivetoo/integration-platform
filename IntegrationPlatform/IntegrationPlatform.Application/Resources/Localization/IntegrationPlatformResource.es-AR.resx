@@ -24,6 +24,15 @@
   <data name="connector.notActive" xml:space="preserve">
     <value>Conector inactivo: la ejecución fue bloqueada.</value>
   </data>
+  <data name="connector.webhook.registered" xml:space="preserve">
+    <value>Webhook registrado/actualizado con éxito en el proveedor.</value>
+  </data>
+  <data name="connector.webhook.registrationFailed" xml:space="preserve">
+    <value>Error al registrar el webhook en el proveedor.</value>
+  </data>
+  <data name="connector.webhook.registrationNotSupported" xml:space="preserve">
+    <value>Esta integración no registra webhooks automáticamente.</value>
+  </data>
   <data name="integration.notActive" xml:space="preserve">
     <value>Integración inactiva: la ejecución fue bloqueada.</value>
   </data>

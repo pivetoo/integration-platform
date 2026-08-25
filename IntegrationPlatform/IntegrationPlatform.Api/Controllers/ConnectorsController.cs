@@ -3,6 +3,7 @@ using Archon.Api.Controllers;
 using Archon.Core.Pagination;
 using IntegrationPlatform.Api.Contracts.Connectors;
 using IntegrationPlatform.Application.Localization;
+using IntegrationPlatform.Application.Models;
 using IntegrationPlatform.Application.Requests.Connectors;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
@@ -103,6 +104,14 @@ namespace IntegrationPlatform.Api.Controllers
 
             Connector connector = await connectorService.UpdateConnector(id, request, cancellationToken);
             return Http200(MapConnector(connector), Localizer["connector.updated"]);
+        }
+
+        [RequireAccess]
+        [PostEndpoint("{id:long}/register-webhook")]
+        public async Task<IActionResult> RegisterWebhook(long id, CancellationToken cancellationToken)
+        {
+            ConnectorWebhookRegistrationResult result = await connectorService.RegisterWebhook(id, cancellationToken);
+            return Http200(result);
         }
 
         [RequireAccess]

@@ -43,9 +43,13 @@ namespace IntegrationPlatform.Api.Controllers
 
             IExecutionEngineService executionEngineService = HttpContext.RequestServices.GetRequiredService<IExecutionEngineService>();
 
+            // Chaves em minusculo: HTTP header e case-insensitive, mas o acesso via payload.webhookHeaders[...]
+            // no step JavaScript nao e - normaliza aqui para nao depender de capitalizacao do provedor.
+            Dictionary<string, string> headers = Request.Headers.ToDictionary(item => item.Key.ToLowerInvariant(), item => item.Value.ToString());
+
             try
             {
-                Execution execution = await executionEngineService.ExecuteWebhookByIntegration(integrationIdentifier, rawBody, context, cancellationToken);
+                Execution execution = await executionEngineService.ExecuteWebhookByIntegration(integrationIdentifier, rawBody, context, headers, cancellationToken);
                 return Http200(new { executionId = execution.Id, status = execution.Status.ToString() });
             }
             catch (KeyNotFoundException ex)

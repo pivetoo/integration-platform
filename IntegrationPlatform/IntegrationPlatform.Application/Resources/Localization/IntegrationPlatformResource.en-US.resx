@@ -24,6 +24,15 @@
   <data name="connector.notActive" xml:space="preserve">
     <value>Inactive connector: execution was blocked.</value>
   </data>
+  <data name="connector.webhook.registered" xml:space="preserve">
+    <value>Webhook registered/updated successfully with the provider.</value>
+  </data>
+  <data name="connector.webhook.registrationFailed" xml:space="preserve">
+    <value>Failed to register the webhook with the provider.</value>
+  </data>
+  <data name="connector.webhook.registrationNotSupported" xml:space="preserve">
+    <value>This integration does not register webhooks automatically.</value>
+  </data>
   <data name="integration.notActive" xml:space="preserve">
     <value>Inactive integration: execution was blocked.</value>
   </data>

@@ -479,7 +479,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             return await ExecutePipeline(connector.Id, pipeline.Id, inputDataJson, type, null, null, cancellationToken);
         }
 
-        public async Task<Execution> ExecuteWebhookByIntegration(string integrationIdentifier, string rawBody, string? webhookContext = null, CancellationToken cancellationToken = default)
+        public async Task<Execution> ExecuteWebhookByIntegration(string integrationIdentifier, string rawBody, string? webhookContext = null, Dictionary<string, string>? headers = null, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(integrationIdentifier);
 
@@ -521,6 +521,11 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 normalizedBody = InjectWebhookContext(normalizedBody, webhookContext);
             }
 
+            if (headers is { Count: > 0 })
+            {
+                normalizedBody = InjectWebhookHeaders(normalizedBody, headers);
+            }
+
             return await ExecutePipeline(connector.Id, pipeline.Id, normalizedBody, ExecutionType.Webhook, null, null, cancellationToken);
         }
 
@@ -532,6 +537,17 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             Dictionary<string, object>? fields = JsonSerializer.Deserialize<Dictionary<string, object>>(normalizedBody);
             fields ??= [];
             fields["webhookContext"] = webhookContext;
+            return JsonSerializer.Serialize(fields);
+        }
+
+        // Headers da requisicao HTTP original (ex.: asaas-access-token) entram no payload como
+        // "webhookHeaders" (chaves em minusculo) para os steps do pipeline validarem a origem da
+        // notificacao - antes disso o receptor descartava os headers por completo (IP-001).
+        internal static string InjectWebhookHeaders(string normalizedBody, Dictionary<string, string> headers)
+        {
+            Dictionary<string, object>? fields = JsonSerializer.Deserialize<Dictionary<string, object>>(normalizedBody);
+            fields ??= [];
+            fields["webhookHeaders"] = headers;
             return JsonSerializer.Serialize(fields);
         }
 

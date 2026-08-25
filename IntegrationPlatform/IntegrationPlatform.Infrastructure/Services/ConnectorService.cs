@@ -2,21 +2,26 @@ using Archon.Core.Pagination;
 using Archon.Infrastructure.Persistence.EF;
 using Archon.Infrastructure.Services;
 using IntegrationPlatform.Application.Localization;
+using IntegrationPlatform.Application.Models;
 using IntegrationPlatform.Application.Requests.Connectors;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
+using IntegrationPlatform.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using System.Security.Cryptography;
 
 namespace IntegrationPlatform.Infrastructure.Services
 {
     public sealed class ConnectorService : CrudService<Connector>, IConnectorService
     {
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
+        private readonly IExecutionEngineService executionEngineService;
 
-        public ConnectorService(DbContext dbContext, IStringLocalizer<IntegrationPlatformResource> localizer) : base(dbContext)
+        public ConnectorService(DbContext dbContext, IStringLocalizer<IntegrationPlatformResource> localizer, IExecutionEngineService executionEngineService) : base(dbContext)
         {
             Localizer = localizer;
+            this.executionEngineService = executionEngineService;
         }
 
         public async Task<PagedResult<Connector>> GetConnectors(PagedRequest request, string? search, CancellationToken cancellationToken = default)
@@ -211,6 +216,69 @@ namespace IntegrationPlatform.Infrastructure.Services
             }
 
             return await GetConnectorById(result.Id, cancellationToken) ?? result;
+        }
+
+        public async Task<ConnectorWebhookRegistrationResult> RegisterWebhook(long connectorId, CancellationToken cancellationToken = default)
+        {
+            Connector? connector = await DbContext.Set<Connector>()
+                .AsNoTracking()
+                .Include(item => item.Integration)
+                .FirstOrDefaultAsync(item => item.Id == connectorId, cancellationToken);
+
+            if (connector is null)
+            {
+                throw new InvalidOperationException("connector.notFound");
+            }
+
+            string pipelineIdentifier = $"{connector.Integration.Identifier}-registrar-webhook";
+            Pipeline? pipeline = await DbContext.Set<Pipeline>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.IntegrationId == connector.IntegrationId && item.Identifier == pipelineIdentifier && item.IsActive, cancellationToken);
+
+            if (pipeline is null)
+            {
+                return new ConnectorWebhookRegistrationResult(false, false, Localizer["connector.webhook.registrationNotSupported"]);
+            }
+
+            await EnsureWebhookAuthToken(connectorId, connector.IntegrationId, cancellationToken);
+
+            Execution execution = await executionEngineService.ExecutePipeline(connectorId, pipeline.Id, null, ExecutionType.Manual, null, null, cancellationToken);
+
+            bool success = execution.Status == ExecutionStatus.Success;
+            string message = success
+                ? Localizer["connector.webhook.registered"]
+                : !string.IsNullOrWhiteSpace(execution.Errors) ? execution.Errors : Localizer["connector.webhook.registrationFailed"];
+
+            return new ConnectorWebhookRegistrationResult(true, success, message);
+        }
+
+        // Gera e persiste o segredo enviado a Asaas (authToken) no primeiro registro; reaproveita nas
+        // execucoes seguintes para nao trocar o token a cada save (o provedor continuaria validando
+        // notificacoes antigas com um token que deixou de existir do nosso lado).
+        private async Task EnsureWebhookAuthToken(long connectorId, long integrationId, CancellationToken cancellationToken)
+        {
+            IntegrationAttribute? attribute = await DbContext.Set<IntegrationAttribute>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.IntegrationId == integrationId && item.Field == "webhook_auth_token", cancellationToken);
+
+            if (attribute is null)
+            {
+                return;
+            }
+
+            bool exists = await DbContext.Set<ConnectorAttributeValue>()
+                .AsNoTracking()
+                .AnyAsync(item => item.ConnectorId == connectorId && item.IntegrationAttributeId == attribute.Id, cancellationToken);
+
+            if (exists)
+            {
+                return;
+            }
+
+            string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            ConnectorAttributeValue value = new(connectorId, attribute.Id, token);
+            DbContext.Set<ConnectorAttributeValue>().Add(value);
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         private async Task EnsureIntegrationExists(long integrationId, CancellationToken cancellationToken)

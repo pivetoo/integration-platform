@@ -1,5 +1,6 @@
 using Archon.Core.Pagination;
 using Archon.Application.Services;
+using IntegrationPlatform.Application.Models;
 using IntegrationPlatform.Application.Requests.Connectors;
 using IntegrationPlatform.Domain.Entities;
 
@@ -23,5 +24,8 @@ namespace IntegrationPlatform.Application.Services
 
         // Torna o conector a conta padrao da categoria dele (desmarca as demais da mesma categoria).
         Task<Connector> SetDefaultConnector(long id, CancellationToken cancellationToken = default);
+
+        // Executa (idempotente) o pipeline "{identifier}-registrar-webhook" da integracao, se existir.
+        Task<ConnectorWebhookRegistrationResult> RegisterWebhook(long connectorId, CancellationToken cancellationToken = default);
     }
 }
