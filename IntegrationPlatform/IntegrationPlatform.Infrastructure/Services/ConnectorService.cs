@@ -7,9 +7,9 @@ using IntegrationPlatform.Application.Requests.Connectors;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
+using IntegrationPlatform.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
-using System.Security.Cryptography;
 
 namespace IntegrationPlatform.Infrastructure.Services
 {
@@ -275,7 +275,7 @@ namespace IntegrationPlatform.Infrastructure.Services
                 return;
             }
 
-            string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            string token = WebhookAuthTokenGenerator.Generate();
             ConnectorAttributeValue value = new(connectorId, attribute.Id, token);
             DbContext.Set<ConnectorAttributeValue>().Add(value);
             await DbContext.SaveChangesAsync(cancellationToken);
