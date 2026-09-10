@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout, useAuth, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem, ModuleNavConfig } from 'archon-ui';
-import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers, LayoutDashboard, FileBarChart2, ScrollText } from 'lucide-react';
+import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers, LayoutDashboard, ScrollText } from 'lucide-react';
 import logoEmpresa from '../assets/logo-empresa.png';
 
 export default function IntegrationPlatformLayout() {
@@ -74,13 +74,6 @@ export default function IntegrationPlatformLayout() {
       routes: [
         { key: 'rotinas-pipeline', label: t('layout.menu.pipelineRoutines'), path: '/automacao', icon: <Clock3 size={20} /> },
       ],
-    },
-    {
-      key: 'relatorios',
-      label: t('layout.menu.reports'),
-      icon: <FileBarChart2 size={20} />,
-      group: 'op',
-      routes: [],
     },
   ];
 
