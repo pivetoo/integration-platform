@@ -431,12 +431,7 @@
   <data name="layout.menu.reports" xml:space="preserve"><value>Reports</value></data>
   <data name="layout.breadcrumb.home" xml:space="preserve"><value>Home</value></data>
   <data name="layout.breadcrumb.details" xml:space="preserve"><value>Details</value></data>
-  <data name="dashboard.subtitle" xml:space="preserve"><value>Overview of integrations, connectors and executions</value></data>
-  <data name="dashboard.greeting.dawn" xml:space="preserve"><value>Working late</value></data>
-  <data name="dashboard.greeting.morning" xml:space="preserve"><value>Good morning</value></data>
-  <data name="dashboard.greeting.afternoon" xml:space="preserve"><value>Good afternoon</value></data>
-  <data name="dashboard.greeting.evening" xml:space="preserve"><value>Good evening</value></data>
-  <data name="dashboard.refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="dashboard.title" xml:space="preserve"><value>Dashboard</value></data>
   <data name="dashboard.kpi.integrations.title" xml:space="preserve"><value>Integrations</value></data>
   <data name="dashboard.kpi.integrations.subtitle" xml:space="preserve"><value>active</value></data>
   <data name="dashboard.kpi.connectors.title" xml:space="preserve"><value>Connectors</value></data>

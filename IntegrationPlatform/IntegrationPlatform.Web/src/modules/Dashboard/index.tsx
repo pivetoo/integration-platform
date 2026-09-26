@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Badge, Button, GlobalLoader, LineChart, PieChart, BarChart, ChartContainer, useApi, useAuth, useI18n } from 'archon-ui';
+import { Card, CardContent, CardHeader, CardTitle, Badge, GlobalLoader, LineChart, PieChart, BarChart, ChartContainer, useApi, useI18n } from 'archon-ui';
 import type { DashboardData } from '../../types/dashboard';
-import { Cable, Plug, GitBranch, ListOrdered, Play, CheckCircle2, XCircle, AlertTriangle, Timer, TrendingUp, PieChart as PieChartIcon, BarChart3, Clock, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, Cable, Plug, GitBranch, ListOrdered, Play, CheckCircle2, XCircle, AlertTriangle, Timer, TrendingUp, PieChart as PieChartIcon, BarChart3, Clock } from 'lucide-react';
 import { dashboardService } from '../../services/dashboardService';
 import { ExecutionStatusLabels } from '../../types/execution';
 import type { ExecutionStatus } from '../../types/execution';
@@ -48,25 +48,14 @@ function getStatusIcon(status: number) {
   return <Clock className="h-3.5 w-3.5 animate-spin" />;
 }
 
-function buildGreeting(t: (key: string) => string, firstName: string | undefined): string {
-  const hour = new Date().getHours();
-  const period = hour < 5 ? 'dawn' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-  const base = t(`dashboard.greeting.${period}`);
-  return firstName ? `${base}, ${firstName}!` : `${base}!`;
-}
-
 export default function Dashboard() {
   const { t } = useI18n();
-  const { user } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  const { execute: fetchData, loading } = useApi<DashboardData>({
+  const { execute: fetchData } = useApi<DashboardData>({
     showErrorMessage: true,
   });
-
-  const firstName = useMemo(() => user?.name?.trim().split(/\s+/)[0], [user?.name]);
-  const greeting = useMemo(() => buildGreeting(t, firstName), [t, firstName]);
 
   const loadData = async () => {
     const result = await fetchData(() => dashboardService.getData());
@@ -114,43 +103,12 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="border-l-4 border-primary pl-5">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            <strong className="text-primary">{greeting}</strong>
-          </h1>
-          <p className="text-lg text-muted-foreground mt-3 leading-relaxed">{t('dashboard.subtitle')}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3 py-1.5 text-xs">
-              <Play className="h-3.5 w-3.5 text-amber-600" />
-              <span className="font-medium text-muted-foreground">{t('dashboard.kpi.executionsToday.title')}</span>
-              <span className="font-semibold text-foreground">{kpis?.execucoesHoje ?? 0}</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3 py-1.5 text-xs">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="font-medium text-muted-foreground">{t('dashboard.kpi.successRate.title')}</span>
-              <span className="font-semibold text-foreground">{kpis ? `${kpis.taxaSucesso}%` : '-'}</span>
-            </div>
-            <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${errosHoje > 0 ? 'border-red-300 bg-red-50 dark:border-red-900 dark:bg-red-950/30' : 'border-border/70 bg-muted/30'}`}>
-              <AlertTriangle className="h-3.5 w-3.5 text-red-600" />
-              <span className="font-medium text-muted-foreground">{t('dashboard.kpi.errorsToday.title')}</span>
-              <span className="font-semibold text-foreground">{errosHoje}</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3 py-1.5 text-xs">
-              <Timer className="h-3.5 w-3.5 text-cyan-600" />
-              <span className="font-medium text-muted-foreground">{t('dashboard.kpi.avgDuration.title')}</span>
-              <span className="font-semibold text-foreground">{formatDuration(kpis?.duracaoMediaHojeMs)}</span>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw className={`mr-1 h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> {t('dashboard.refresh')}
-          </Button>
-        </div>
+      <div className="flex items-center gap-3">
+        <LayoutDashboard className="h-8 w-8 text-primary" />
+        <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Card>
           <CardContent className="pt-5 pb-5 flex items-start justify-between">
             <div>
@@ -192,6 +150,50 @@ export default function Dashboard() {
               <p className="text-[10px] text-muted-foreground">{t('dashboard.kpi.queuePending.subtitle')}</p>
             </div>
             <span className="rounded-md bg-amber-500/15 p-2 text-amber-600"><ListOrdered size={18} /></span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-5 flex items-start justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('dashboard.kpi.executionsToday.title')}</p>
+              <p className="text-2xl font-semibold mt-1">{kpis?.execucoesHoje ?? '-'}</p>
+              <p className="text-[10px] text-muted-foreground">{t('dashboard.kpi.executionsToday.subtitle')}</p>
+            </div>
+            <span className="rounded-md bg-amber-500/15 p-2 text-amber-600"><Play size={18} /></span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-5 flex items-start justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('dashboard.kpi.successRate.title')}</p>
+              <p className="text-2xl font-semibold mt-1">{kpis ? `${kpis.taxaSucesso}%` : '-'}</p>
+              <p className="text-[10px] text-muted-foreground">{t('dashboard.kpi.successRate.subtitle')}</p>
+            </div>
+            <span className="rounded-md bg-emerald-500/15 p-2 text-emerald-600"><CheckCircle2 size={18} /></span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-5 flex items-start justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('dashboard.kpi.errorsToday.title')}</p>
+              <p className={`text-2xl font-semibold mt-1 ${errosHoje > 0 ? 'text-red-600' : ''}`}>{errosHoje}</p>
+              <p className="text-[10px] text-muted-foreground">{t('dashboard.kpi.errorsToday.subtitle')}</p>
+            </div>
+            <span className="rounded-md bg-red-500/15 p-2 text-red-600"><AlertTriangle size={18} /></span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-5 flex items-start justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('dashboard.kpi.avgDuration.title')}</p>
+              <p className="text-2xl font-semibold mt-1">{formatDuration(kpis?.duracaoMediaHojeMs)}</p>
+              <p className="text-[10px] text-muted-foreground">{t('dashboard.kpi.avgDuration.subtitle')}</p>
+            </div>
+            <span className="rounded-md bg-indigo-500/15 p-2 text-indigo-600"><Timer size={18} /></span>
           </CardContent>
         </Card>
       </div>
