@@ -13,6 +13,24 @@ namespace IntegrationPlatform.Application.Models
         public double SuccessRate { get; set; }
 
         public long ErrorsToday { get; set; }
+
+        public long QueuePending { get; set; }
+
+        public long? AverageDurationTodayMs { get; set; }
+    }
+
+    public class QueueStatusSummary
+    {
+        public int Status { get; set; }
+
+        public long Count { get; set; }
+    }
+
+    public class ConnectorExecutionSummary
+    {
+        public string Connector { get; set; } = string.Empty;
+
+        public long ExecutionCount { get; set; }
     }
 
     public class MonthlyExecutionSummary
@@ -46,5 +64,9 @@ namespace IntegrationPlatform.Application.Models
         public List<MonthlyExecutionSummary> MonthlyExecutions { get; set; } = [];
 
         public List<RecentExecutionItem> RecentExecutions { get; set; } = [];
+
+        public List<QueueStatusSummary> QueueByStatus { get; set; } = [];
+
+        public List<ConnectorExecutionSummary> TopConnectors { get; set; } = [];
     }
 }

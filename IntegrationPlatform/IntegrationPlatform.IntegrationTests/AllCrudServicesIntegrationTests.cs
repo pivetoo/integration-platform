@@ -187,6 +187,8 @@ namespace IntegrationPlatform.IntegrationTests
                 DashboardData data = await service.GetDashboardData();
 
                 data.Should().NotBeNull();
+                data.QueueByStatus.Should().NotBeNull();
+                data.TopConnectors.Should().NotBeNull();
             });
         }
     }

@@ -22,7 +22,9 @@ namespace IntegrationPlatform.Infrastructure.Services
             {
                 Kpis = await GetKpis(cancellationToken),
                 MonthlyExecutions = await GetMonthlyExecutions(cancellationToken),
-                RecentExecutions = await GetRecentExecutions(cancellationToken)
+                RecentExecutions = await GetRecentExecutions(cancellationToken),
+                QueueByStatus = await GetQueueByStatus(cancellationToken),
+                TopConnectors = await GetTopConnectors(cancellationToken)
             };
         }
 
@@ -62,6 +64,21 @@ namespace IntegrationPlatform.Infrastructure.Services
                 ? Math.Round((double)successToday / totalToday * 100, 1)
                 : 0;
 
+            List<long> durationsToday = executionsToday
+                .Where(item => item.Duration.HasValue)
+                .Select(item => item.Duration!.Value)
+                .ToList();
+
+            long? averageDurationTodayMs = durationsToday.Count > 0
+                ? (long)durationsToday.Average()
+                : null;
+
+            long queuePending = await (
+                from item in dbContext.Set<ProcessingQueue>().AsNoTracking()
+                where item.Status == ProcessingStatus.Pending
+                select item.Id)
+                .LongCountAsync(cancellationToken);
+
             return new DashboardKpis
             {
                 ActiveIntegrations = activeIntegrations,
@@ -69,7 +86,9 @@ namespace IntegrationPlatform.Infrastructure.Services
                 ActivePipelines = activePipelines,
                 ExecutionsToday = totalToday,
                 ErrorsToday = errorsToday,
-                SuccessRate = successRate
+                SuccessRate = successRate,
+                QueuePending = queuePending,
+                AverageDurationTodayMs = averageDurationTodayMs
             };
         }
 
@@ -103,6 +122,38 @@ namespace IntegrationPlatform.Infrastructure.Services
             }
 
             return result;
+        }
+
+        private async Task<List<QueueStatusSummary>> GetQueueByStatus(CancellationToken cancellationToken)
+        {
+            return await (
+                from item in dbContext.Set<ProcessingQueue>().AsNoTracking()
+                group item by item.Status into statusGroup
+                select new QueueStatusSummary
+                {
+                    Status = (int)statusGroup.Key,
+                    Count = statusGroup.LongCount()
+                })
+                .ToListAsync(cancellationToken);
+        }
+
+        private async Task<List<ConnectorExecutionSummary>> GetTopConnectors(CancellationToken cancellationToken)
+        {
+            DateTimeOffset since = DateTimeOffset.UtcNow.AddDays(-30);
+
+            return await (
+                from execution in dbContext.Set<Execution>().AsNoTracking()
+                join connector in dbContext.Set<Connector>().AsNoTracking() on execution.ConnectorId equals connector.Id
+                where execution.StartedAt >= since
+                group execution by connector.Name into connectorGroup
+                orderby connectorGroup.LongCount() descending
+                select new ConnectorExecutionSummary
+                {
+                    Connector = connectorGroup.Key,
+                    ExecutionCount = connectorGroup.LongCount()
+                })
+                .Take(5)
+                .ToListAsync(cancellationToken);
         }
 
         private async Task<List<RecentExecutionItem>> GetRecentExecutions(CancellationToken cancellationToken)

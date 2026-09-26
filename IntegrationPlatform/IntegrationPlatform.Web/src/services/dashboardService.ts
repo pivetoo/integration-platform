@@ -11,6 +11,8 @@ interface DashboardApiData {
     executionsToday: number;
     successRate: number;
     errorsToday: number;
+    queuePending: number;
+    averageDurationTodayMs?: number;
   };
   monthlyExecutions: Array<{
     month: string;
@@ -24,6 +26,14 @@ interface DashboardApiData {
     status: number;
     duration?: number;
     startedAt: string;
+  }>;
+  queueByStatus: Array<{
+    status: number;
+    count: number;
+  }>;
+  topConnectors: Array<{
+    connector: string;
+    executionCount: number;
   }>;
 }
 
@@ -41,9 +51,12 @@ export const dashboardService = {
           execucoesHoje: 0,
           taxaSucesso: 0,
           errosHoje: 0,
+          filaPendente: 0,
         },
         execucoesMensais: [],
         execucoesRecentes: [],
+        filaPorStatus: [],
+        topConectores: [],
       };
     }
 
@@ -55,6 +68,8 @@ export const dashboardService = {
         execucoesHoje: data.kpis.executionsToday,
         taxaSucesso: data.kpis.successRate,
         errosHoje: data.kpis.errorsToday,
+        filaPendente: data.kpis.queuePending,
+        duracaoMediaHojeMs: data.kpis.averageDurationTodayMs,
       },
       execucoesMensais: data.monthlyExecutions.map((item) => ({
         mes: item.month,
@@ -68,6 +83,14 @@ export const dashboardService = {
         status: item.status,
         duration: item.duration,
         startedAt: item.startedAt,
+      })),
+      filaPorStatus: data.queueByStatus.map((item) => ({
+        status: item.status,
+        count: item.count,
+      })),
+      topConectores: data.topConnectors.map((item) => ({
+        conector: item.connector,
+        executionCount: item.executionCount,
       })),
     };
   },

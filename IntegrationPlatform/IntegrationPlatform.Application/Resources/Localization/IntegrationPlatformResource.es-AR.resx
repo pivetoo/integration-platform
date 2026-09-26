@@ -431,7 +431,12 @@
   <data name="layout.menu.reports" xml:space="preserve"><value>Informes</value></data>
   <data name="layout.breadcrumb.home" xml:space="preserve"><value>Inicio</value></data>
   <data name="layout.breadcrumb.details" xml:space="preserve"><value>Detalles</value></data>
-  <data name="dashboard.title" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="dashboard.subtitle" xml:space="preserve"><value>Resumen de integraciones, conectores y ejecuciones</value></data>
+  <data name="dashboard.greeting.dawn" xml:space="preserve"><value>Buena madrugada</value></data>
+  <data name="dashboard.greeting.morning" xml:space="preserve"><value>Buenos días</value></data>
+  <data name="dashboard.greeting.afternoon" xml:space="preserve"><value>Buenas tardes</value></data>
+  <data name="dashboard.greeting.evening" xml:space="preserve"><value>Buenas noches</value></data>
+  <data name="dashboard.refresh" xml:space="preserve"><value>Actualizar</value></data>
   <data name="dashboard.kpi.integrations.title" xml:space="preserve"><value>Integraciones</value></data>
   <data name="dashboard.kpi.integrations.subtitle" xml:space="preserve"><value>activas</value></data>
   <data name="dashboard.kpi.connectors.title" xml:space="preserve"><value>Conectores</value></data>
@@ -444,9 +449,20 @@
   <data name="dashboard.kpi.successRate.subtitle" xml:space="preserve"><value>hoy</value></data>
   <data name="dashboard.kpi.errorsToday.title" xml:space="preserve"><value>Errores Hoy</value></data>
   <data name="dashboard.kpi.errorsToday.subtitle" xml:space="preserve"><value>fallas</value></data>
+  <data name="dashboard.kpi.queuePending.title" xml:space="preserve"><value>Cola Pendiente</value></data>
+  <data name="dashboard.kpi.queuePending.subtitle" xml:space="preserve"><value>esperando</value></data>
+  <data name="dashboard.kpi.avgDuration.title" xml:space="preserve"><value>Duración Media</value></data>
+  <data name="dashboard.kpi.avgDuration.subtitle" xml:space="preserve"><value>hoy</value></data>
   <data name="dashboard.monthlyExecutions" xml:space="preserve"><value>Ejecuciones Mensuales</value></data>
+  <data name="dashboard.monthlyExecutions.series.success" xml:space="preserve"><value>Éxito</value></data>
+  <data name="dashboard.monthlyExecutions.series.error" xml:space="preserve"><value>Error</value></data>
   <data name="dashboard.recentExecutions" xml:space="preserve"><value>Ejecuciones Recientes</value></data>
   <data name="dashboard.noRecentExecutions" xml:space="preserve"><value>No hay ejecuciones recientes</value></data>
+  <data name="dashboard.queueByStatus.title" xml:space="preserve"><value>Cola por Estado</value></data>
+  <data name="dashboard.queueByStatus.empty" xml:space="preserve"><value>No hay elementos en la cola</value></data>
+  <data name="dashboard.topConnectors.title" xml:space="preserve"><value>Top Conectores</value></data>
+  <data name="dashboard.topConnectors.subtitle" xml:space="preserve"><value>ejecuciones en los últimos 30 días</value></data>
+  <data name="dashboard.topConnectors.empty" xml:space="preserve"><value>No hay ejecuciones en los últimos 30 días</value></data>
   <data name="integration.list.deleteTitle" xml:space="preserve"><value>Eliminar Integración</value></data>
   <data name="integration.list.deleteDescription" xml:space="preserve"><value>¿Seguro que desea eliminar {0} integración(es)?</value></data>
   <data name="integration.category.list.title" xml:space="preserve"><value>Categorías de Integración</value></data>

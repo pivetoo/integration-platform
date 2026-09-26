@@ -5,6 +5,8 @@ export interface DashboardKpis {
   execucoesHoje: number;
   taxaSucesso: number;
   errosHoje: number;
+  filaPendente: number;
+  duracaoMediaHojeMs?: number;
 }
 
 export interface ExecucaoMensal {
@@ -22,8 +24,20 @@ export interface ExecucaoRecente {
   startedAt: string;
 }
 
+export interface FilaPorStatus {
+  status: number;
+  count: number;
+}
+
+export interface ConectorPorExecucoes {
+  conector: string;
+  executionCount: number;
+}
+
 export interface DashboardData {
   kpis: DashboardKpis;
   execucoesMensais: ExecucaoMensal[];
   execucoesRecentes: ExecucaoRecente[];
+  filaPorStatus: FilaPorStatus[];
+  topConectores: ConectorPorExecucoes[];
 }
