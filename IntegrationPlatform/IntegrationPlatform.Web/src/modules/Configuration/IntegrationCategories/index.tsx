@@ -16,7 +16,7 @@ export default function CategoriasIntegracao() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('active');
   const [selectedRows, setSelectedRows] = useState<IntegrationCategory[]>([]);
   const [itemsToDelete, setItemsToDelete] = useState<IntegrationCategory[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);

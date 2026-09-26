@@ -20,7 +20,7 @@ export default function ServiceContracts() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('active');
   const [selectedRows, setSelectedRows] = useState<ServiceContract[]>([]);
   const [itemsToDelete, setItemsToDelete] = useState<ServiceContract[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);

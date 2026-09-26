@@ -21,7 +21,7 @@ export default function Integracoes() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('active');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [categories, setCategories] = useState<IntegrationCategory[]>([]);
   const [selectedRows, setSelectedRows] = useState<Integration[]>([]);
