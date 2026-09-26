@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { databaseConnectionService } from '../../../services/databaseConnectionService';
 import { DatabaseTypeLabels, DatabaseType } from '../../../types/databaseConnection';
 import type { DatabaseConnection } from '../../../types/databaseConnection';
 import ConexaoBancoDadosFormModal from '../../../components/modals/DatabaseConnectionFormModal';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 const tipoBancoVariantMap: Record<number, string> = {
   [DatabaseType.PostgreSQL]: 'default',
@@ -22,21 +24,15 @@ export default function ConexoesBancoDados() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedConexoes, setSelectedConexoes] = useState<DatabaseConnection[]>([]);
+  const [selectedRows, setSelectedRows] = useState<DatabaseConnection[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<DatabaseConnection[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingConexao, setEditingConexao] = useState<DatabaseConnection | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchConexoes, loading } = useApi<PaginatedResult<DatabaseConnection>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteConexoes } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('database.connection.list.removed'), variant: 'success' });
-    },
   });
 
   const loadConexoes = async () => {
@@ -72,32 +68,56 @@ export default function ConexoesBancoDados() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedConexoes.length === 1) {
-      setEditingConexao(selectedConexoes[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const conexao of selectedConexoes) {
-      await deleteConexoes(() => databaseConnectionService.delete(conexao.id));
-    }
+    await runBulk(itemsToDelete, (conexao) => databaseConnectionService.delete(conexao.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedConexoes([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadConexoes();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingConexao(null);
-    setSelectedConexoes([]);
+    setSelectedRows([]);
     void loadConexoes();
   };
+
+  const rowActions: DataTableRowAction<DatabaseConnection>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingConexao(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<DatabaseConnection>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<DatabaseConnection>[] = [
     { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
@@ -121,10 +141,7 @@ export default function ConexoesBancoDados() {
     <PageLayout
       title={t('database.connection.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadConexoes()}
-      selectedRowsCount={selectedConexoes.length}
     >
       <TableToolbar
         searchValue={search}
@@ -138,9 +155,10 @@ export default function ConexoesBancoDados() {
         columns={columns}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedConexoes}
-        onSelectionChange={setSelectedConexoes}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -165,9 +183,11 @@ export default function ConexoesBancoDados() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('database.connection.list.deleteTitle')}
-        description={t('database.connection.list.deleteDescription').replace('{0}', String(selectedConexoes.length))}
+        description={t('database.connection.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
+        variant="danger"
+        loading={bulkRunning}
       />
     </PageLayout>
   );

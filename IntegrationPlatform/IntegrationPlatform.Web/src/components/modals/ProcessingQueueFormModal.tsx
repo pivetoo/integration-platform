@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { processingQueueService } from '../../services/processingQueueService';
 import { connectorService } from '../../services/connectorService';
 import { pipelineService } from '../../services/pipelineService';
@@ -87,78 +87,80 @@ export default function ProcessingQueueFormModal({ open, onOpenChange, onSuccess
           <ModalTitle>{t('queue.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.connector')}</label>
-              <Select
-                value={formData.connectorId ? formData.connectorId.toString() : ''}
-                onValueChange={(value) => handleChange('connectorId', parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('queue.form.connectorPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {conectores.map((conector) => (
-                    <SelectItem key={conector.id} value={conector.id.toString()}>
-                      {conector.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.connector')}</label>
+                <Select
+                  value={formData.connectorId ? formData.connectorId.toString() : ''}
+                  onValueChange={(value) => handleChange('connectorId', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('queue.form.connectorPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {conectores.map((conector) => (
+                      <SelectItem key={conector.id} value={conector.id.toString()}>
+                        {conector.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.pipeline')}</label>
-              <Select
-                value={formData.pipelineId ? formData.pipelineId.toString() : ''}
-                onValueChange={(value) => handleChange('pipelineId', parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('queue.form.pipelinePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {pipelines.map((pipeline) => (
-                    <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
-                      {pipeline.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.pipeline')}</label>
+                <Select
+                  value={formData.pipelineId ? formData.pipelineId.toString() : ''}
+                  onValueChange={(value) => handleChange('pipelineId', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('queue.form.pipelinePlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pipelines.map((pipeline) => (
+                      <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
+                        {pipeline.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="priority" className="text-sm font-medium">{t('common.column.priority')}</label>
-              <Input
-                id="priority"
-                type="number"
-                value={formData.priority}
-                onChange={(e) => handleChange('priority', parseInt(e.target.value) || 0)}
-                min={0}
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="priority" className="text-sm font-medium">{t('common.column.priority')}</label>
+                <Input
+                  id="priority"
+                  type="number"
+                  value={formData.priority}
+                  onChange={(e) => handleChange('priority', parseInt(e.target.value) || 0)}
+                  min={0}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="scheduledAt" className="text-sm font-medium">{t('queue.form.scheduledAt')}</label>
-              <Input
-                id="scheduledAt"
-                type="datetime-local"
-                value={formData.scheduledAt || ''}
-                onChange={(e) => handleChange('scheduledAt', e.target.value)}
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="scheduledAt" className="text-sm font-medium">{t('queue.form.scheduledAt')}</label>
+                <Input
+                  id="scheduledAt"
+                  type="datetime-local"
+                  value={formData.scheduledAt || ''}
+                  onChange={(e) => handleChange('scheduledAt', e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="payload" className="text-sm font-medium">{t('queue.form.payloadLabel')}</label>
-              <textarea
-                id="payload"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={formData.payload || ''}
-                onChange={(e) => handleChange('payload', e.target.value)}
-                rows={3}
-              />
+              <div className="space-y-2">
+                <label htmlFor="payload" className="text-sm font-medium">{t('queue.form.payloadLabel')}</label>
+                <textarea
+                  id="payload"
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  value={formData.payload || ''}
+                  onChange={(e) => handleChange('payload', e.target.value)}
+                  rows={3}
+                />
+              </div>
             </div>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

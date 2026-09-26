@@ -277,6 +277,21 @@ export default function ConectorDetalhe() {
     <PageLayout
       title={conector?.name || t('connector.detail.fallbackTitle')}
       onRefresh={() => { loadConector(); loadValores(); }}
+      actions={
+        atributos.length > 0
+          ? [
+              {
+                key: 'save-attributes',
+                label: saving ? t('common.action.saving') : t('connector.detail.saveAttributes'),
+                icon: <Save size={16} />,
+                variant: 'primary',
+                onClick: handleSave,
+                disabled: saving,
+                primary: true,
+              },
+            ]
+          : []
+      }
     >
       <div className="space-y-6">
 
@@ -293,7 +308,7 @@ export default function ConectorDetalhe() {
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
-                <Badge variant={conector.isActive ? 'success' : 'destructive'}>
+                <Badge dot variant={conector.isActive ? 'soft-success' : 'soft-neutral'}>
                   {conector.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>

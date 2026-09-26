@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { javaScriptFunctionService } from '../../../services/javaScriptFunctionService';
 import type { JavaScriptFunction } from '../../../types/javaScriptFunction';
 import FuncaoJavaScriptFormModal from '../../../components/modals/JavaScriptFunctionFormModal';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function FuncoesJavaScript() {
   const { t } = useI18n();
@@ -14,21 +16,15 @@ export default function FuncoesJavaScript() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedFuncoes, setSelectedFuncoes] = useState<JavaScriptFunction[]>([]);
+  const [selectedRows, setSelectedRows] = useState<JavaScriptFunction[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<JavaScriptFunction[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingFuncao, setEditingFuncao] = useState<JavaScriptFunction | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchFuncoes, loading } = useApi<PaginatedResult<JavaScriptFunction>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteFuncoes } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('javaScriptFunction.list.removed'), variant: 'success' });
-    },
   });
 
   const loadFuncoes = async () => {
@@ -64,32 +60,56 @@ export default function FuncoesJavaScript() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedFuncoes.length === 1) {
-      setEditingFuncao(selectedFuncoes[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const funcao of selectedFuncoes) {
-      await deleteFuncoes(() => javaScriptFunctionService.delete(funcao.id));
-    }
+    await runBulk(itemsToDelete, (funcao) => javaScriptFunctionService.delete(funcao.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedFuncoes([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadFuncoes();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingFuncao(null);
-    setSelectedFuncoes([]);
+    setSelectedRows([]);
     void loadFuncoes();
   };
+
+  const rowActions: DataTableRowAction<JavaScriptFunction>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingFuncao(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<JavaScriptFunction>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<JavaScriptFunction>[] = [
     { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
@@ -100,10 +120,7 @@ export default function FuncoesJavaScript() {
     <PageLayout
       title={t('javaScriptFunction.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadFuncoes()}
-      selectedRowsCount={selectedFuncoes.length}
     >
       <TableToolbar
         searchValue={search}
@@ -117,9 +134,10 @@ export default function FuncoesJavaScript() {
         data={funcoes}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedFuncoes}
-        onSelectionChange={setSelectedFuncoes}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -137,10 +155,11 @@ export default function FuncoesJavaScript() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('javaScriptFunction.list.deleteTitle')}
-        description={t('javaScriptFunction.list.deleteDescription').replace('{0}', String(selectedFuncoes.length))}
+        description={t('javaScriptFunction.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <FuncaoJavaScriptFormModal

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { PageLayout, DataTable, ConfirmModal, Badge, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, ConfirmModal, Badge, FilterPanel, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { serviceContractService } from '../../../services/serviceContractService';
 import { integrationCategoryService } from '../../../services/integrationCategoryService';
 import type { ServiceContract } from '../../../types/serviceContract';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
 import ServiceContractFormModal from '../../../components/modals/ServiceContractFormModal';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function ServiceContracts() {
   const { t } = useI18n();
@@ -19,20 +21,15 @@ export default function ServiceContracts() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selected, setSelected] = useState<ServiceContract[]>([]);
+  const [selectedRows, setSelectedRows] = useState<ServiceContract[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<ServiceContract[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<ServiceContract | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchContracts, loading } = useApi<PaginatedResult<ServiceContract>>({ showErrorMessage: true });
   const { execute: fetchCategories } = useApi<IntegrationCategory[]>({ showErrorMessage: true });
-  const { execute: deleteContract } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('serviceContract.list.removed'), variant: 'success' });
-    },
-  });
 
   const categoryMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -118,42 +115,57 @@ export default function ServiceContracts() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selected.length === 1) {
-      setEditing(selected[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const hasSystemSelected = selected.some((item) => item.isSystem);
-
-  const handleDelete = () => {
-    if (hasSystemSelected) {
-      toast({
-        title: t('serviceContract.list.deleteSystemBlockedTitle'),
-        description: t('serviceContract.list.deleteSystemBlocked'),
-        variant: 'destructive',
-      });
-      return;
-    }
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const contract of selected) {
-      await deleteContract(() => serviceContractService.delete(contract.id));
-    }
+    await runBulk(itemsToDelete, (contract) => serviceContractService.delete(contract.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelected([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadContracts();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditing(null);
-    setSelected([]);
+    setSelectedRows([]);
     void loadContracts();
   };
+
+  const rowActions: DataTableRowAction<ServiceContract>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditing(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      hidden: (row) => row.isSystem,
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<ServiceContract>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning || selectedRows.some((row) => row.isSystem),
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<ServiceContract>[] = [
     {
@@ -164,7 +176,7 @@ export default function ServiceContracts() {
       render: (value: string, record) => (
         <span className="inline-flex items-center gap-2">
           <span className="font-medium">{value}</span>
-          {record.isSystem && <Badge variant="secondary" className="text-xs">{t('serviceContract.list.systemBadge')}</Badge>}
+          {record.isSystem && <Badge variant="outline" className="text-xs">{t('serviceContract.list.systemBadge')}</Badge>}
         </span>
       ),
     },
@@ -190,7 +202,7 @@ export default function ServiceContracts() {
       hiddenBelow: 'lg',
       render: (value: boolean) =>
         value ? (
-          <Badge variant="success">{t('serviceContract.callback.yes')}</Badge>
+          <Badge dot variant="soft-success">{t('serviceContract.callback.yes')}</Badge>
         ) : (
           <span className="text-xs text-muted-foreground">{t('serviceContract.callback.no')}</span>
         ),
@@ -201,7 +213,7 @@ export default function ServiceContracts() {
       dataIndex: 'isActive',
       width: 120,
       render: (value: boolean) => (
-        <Badge variant={value ? 'success' : 'secondary'}>
+        <Badge dot variant={value ? 'soft-success' : 'soft-neutral'}>
           {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
@@ -212,10 +224,7 @@ export default function ServiceContracts() {
     <PageLayout
       title={t('serviceContract.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadContracts()}
-      selectedRowsCount={selected.length}
     >
       <TableToolbar
         searchValue={search}
@@ -230,9 +239,10 @@ export default function ServiceContracts() {
         data={contracts}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selected}
-        onSelectionChange={setSelected}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -250,10 +260,11 @@ export default function ServiceContracts() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('serviceContract.list.deleteTitle')}
-        description={t('serviceContract.list.deleteDescription').replace('{0}', String(selected.length))}
+        description={t('serviceContract.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <ServiceContractFormModal

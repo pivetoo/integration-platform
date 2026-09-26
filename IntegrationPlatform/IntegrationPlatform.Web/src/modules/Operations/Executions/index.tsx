@@ -10,11 +10,11 @@ import type { Pipeline } from '../../../types/pipeline';
 import ExecutionDetailModal from '../../../components/modals/ExecutionDetailModal';
 import { formatDateTime, formatDuration } from '../../../utils/formatters';
 
-const statusVariantMap: Record<number, string> = {
-  1: 'warning',
-  2: 'success',
-  3: 'destructive',
-  4: 'secondary',
+const statusVariantMap: Record<number, 'soft-warning' | 'soft-success' | 'soft-destructive' | 'soft-neutral'> = {
+  1: 'soft-warning',
+  2: 'soft-success',
+  3: 'soft-destructive',
+  4: 'soft-neutral',
 };
 
 export default function Executions() {
@@ -112,7 +112,7 @@ export default function Executions() {
       dataIndex: 'status',
       width: 120,
       render: (value: ExecutionStatus) => (
-        <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'success' | 'destructive' | 'secondary'}>
+        <Badge dot variant={statusVariantMap[value] || 'soft-neutral'}>
           {ExecutionStatusLabels[value] || '-'}
         </Badge>
       ),

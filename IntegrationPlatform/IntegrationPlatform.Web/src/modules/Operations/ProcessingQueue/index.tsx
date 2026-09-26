@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import { Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { processingQueueService } from '../../../services/processingQueueService';
 import { ProcessingStatusLabels, ProcessingStatus } from '../../../types/processingQueue';
@@ -9,13 +10,14 @@ import type { Conector } from '../../../types/connector';
 import type { Pipeline } from '../../../types/pipeline';
 import ProcessingQueueFormModal from '../../../components/modals/ProcessingQueueFormModal';
 import { formatDateTime } from '../../../utils/formatters';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
-const statusVariantMap: Record<number, string> = {
-  [ProcessingStatus.Pending]: 'warning',
-  [ProcessingStatus.Processing]: 'info',
-  [ProcessingStatus.Completed]: 'success',
-  [ProcessingStatus.Error]: 'destructive',
-  [ProcessingStatus.Cancelled]: 'secondary',
+const statusVariantMap: Record<number, 'soft-warning' | 'soft-info' | 'soft-success' | 'soft-destructive' | 'soft-neutral'> = {
+  [ProcessingStatus.Pending]: 'soft-warning',
+  [ProcessingStatus.Processing]: 'soft-info',
+  [ProcessingStatus.Completed]: 'soft-success',
+  [ProcessingStatus.Error]: 'soft-destructive',
+  [ProcessingStatus.Cancelled]: 'soft-neutral',
 };
 
 export default function ProcessingQueue() {
@@ -27,20 +29,14 @@ export default function ProcessingQueue() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selectedItens, setSelectedItens] = useState<ProcessingQueueItem[]>([]);
+  const [selectedRows, setSelectedRows] = useState<ProcessingQueueItem[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<ProcessingQueueItem[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchItens, loading } = useApi<PaginatedResult<ProcessingQueueItem>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteItens } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('processingQueue.list.removed'), variant: 'success' });
-    },
   });
 
   const loadItens = async () => {
@@ -98,24 +94,46 @@ export default function ProcessingQueue() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const item of selectedItens) {
-      await deleteItens(() => processingQueueService.delete(item.id));
-    }
+    await runBulk(itemsToDelete, (item) => processingQueueService.delete(item.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedItens([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadItens();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
-    setSelectedItens([]);
+    setSelectedRows([]);
     void loadItens();
   };
+
+  const rowActions: DataTableRowAction<ProcessingQueueItem>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<ProcessingQueueItem>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<ProcessingQueueItem>[] = [
     {
@@ -144,7 +162,7 @@ export default function ProcessingQueue() {
       dataIndex: 'status',
       width: 130,
       render: (value: ProcessingStatus) => (
-        <Badge variant={(statusVariantMap[value] || 'outline') as 'warning' | 'info' | 'success' | 'destructive' | 'secondary'}>
+        <Badge dot variant={statusVariantMap[value] || 'soft-neutral'}>
           {ProcessingStatusLabels[value] || '-'}
         </Badge>
       ),
@@ -169,9 +187,7 @@ export default function ProcessingQueue() {
     <PageLayout
       title={t('processingQueue.list.title')}
       onAdd={handleAdd}
-      onDelete={handleDelete}
       onRefresh={() => void loadItens()}
-      selectedRowsCount={selectedItens.length}
     >
       <TableToolbar
         searchValue={search}
@@ -186,9 +202,10 @@ export default function ProcessingQueue() {
         data={itens}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedItens}
-        onSelectionChange={setSelectedItens}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -206,10 +223,11 @@ export default function ProcessingQueue() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('processingQueue.list.deleteTitle')}
-        description={t('processingQueue.list.deleteDescription').replace('{0}', String(selectedItens.length))}
+        description={t('processingQueue.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <ProcessingQueueFormModal

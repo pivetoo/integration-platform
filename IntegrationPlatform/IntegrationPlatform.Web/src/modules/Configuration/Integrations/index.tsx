@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, Eye, Pencil, Trash2 } from 'lucide-react';
 import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { integrationService } from '../../../services/integrationService';
 import { integrationCategoryService } from '../../../services/integrationCategoryService';
 import type { Integration, IntegrationExportModel } from '../../../types/integration';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
 import IntegracaoFormModal from '../../../components/modals/IntegrationFormModal';
-import DetailsButton from '../../../components/DetailsButton';
+import { useBulkRun } from '../../../lib/useBulkRun';
 import { parseJsonSafe } from '../../../utils/json';
 
 export default function Integracoes() {
@@ -24,21 +24,15 @@ export default function Integracoes() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [categories, setCategories] = useState<IntegrationCategory[]>([]);
-  const [selectedIntegracoes, setSelectedIntegracoes] = useState<Integration[]>([]);
+  const [selectedRows, setSelectedRows] = useState<Integration[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<Integration[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIntegracao, setEditingIntegracao] = useState<Integration | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchIntegracoes, loading } = useApi<PaginatedResult<Integration>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteIntegracoes } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: 'Removido', description: 'Integração removida com sucesso', variant: 'success' });
-    },
   });
 
   const { execute: exportarIntegracao } = useApi<IntegrationExportModel>({
@@ -118,43 +112,27 @@ export default function Integracoes() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedIntegracoes.length === 1) {
-      setEditingIntegracao(selectedIntegracoes[0]);
-      setIsFormOpen(true);
-    }
-  };
-
   const handleRowDoubleClick = (integracao: Integration) => {
     navigate(`/integracoes/${integracao.id}`);
   };
 
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const integracao of selectedIntegracoes) {
-      await deleteIntegracoes(() => integrationService.delete(integracao.id));
-    }
+    await runBulk(itemsToDelete, (item) => integrationService.delete(item.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedIntegracoes([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadIntegracoes();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingIntegracao(null);
-    setSelectedIntegracoes([]);
+    setSelectedRows([]);
     void loadIntegracoes();
   };
 
-  const handleExport = async () => {
-    if (selectedIntegracoes.length !== 1) {
-      return;
-    }
-
-    const result = await exportarIntegracao(() => integrationService.export(selectedIntegracoes[0].id));
+  const handleExportItem = async (item: Integration) => {
+    const result = await exportarIntegracao(() => integrationService.export(item.id));
     if (result) {
       const json = JSON.stringify(result, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
@@ -193,6 +171,54 @@ export default function Integracoes() {
     }
   };
 
+  const rowActions: DataTableRowAction<Integration>[] = [
+    {
+      key: 'details',
+      label: t('common.action.details') !== 'common.action.details' ? t('common.action.details') : 'Detalhes',
+      icon: <Eye className="h-4 w-4" />,
+      onClick: (row) => navigate(`/integracoes/${row.id}`),
+    },
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingIntegracao(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'export',
+      label: t('common.action.export'),
+      icon: <Download className="h-4 w-4" />,
+      onClick: (row) => void handleExportItem(row),
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<Integration>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
   const columns: DataTableColumn<Integration>[] = [
     {
       key: 'iconUrl',
@@ -225,18 +251,9 @@ export default function Integracoes() {
       dataIndex: 'isActive',
       width: 110,
       render: (value: boolean) => (
-        <Badge variant={value ? 'success' : 'destructive'}>
+        <Badge dot variant={value ? 'soft-success' : 'soft-neutral'}>
           {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
-      ),
-    },
-    {
-      key: 'actions',
-      title: '',
-      dataIndex: undefined,
-      width: 110,
-      render: (_: unknown, record: Integration) => (
-        <DetailsButton onClick={(e) => { e.stopPropagation(); navigate(`/integracoes/${record.id}`); }} />
       ),
     },
   ];
@@ -245,19 +262,8 @@ export default function Integracoes() {
     <PageLayout
       title={t("integration.integrations.title")}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadIntegracoes()}
-      selectedRowsCount={selectedIntegracoes.length}
       actions={[
-        {
-          key: 'exportar',
-          label: t('common.action.export'),
-          icon: <Download size={16} />,
-          variant: 'outline',
-          onClick: handleExport,
-          disabled: selectedIntegracoes.length !== 1,
-        },
         {
           key: 'importar',
           label: t('common.action.import'),
@@ -288,9 +294,10 @@ export default function Integracoes() {
         data={integracoes}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedIntegracoes}
-        onSelectionChange={setSelectedIntegracoes}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         onRowDoubleClick={handleRowDoubleClick}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
@@ -309,10 +316,11 @@ export default function Integracoes() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('integration.list.deleteTitle')}
-        description={t('integration.list.deleteDescription').replace('{0}', String(selectedIntegracoes.length))}
+        description={t('integration.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <IntegracaoFormModal

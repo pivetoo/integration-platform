@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { pipelineRoutineService } from '../../services/pipelineRoutineService';
 import { connectorService } from '../../services/connectorService';
 import { pipelineService } from '../../services/pipelineService';
@@ -121,92 +121,93 @@ export default function PipelineRoutineFormModal({ open, onOpenChange, rotina, o
           <ModalTitle>{isEditing ? t('pipeline.routine.form.editTitle') : t('pipeline.routine.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.connector')}</label>
-              <Select
-                value={formData.connectorId ? formData.connectorId.toString() : ''}
-                onValueChange={(value) => handleChange('connectorId', parseInt(value, 10))}
-                disabled={isEditing}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('pipeline.routine.form.connectorPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {conectores.map((conector) => (
-                    <SelectItem key={conector.id} value={conector.id.toString()}>
-                      {conector.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.connector')}</label>
+                <Select
+                  value={formData.connectorId ? formData.connectorId.toString() : ''}
+                  onValueChange={(value) => handleChange('connectorId', parseInt(value, 10))}
+                  disabled={isEditing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('pipeline.routine.form.connectorPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {conectores.map((conector) => (
+                      <SelectItem key={conector.id} value={conector.id.toString()}>
+                        {conector.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.pipeline')}</label>
-              <Select
-                value={formData.pipelineId ? formData.pipelineId.toString() : ''}
-                onValueChange={(value) => handleChange('pipelineId', parseInt(value, 10))}
-                disabled={isEditing}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('pipeline.routine.form.pipelinePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {pipelines.map((pipeline) => (
-                    <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
-                      {pipeline.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.pipeline')}</label>
+                <Select
+                  value={formData.pipelineId ? formData.pipelineId.toString() : ''}
+                  onValueChange={(value) => handleChange('pipelineId', parseInt(value, 10))}
+                  disabled={isEditing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('pipeline.routine.form.pipelinePlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pipelines.map((pipeline) => (
+                      <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
+                        {pipeline.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="intervalMinutes" className="text-sm font-medium">{t('pipeline.routine.form.intervalMinutes')}</label>
-              <Input
-                id="intervalMinutes"
-                type="number"
-                min={1}
-                value={formData.intervalMinutes}
-                onChange={(e) => handleChange('intervalMinutes', parseInt(e.target.value, 10) || 1)}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="intervalMinutes" className="text-sm font-medium">{t('pipeline.routine.form.intervalMinutes')}</label>
+                <Input
+                  id="intervalMinutes"
+                  type="number"
+                  min={1}
+                  value={formData.intervalMinutes}
+                  onChange={(e) => handleChange('intervalMinutes', parseInt(e.target.value, 10) || 1)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="nextExecution" className="text-sm font-medium">{t('pipeline.routine.form.nextExecution')}</label>
-              <Input
-                id="nextExecution"
-                type="datetime-local"
-                value={formData.nextExecution || ''}
-                onChange={(e) => handleChange('nextExecution', e.target.value)}
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="nextExecution" className="text-sm font-medium">{t('pipeline.routine.form.nextExecution')}</label>
+                <Input
+                  id="nextExecution"
+                  type="datetime-local"
+                  value={formData.nextExecution || ''}
+                  onChange={(e) => handleChange('nextExecution', e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="defaultPayload" className="text-sm font-medium">{t('pipeline.routine.form.defaultPayload')}</label>
-              <textarea
-                id="defaultPayload"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                rows={3}
-                value={formData.defaultPayload || ''}
-                onChange={(e) => handleChange('defaultPayload', e.target.value)}
-              />
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="defaultPayload" className="text-sm font-medium">{t('pipeline.routine.form.defaultPayload')}</label>
+                <textarea
+                  id="defaultPayload"
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  rows={3}
+                  value={formData.defaultPayload || ''}
+                  onChange={(e) => handleChange('defaultPayload', e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="isActive"
-              checked={formData.isActive}
-              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
-            />
-            <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
+            <div className="flex items-center gap-2 sm:mr-auto">
+              <Checkbox
+                id="isActive"
+                checked={formData.isActive}
+                onCheckedChange={(checked) => handleChange('isActive', !!checked)}
+              />
+              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
+            </div>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('common.action.cancel')}
             </Button>

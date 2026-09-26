@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { PageLayout, DataTable, ConfirmModal, Badge, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, ConfirmModal, Badge, FilterPanel, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { integrationCategoryService } from '../../../services/integrationCategoryService';
 import type { IntegrationCategory } from '../../../types/integrationCategory';
 import CategoriaIntegracaoFormModal from '../../../components/modals/IntegrationCategoryFormModal';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function CategoriasIntegracao() {
   const { t } = useI18n();
@@ -15,21 +17,15 @@ export default function CategoriasIntegracao() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selectedCategorias, setSelectedCategorias] = useState<IntegrationCategory[]>([]);
+  const [selectedRows, setSelectedRows] = useState<IntegrationCategory[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<IntegrationCategory[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCategoria, setEditingCategoria] = useState<IntegrationCategory | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchCategorias, loading } = useApi<PaginatedResult<IntegrationCategory>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteCategorias } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('integration.category.list.removed'), variant: 'success' });
-    },
   });
 
   const loadCategorias = async () => {
@@ -89,42 +85,57 @@ export default function CategoriasIntegracao() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedCategorias.length === 1) {
-      setEditingCategoria(selectedCategorias[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const hasSystemSelected = selectedCategorias.some((item) => item.isSystem);
-
-  const handleDelete = () => {
-    if (hasSystemSelected) {
-      toast({
-        title: t('integration.category.list.deleteSystemBlockedTitle'),
-        description: t('integration.category.list.deleteSystemBlocked'),
-        variant: 'destructive',
-      });
-      return;
-    }
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const categoria of selectedCategorias) {
-      await deleteCategorias(() => integrationCategoryService.delete(categoria.id));
-    }
+    await runBulk(itemsToDelete, (categoria) => integrationCategoryService.delete(categoria.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedCategorias([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadCategorias();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingCategoria(null);
-    setSelectedCategorias([]);
+    setSelectedRows([]);
     void loadCategorias();
   };
+
+  const rowActions: DataTableRowAction<IntegrationCategory>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingCategoria(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      hidden: (row) => row.isSystem,
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<IntegrationCategory>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning || selectedRows.some((row) => row.isSystem),
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<IntegrationCategory>[] = [
     {
@@ -136,7 +147,7 @@ export default function CategoriasIntegracao() {
         <span className="inline-flex items-center gap-2">
           <span className="font-medium">{value}</span>
           {record.isSystem && (
-            <Badge variant="secondary" className="text-xs">{t('integration.category.list.systemBadge')}</Badge>
+            <Badge variant="outline" className="text-xs">{t('integration.category.list.systemBadge')}</Badge>
           )}
         </span>
       ),
@@ -157,7 +168,7 @@ export default function CategoriasIntegracao() {
       dataIndex: 'isActive',
       width: 120,
       render: (value: boolean) => (
-        <Badge variant={value ? 'success' : 'secondary'}>
+        <Badge dot variant={value ? 'soft-success' : 'soft-neutral'}>
           {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
@@ -168,10 +179,7 @@ export default function CategoriasIntegracao() {
     <PageLayout
       title={t('integration.category.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadCategorias()}
-      selectedRowsCount={selectedCategorias.length}
     >
       <TableToolbar
         searchValue={search}
@@ -186,9 +194,10 @@ export default function CategoriasIntegracao() {
         data={categorias}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedCategorias}
-        onSelectionChange={setSelectedCategorias}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -206,10 +215,11 @@ export default function CategoriasIntegracao() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('integration.category.list.deleteTitle')}
-        description={t('integration.category.list.deleteDescription').replace('{0}', String(selectedCategorias.length))}
+        description={t('integration.category.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <CategoriaIntegracaoFormModal

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { integrationService } from '../../services/integrationService';
 import { integrationCategoryService } from '../../services/integrationCategoryService';
 import type { Integration, CreateIntegrationRequest } from '../../types/integration';
@@ -88,95 +88,96 @@ export default function IntegrationFormModal({ open, onOpenChange, integracao, o
           <ModalTitle>{isEditing ? t('integration.form.editTitle') : t('integration.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="identifier" className="text-sm font-medium">{t('common.column.identifier')}</label>
-              <Input
-                id="identifier"
-                value={formData.identifier}
-                onChange={(e) => handleChange('identifier', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
-              <Input
-                id="description"
-                value={formData.description || ''}
-                onChange={(e) => handleChange('description', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="iconUrl" className="text-sm font-medium">URL do logo</label>
-              <div className="flex items-center gap-3">
-                {formData.iconUrl ? (
-                  <img
-                    src={formData.iconUrl}
-                    alt=""
-                    className="h-10 w-10 rounded-md border bg-card object-contain p-1"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3' }}
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-dashed bg-muted/40 text-xs text-muted-foreground">
-                    sem
-                  </div>
-                )}
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="identifier" className="text-sm font-medium">{t('common.column.identifier')}</label>
                 <Input
-                  id="iconUrl"
-                  value={formData.iconUrl || ''}
-                  onChange={(e) => handleChange('iconUrl', e.target.value)}
-                  placeholder="https://cdn.simpleicons.org/sendgrid"
+                  id="identifier"
+                  value={formData.identifier}
+                  onChange={(e) => handleChange('identifier', e.target.value)}
+                  required
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                URL pública do logo (PNG/SVG). Sugestões: <code>https://cdn.simpleicons.org/{'{slug}'}</code> ou <code>https://logo.clearbit.com/{'{dominio}'}</code>.
-              </p>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.category')}</label>
-              <Select
-                value={formData.integrationCategoryId ? formData.integrationCategoryId.toString() : '_none'}
-                onValueChange={(value) => handleChange('integrationCategoryId', value === '_none' ? undefined : parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('integration.form.categoryPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">{t('integration.form.noCategory')}</SelectItem>
-                  {categorias.map((categoria) => (
-                    <SelectItem key={categoria.id} value={categoria.id.toString()}>
-                      {categoria.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  required
+                />
+              </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="isActive"
-              checked={formData.isActive}
-              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
-            />
-            <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
-          </div>
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
+                <Input
+                  id="description"
+                  value={formData.description || ''}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="iconUrl" className="text-sm font-medium">URL do logo</label>
+                <div className="flex items-center gap-3">
+                  {formData.iconUrl ? (
+                    <img
+                      src={formData.iconUrl}
+                      alt=""
+                      className="h-10 w-10 rounded-md border bg-card object-contain p-1"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3' }}
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md border border-dashed bg-muted/40 text-xs text-muted-foreground">
+                      sem
+                    </div>
+                  )}
+                  <Input
+                    id="iconUrl"
+                    value={formData.iconUrl || ''}
+                    onChange={(e) => handleChange('iconUrl', e.target.value)}
+                    placeholder="https://cdn.simpleicons.org/sendgrid"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  URL pública do logo (PNG/SVG). Sugestões: <code>https://cdn.simpleicons.org/{'{slug}'}</code> ou <code>https://logo.clearbit.com/{'{dominio}'}</code>.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.category')}</label>
+                <Select
+                  value={formData.integrationCategoryId ? formData.integrationCategoryId.toString() : '_none'}
+                  onValueChange={(value) => handleChange('integrationCategoryId', value === '_none' ? undefined : parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('integration.form.categoryPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">{t('integration.form.noCategory')}</SelectItem>
+                    {categorias.map((categoria) => (
+                      <SelectItem key={categoria.id} value={categoria.id.toString()}>
+                        {categoria.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </ModalBody>
 
           <ModalFooter>
+            <div className="flex items-center gap-2 sm:mr-auto">
+              <Checkbox
+                id="isActive"
+                checked={formData.isActive}
+                onCheckedChange={(checked) => handleChange('isActive', !!checked)}
+              />
+              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
+            </div>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('common.action.cancel')}
             </Button>

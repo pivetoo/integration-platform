@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { pipelineRoutineService } from '../../../services/pipelineRoutineService';
 import type { PipelineRoutine } from '../../../types/pipelineRoutine';
@@ -8,6 +9,7 @@ import type { Conector } from '../../../types/connector';
 import type { Pipeline } from '../../../types/pipeline';
 import PipelineRoutineFormModal from '../../../components/modals/PipelineRoutineFormModal';
 import { formatDateTime } from '../../../utils/formatters';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function PipelineRoutines() {
   const { t } = useI18n();
@@ -18,21 +20,15 @@ export default function PipelineRoutines() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selectedRotinas, setSelectedRotinas] = useState<PipelineRoutine[]>([]);
+  const [selectedRows, setSelectedRows] = useState<PipelineRoutine[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<PipelineRoutine[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRotina, setEditingRotina] = useState<PipelineRoutine | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchRotinas, loading } = useApi<PaginatedResult<PipelineRoutine>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteRotinas } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('automation.list.removed'), variant: 'success' });
-    },
   });
 
   const loadRotinas = async () => {
@@ -92,33 +88,56 @@ export default function PipelineRoutines() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedRotinas.length === 1) {
-      setEditingRotina(selectedRotinas[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const rotina of selectedRotinas) {
-      await deleteRotinas(() => pipelineRoutineService.delete(rotina.id));
-    }
-
+    await runBulk(itemsToDelete, (rotina) => pipelineRoutineService.delete(rotina.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedRotinas([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadRotinas();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingRotina(null);
-    setSelectedRotinas([]);
+    setSelectedRows([]);
     void loadRotinas();
   };
+
+  const rowActions: DataTableRowAction<PipelineRoutine>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingRotina(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<PipelineRoutine>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<PipelineRoutine>[] = [
     {
@@ -147,7 +166,7 @@ export default function PipelineRoutines() {
       dataIndex: 'isActive',
       width: 110,
       render: (value: boolean) => (
-        <Badge variant={value ? 'success' : 'destructive'}>
+        <Badge dot variant={value ? 'soft-success' : 'soft-neutral'}>
           {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
@@ -172,10 +191,7 @@ export default function PipelineRoutines() {
     <PageLayout
       title={t('automation.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadRotinas()}
-      selectedRowsCount={selectedRotinas.length}
     >
       <TableToolbar
         searchValue={search}
@@ -190,9 +206,10 @@ export default function PipelineRoutines() {
         data={rotinas}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedRotinas}
-        onSelectionChange={setSelectedRotinas}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -210,10 +227,11 @@ export default function PipelineRoutines() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('automation.list.deleteTitle')}
-        description={t('automation.list.deleteDescription').replace('{0}', String(selectedRotinas.length))}
+        description={t('automation.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <PipelineRoutineFormModal

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, Play, RefreshCcw, Filter, Bug } from 'lucide-react';
-import { Badge, Button, Modal, ModalContent, ModalHeader, ModalTitle, useApi, useI18n } from 'archon-ui';
+import { Badge, Button, Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, useApi, useI18n } from 'archon-ui';
 import { connectorService } from '../../services/connectorService';
 import { executionService } from '../../services/executionService';
 import { executionLogService } from '../../services/executionLogService';
@@ -436,7 +436,8 @@ export default function PipelineDebuggerModal({
           </ModalTitle>
         </ModalHeader>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <ModalBody className="flex flex-col gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium">{t('pipeline.debugger.inputPayload')}</label>
             <textarea
@@ -633,7 +634,7 @@ export default function PipelineDebuggerModal({
                     filteredLogs.map((log) => (
                       <div key={log.id} className="rounded-md border p-2">
                         <div className="mb-1 flex items-center justify-between gap-2">
-                          <Badge variant={log.level === LogLevel.Error ? 'destructive' : log.level === LogLevel.Warning ? 'warning' : 'secondary'}>
+                          <Badge dot variant={log.level === LogLevel.Error ? 'soft-destructive' : log.level === LogLevel.Warning ? 'soft-warning' : 'soft-neutral'}>
                             {nivelLogLabels[log.level] || LogLevelLabels[log.level]}
                           </Badge>
                           {log.duration != null && <span className="text-xs text-muted-foreground">{log.duration}ms</span>}
@@ -647,7 +648,8 @@ export default function PipelineDebuggerModal({
             </div>
           </div>
         </div>
-      </ModalContent>
-    </Modal>
-  );
+      </ModalBody>
+    </ModalContent>
+  </Modal>
+);
 }

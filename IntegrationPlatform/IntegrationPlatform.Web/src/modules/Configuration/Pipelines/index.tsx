@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { pipelineService } from '../../../services/pipelineService';
 import type { Pipeline } from '../../../types/pipeline';
 import type { Integration } from '../../../types/integration';
 import PipelineFormModal from '../../../components/modals/PipelineFormModal';
-import DetailsButton from '../../../components/DetailsButton';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function Pipelines() {
   const { t } = useI18n();
@@ -19,21 +20,15 @@ export default function Pipelines() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selectedPipelines, setSelectedPipelines] = useState<Pipeline[]>([]);
+  const [selectedRows, setSelectedRows] = useState<Pipeline[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<Pipeline[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPipeline, setEditingPipeline] = useState<Pipeline | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchPipelines, loading } = useApi<PaginatedResult<Pipeline>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deletePipelines } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('pipeline.list.removed'), variant: 'success' });
-    },
   });
 
   const loadPipelines = async () => {
@@ -93,36 +88,66 @@ export default function Pipelines() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedPipelines.length === 1) {
-      setEditingPipeline(selectedPipelines[0]);
-      setIsFormOpen(true);
-    }
-  };
-
   const handleRowDoubleClick = (pipeline: Pipeline) => {
     navigate(`/pipelines/${pipeline.id}`);
   };
 
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const pipeline of selectedPipelines) {
-      await deletePipelines(() => pipelineService.delete(pipeline.id));
-    }
+    await runBulk(itemsToDelete, (pipeline) => pipelineService.delete(pipeline.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedPipelines([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadPipelines();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingPipeline(null);
-    setSelectedPipelines([]);
+    setSelectedRows([]);
     void loadPipelines();
   };
+
+  const rowActions: DataTableRowAction<Pipeline>[] = [
+    {
+      key: 'details',
+      label: t('common.action.details') !== 'common.action.details' ? t('common.action.details') : 'Detalhes',
+      icon: <Eye className="h-4 w-4" />,
+      onClick: (row) => navigate(`/pipelines/${row.id}`),
+    },
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingPipeline(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<Pipeline>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<Pipeline>[] = [
     { key: 'identifier', title: t('common.column.identifier'), dataIndex: 'identifier', hiddenBelow: 'md' },
@@ -140,18 +165,9 @@ export default function Pipelines() {
       dataIndex: 'isActive',
       width: 110,
       render: (value: boolean) => (
-        <Badge variant={value ? 'success' : 'destructive'}>
+        <Badge dot variant={value ? 'soft-success' : 'soft-neutral'}>
           {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
-      ),
-    },
-    {
-      key: 'actions',
-      title: '',
-      dataIndex: undefined,
-      width: 110,
-      render: (_: unknown, record: Pipeline) => (
-        <DetailsButton onClick={(e) => { e.stopPropagation(); navigate(`/pipelines/${record.id}`); }} />
       ),
     },
   ];
@@ -160,10 +176,7 @@ export default function Pipelines() {
     <PageLayout
       title={t('pipeline.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadPipelines()}
-      selectedRowsCount={selectedPipelines.length}
     >
       <TableToolbar
         searchValue={search}
@@ -178,9 +191,10 @@ export default function Pipelines() {
         data={pipelines}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedPipelines}
-        onSelectionChange={setSelectedPipelines}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         onRowDoubleClick={handleRowDoubleClick}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
@@ -199,10 +213,11 @@ export default function Pipelines() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('pipeline.list.deleteTitle')}
-        description={t('pipeline.list.deleteDescription').replace('{0}', String(selectedPipelines.length))}
+        description={t('pipeline.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <PipelineFormModal

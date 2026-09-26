@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn, FilterSection } from 'archon-ui';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, FilterPanel, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, FilterSection, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { connectorService } from '../../../services/connectorService';
 import type { Conector } from '../../../types/connector';
 import type { Integration } from '../../../types/integration';
 import ConectorFormModal from '../../../components/modals/ConnectorFormModal';
-import DetailsButton from '../../../components/DetailsButton';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function Conectores() {
   const { t } = useI18n();
@@ -19,21 +20,15 @@ export default function Conectores() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selectedConectores, setSelectedConectores] = useState<Conector[]>([]);
+  const [selectedRows, setSelectedRows] = useState<Conector[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<Conector[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingConector, setEditingConector] = useState<Conector | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchConectores, loading } = useApi<PaginatedResult<Conector>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteConectores } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('connector.list.removed'), variant: 'success' });
-    },
   });
 
   const loadConectores = async () => {
@@ -93,36 +88,66 @@ export default function Conectores() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedConectores.length === 1) {
-      setEditingConector(selectedConectores[0]);
-      setIsFormOpen(true);
-    }
-  };
-
   const handleRowDoubleClick = (conector: Conector) => {
     navigate(`/conectores/${conector.id}`);
   };
 
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const conector of selectedConectores) {
-      await deleteConectores(() => connectorService.delete(conector.id));
-    }
+    await runBulk(itemsToDelete, (conector) => connectorService.delete(conector.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedConectores([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadConectores();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingConector(null);
-    setSelectedConectores([]);
+    setSelectedRows([]);
     void loadConectores();
   };
+
+  const rowActions: DataTableRowAction<Conector>[] = [
+    {
+      key: 'details',
+      label: t('common.action.details') !== 'common.action.details' ? t('common.action.details') : 'Detalhes',
+      icon: <Eye className="h-4 w-4" />,
+      onClick: (row) => navigate(`/conectores/${row.id}`),
+    },
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingConector(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<Conector>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<Conector>[] = [
     { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
@@ -137,18 +162,9 @@ export default function Conectores() {
       title: t('common.column.status'),
       dataIndex: 'isActive',
       render: (value: boolean) => (
-        <Badge variant={value ? 'success' : 'destructive'}>
-          {value ? t('common.boolean.yes') : t('common.boolean.no')}
+        <Badge dot variant={value ? 'soft-success' : 'soft-neutral'}>
+          {value ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
-      ),
-    },
-    {
-      key: 'actions',
-      title: '',
-      dataIndex: undefined,
-      width: 110,
-      render: (_: unknown, record: Conector) => (
-        <DetailsButton onClick={(e) => { e.stopPropagation(); navigate(`/conectores/${record.id}`); }} />
       ),
     },
   ];
@@ -157,10 +173,7 @@ export default function Conectores() {
     <PageLayout
       title={t('connector.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadConectores()}
-      selectedRowsCount={selectedConectores.length}
     >
       <TableToolbar
         searchValue={search}
@@ -175,9 +188,10 @@ export default function Conectores() {
         data={conectores}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedConectores}
-        onSelectionChange={setSelectedConectores}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         onRowDoubleClick={handleRowDoubleClick}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
@@ -196,10 +210,11 @@ export default function Conectores() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('connector.list.deleteTitle')}
-        description={t('connector.list.deleteDescription').replace('{0}', String(selectedConectores.length))}
+        description={t('connector.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <ConectorFormModal

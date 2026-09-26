@@ -74,7 +74,7 @@ function SortableEtapa({ step, selected, onSelect, onEdit, onDelete }: SortableE
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-semibold text-foreground">{step.name}</span>
-            <Badge variant={step.isActive ? 'success' : 'destructive'}>{step.isActive ? 'Ativo' : 'Inativo'}</Badge>
+            <Badge dot variant={step.isActive ? 'soft-success' : 'soft-neutral'}>{step.isActive ? 'Ativo' : 'Inativo'}</Badge>
           </div>
 
           <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
@@ -268,6 +268,7 @@ export default function PipelineDetalhe() {
           icon: <Plus size={16} />,
           variant: 'secondary',
           onClick: handleAddStep,
+          primary: true,
         },
       ]}
     >
@@ -285,7 +286,7 @@ export default function PipelineDetalhe() {
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
-                <Badge variant={pipeline.isActive ? 'success' : 'destructive'}>
+                <Badge dot variant={pipeline.isActive ? 'soft-success' : 'soft-neutral'}>
                   {pipeline.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>

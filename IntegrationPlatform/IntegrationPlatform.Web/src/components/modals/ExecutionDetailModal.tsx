@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Clock, AlertCircle, Info as InfoIcon, CheckCircle2, Copy, Check } from 'lucide-react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, Badge, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, Badge, useApi, useI18n } from 'archon-ui';
 import type { Execution } from '../../types/execution';
 import { ExecutionStatus } from '../../types/execution';
 import type { ExecutionLog } from '../../types/executionLog';
@@ -15,11 +15,11 @@ interface ExecutionDetailModalProps {
   execution: Execution | null;
 }
 
-const statusVariantMap: Record<number, string> = {
-  1: 'warning',
-  2: 'success',
-  3: 'destructive',
-  4: 'secondary',
+const statusVariantMap: Record<number, 'soft-warning' | 'soft-success' | 'soft-destructive' | 'soft-neutral'> = {
+  1: 'soft-warning',
+  2: 'soft-success',
+  3: 'soft-destructive',
+  4: 'soft-neutral',
 };
 
 function formatDuracao(ms?: number | null): string {
@@ -150,8 +150,8 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
           </ModalTitle>
         </ModalHeader>
 
-        <div className="flex flex-col gap-4 mt-4 overflow-y-auto flex-1">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <ModalBody className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4 text-sm pb-3 border-b">
             <div>
               <span className="font-semibold">{t('common.column.connector')}:</span> {currentExecution.connector?.name || '-'}
             </div>
@@ -161,13 +161,8 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
             <div>
               <span className="font-semibold">{t('common.column.status')}:</span>{' '}
               <Badge
-                variant={
-                  (statusVariantMap[currentExecution.status] || 'outline') as
-                    | 'warning'
-                    | 'success'
-                    | 'destructive'
-                    | 'secondary'
-                }
+                dot
+                variant={statusVariantMap[currentExecution.status] || 'soft-neutral'}
               >
                 {statusLabels[currentExecution.status] || ExecutionStatusLabels[currentExecution.status] || '-'}
               </Badge>
@@ -273,7 +268,8 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
                           {t('execution.detail.response')}
                           {selectedLog.httpStatusCode && (
                             <Badge
-                              variant={selectedLog.httpStatusCode < 400 ? 'success' : 'destructive'}
+                              dot
+                              variant={selectedLog.httpStatusCode < 400 ? 'soft-success' : 'soft-destructive'}
                               className="text-xs"
                             >
                               HTTP {selectedLog.httpStatusCode}
@@ -315,7 +311,7 @@ export default function ExecutionDetailModal({ open, onOpenChange, execution }: 
               )}
             </div>
           </div>
-        </div>
+        </ModalBody>
       </ModalContent>
     </Modal>
   );

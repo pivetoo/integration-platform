@@ -55,7 +55,7 @@ export default function AboutIntegrationPlatformModal({
           <ModalHeader className="space-y-2">
             <div className="flex items-center gap-2">
               <ModalTitle>{t('about.title')}</ModalTitle>
-              <Badge variant="destructive">{t('about.badge')}</Badge>
+              <Badge dot variant="soft-destructive">{t('about.badge')}</Badge>
             </div>
             <ModalDescription>
               {t('about.description')}

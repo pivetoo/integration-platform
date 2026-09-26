@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { databaseScriptService } from '../../../services/databaseScriptService';
 import type { DatabaseScript } from '../../../types/databaseScript';
 import type { DatabaseConnection } from '../../../types/databaseConnection';
 import ScriptBancoDadosFormModal from '../../../components/modals/DatabaseScriptFormModal';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function ScriptsBancoDados() {
   const { t } = useI18n();
@@ -15,21 +17,15 @@ export default function ScriptsBancoDados() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedScripts, setSelectedScripts] = useState<DatabaseScript[]>([]);
+  const [selectedRows, setSelectedRows] = useState<DatabaseScript[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<DatabaseScript[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingScript, setEditingScript] = useState<DatabaseScript | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchScripts, loading } = useApi<PaginatedResult<DatabaseScript>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteScripts } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('database.script.list.removed'), variant: 'success' });
-    },
   });
 
   const loadScripts = async () => {
@@ -65,32 +61,56 @@ export default function ScriptsBancoDados() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedScripts.length === 1) {
-      setEditingScript(selectedScripts[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const script of selectedScripts) {
-      await deleteScripts(() => databaseScriptService.delete(script.id));
-    }
+    await runBulk(itemsToDelete, (script) => databaseScriptService.delete(script.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedScripts([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadScripts();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingScript(null);
-    setSelectedScripts([]);
+    setSelectedRows([]);
     void loadScripts();
   };
+
+  const rowActions: DataTableRowAction<DatabaseScript>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingScript(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<DatabaseScript>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<DatabaseScript>[] = [
     { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
@@ -108,10 +128,7 @@ export default function ScriptsBancoDados() {
     <PageLayout
       title={t('database.script.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadScripts()}
-      selectedRowsCount={selectedScripts.length}
     >
       <TableToolbar
         searchValue={search}
@@ -125,9 +142,10 @@ export default function ScriptsBancoDados() {
         data={scripts}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedScripts}
-        onSelectionChange={setSelectedScripts}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -145,10 +163,11 @@ export default function ScriptsBancoDados() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('database.script.list.deleteTitle')}
-        description={t('database.script.list.deleteDescription').replace('{0}', String(selectedScripts.length))}
+        description={t('database.script.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <ScriptBancoDadosFormModal

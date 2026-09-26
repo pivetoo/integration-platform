@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n, toast } from 'archon-ui';
 import { databaseConnectionService } from '../../services/databaseConnectionService';
 import type { CreateDatabaseConnectionRequest } from '../../types/databaseConnection';
 import { DatabaseType, DatabaseTypeLabels } from '../../types/databaseConnection';
@@ -92,93 +92,95 @@ export default function DatabaseConnectionFormModal({ open, onOpenChange, onSucc
           <ModalTitle>{isEditing ? t('database.connection.form.editTitle') : t('database.connection.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                placeholder={t('database.connection.form.namePlaceholder')}
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  placeholder={t('database.connection.form.namePlaceholder')}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('database.connection.form.databaseType')}</label>
-              <Select
-                value={formData.type.toString()}
-                onValueChange={(value) => handleChange('type', parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(DatabaseTypeLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('database.connection.form.databaseType')}</label>
+                <Select
+                  value={formData.type.toString()}
+                  onValueChange={(value) => handleChange('type', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(DatabaseTypeLabels).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="host" className="text-sm font-medium">{t('common.column.host')}</label>
-              <Input
-                id="host"
-                value={formData.host}
-                onChange={(e) => handleChange('host', e.target.value)}
-                placeholder={t('database.connection.form.hostPlaceholder')}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="host" className="text-sm font-medium">{t('common.column.host')}</label>
+                <Input
+                  id="host"
+                  value={formData.host}
+                  onChange={(e) => handleChange('host', e.target.value)}
+                  placeholder={t('database.connection.form.hostPlaceholder')}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="port" className="text-sm font-medium">{t('database.connection.form.port')}</label>
-              <Input
-                id="port"
-                type="number"
-                value={formData.port}
-                onChange={(e) => handleChange('port', parseInt(e.target.value))}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="port" className="text-sm font-medium">{t('database.connection.form.port')}</label>
+                <Input
+                  id="port"
+                  type="number"
+                  value={formData.port}
+                  onChange={(e) => handleChange('port', parseInt(e.target.value))}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="database" className="text-sm font-medium">{t('common.column.database')}</label>
-              <Input
-                id="database"
-                value={formData.database}
-                onChange={(e) => handleChange('database', e.target.value)}
-                placeholder={t('database.connection.form.databasePlaceholder')}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="database" className="text-sm font-medium">{t('common.column.database')}</label>
+                <Input
+                  id="database"
+                  value={formData.database}
+                  onChange={(e) => handleChange('database', e.target.value)}
+                  placeholder={t('database.connection.form.databasePlaceholder')}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">{t('common.column.username')}</label>
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) => handleChange('username', e.target.value)}
-                placeholder={t('database.connection.form.usernamePlaceholder')}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="username" className="text-sm font-medium">{t('common.column.username')}</label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) => handleChange('username', e.target.value)}
+                  placeholder={t('database.connection.form.usernamePlaceholder')}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">{t('database.connection.form.password')}</label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                required
-              />
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">{t('database.connection.form.password')}</label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

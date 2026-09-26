@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, Badge, ConfirmModal, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { apiCallService } from '../../../services/apiCallService';
 import { HttpMethodLabels, HttpMethod } from '../../../types/apiCall';
 import type { ApiCall } from '../../../types/apiCall';
 import ChamadaApiFormModal from '../../../components/modals/ApiCallFormModal';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 const metodoVariantMap: Record<number, string> = {
   [HttpMethod.GET]: 'success',
@@ -23,24 +25,18 @@ export default function ChamadasApi() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedChamadas, setSelectedChamadas] = useState<ApiCall[]>([]);
+  const [selectedRows, setSelectedRows] = useState<ApiCall[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<ApiCall[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingChamada, setEditingChamada] = useState<ApiCall | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchChamadas, loading } = useApi<PaginatedResult<ApiCall>>({
     showErrorMessage: true,
   });
   const { execute: fetchApiCallById } = useApi<ApiCall>({
     showErrorMessage: false,
-  });
-
-  const { execute: deleteChamadas } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('apiCall.list.removed'), variant: 'success' });
-    },
   });
 
   const loadChamadas = async () => {
@@ -76,33 +72,61 @@ export default function ChamadasApi() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = async () => {
-    if (selectedChamadas.length === 1) {
-      const result = await fetchApiCallById(() => apiCallService.getById(selectedChamadas[0].id));
-      setEditingChamada(result ?? selectedChamadas[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
+  const handleEditRow = async (row: ApiCall) => {
+    const result = await fetchApiCallById(() => apiCallService.getById(row.id));
+    setEditingChamada(result ?? row);
+    setIsFormOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    for (const chamada of selectedChamadas) {
-      await deleteChamadas(() => apiCallService.delete(chamada.id));
-    }
+    await runBulk(itemsToDelete, (chamada) => apiCallService.delete(chamada.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedChamadas([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadChamadas();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingChamada(null);
-    setSelectedChamadas([]);
+    setSelectedRows([]);
     void loadChamadas();
   };
+
+  const rowActions: DataTableRowAction<ApiCall>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        void handleEditRow(row);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<ApiCall>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<ApiCall>[] = [
     { key: 'name', title: t('common.column.name'), dataIndex: 'name', sortable: true },
@@ -124,10 +148,7 @@ export default function ChamadasApi() {
     <PageLayout
       title={t('apiCall.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadChamadas()}
-      selectedRowsCount={selectedChamadas.length}
     >
       <TableToolbar
         searchValue={search}
@@ -141,9 +162,10 @@ export default function ChamadasApi() {
         data={chamadas}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedChamadas}
-        onSelectionChange={setSelectedChamadas}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -161,10 +183,11 @@ export default function ChamadasApi() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('apiCall.list.deleteTitle')}
-        description={t('apiCall.list.deleteDescription').replace('{0}', String(selectedChamadas.length))}
+        description={t('apiCall.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <ChamadaApiFormModal

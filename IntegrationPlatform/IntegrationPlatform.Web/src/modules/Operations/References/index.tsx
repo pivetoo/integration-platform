@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n, toast } from 'archon-ui';
-import type { DataTableColumn } from 'archon-ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { PageLayout, DataTable, ConfirmModal, TableToolbar, useApi, useI18n } from 'archon-ui';
+import type { DataTableColumn, DataTableRowAction, DataTableBulkAction } from 'archon-ui';
 import type { PaginatedResult } from '../../../types/pagination';
 import { referenceService } from '../../../services/referenceService';
 import type { Reference } from '../../../types/reference';
 import type { Conector } from '../../../types/connector';
 import ReferenceFormModal from '../../../components/modals/ReferenceFormModal';
 import { formatDateTime } from '../../../utils/formatters';
+import { useBulkRun } from '../../../lib/useBulkRun';
 
 export default function References() {
   const { t } = useI18n();
@@ -16,21 +18,15 @@ export default function References() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedReferencias, setSelectedReferencias] = useState<Reference[]>([]);
+  const [selectedRows, setSelectedRows] = useState<Reference[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<Reference[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReferencia, setEditingReferencia] = useState<Reference | null>(null);
+  const { run: runBulk, running: bulkRunning } = useBulkRun();
 
   const { execute: fetchReferencias, loading } = useApi<PaginatedResult<Reference>>({
     showErrorMessage: true,
-  });
-
-  const { execute: deleteReferencias } = useApi({
-    showSuccessMessage: false,
-    showErrorMessage: true,
-    onSuccess: () => {
-      toast({ title: t('common.toast.removedTitle'), description: t('reference.list.removed'), variant: 'success' });
-    },
   });
 
   const loadReferencias = async () => {
@@ -66,32 +62,56 @@ export default function References() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = () => {
-    if (selectedReferencias.length === 1) {
-      setEditingReferencia(selectedReferencias[0]);
-      setIsFormOpen(true);
-    }
-  };
-
-  const handleDelete = () => {
-    setIsConfirmOpen(true);
-  };
-
   const handleDeleteConfirm = async () => {
-    for (const referencia of selectedReferencias) {
-      await deleteReferencias(() => referenceService.delete(referencia.id));
-    }
+    await runBulk(itemsToDelete, (referencia) => referenceService.delete(referencia.id), 'deleted');
     setIsConfirmOpen(false);
-    setSelectedReferencias([]);
+    setItemsToDelete([]);
+    setSelectedRows([]);
     void loadReferencias();
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setEditingReferencia(null);
-    setSelectedReferencias([]);
+    setSelectedRows([]);
     void loadReferencias();
   };
+
+  const rowActions: DataTableRowAction<Reference>[] = [
+    {
+      key: 'edit',
+      label: t('common.action.edit'),
+      icon: <Pencil className="h-4 w-4" />,
+      onClick: (row) => {
+        setEditingReferencia(row);
+        setIsFormOpen(true);
+      },
+    },
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      onClick: (row) => {
+        setItemsToDelete([row]);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
+
+  const bulkActions: DataTableBulkAction<Reference>[] = [
+    {
+      key: 'delete',
+      label: t('common.action.delete'),
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'danger',
+      disabled: bulkRunning,
+      onClick: (rows) => {
+        setItemsToDelete(rows);
+        setIsConfirmOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<Reference>[] = [
     {
@@ -131,10 +151,7 @@ export default function References() {
     <PageLayout
       title={t('reference.list.title')}
       onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
       onRefresh={() => void loadReferencias()}
-      selectedRowsCount={selectedReferencias.length}
     >
       <TableToolbar
         searchValue={search}
@@ -148,9 +165,10 @@ export default function References() {
         data={referencias}
         rowKey="id"
         loading={loading}
-        selectable
-        selectedRows={selectedReferencias}
-        onSelectionChange={setSelectedReferencias}
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
@@ -168,10 +186,11 @@ export default function References() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={handleDeleteConfirm}
         title={t('reference.list.deleteTitle')}
-        description={t('reference.list.deleteDescription').replace('{0}', String(selectedReferencias.length))}
+        description={t('reference.list.deleteDescription').replace('{0}', String(itemsToDelete.length))}
         confirmText={t('common.action.delete')}
         cancelText={t('common.action.cancel')}
         variant="danger"
+        loading={bulkRunning}
       />
 
       <ReferenceFormModal

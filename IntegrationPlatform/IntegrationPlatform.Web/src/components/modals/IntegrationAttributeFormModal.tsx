@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { integrationAttributeService } from '../../services/integrationAttributeService';
 import { TipoCampo } from '../../types/integrationAttribute';
 import type { IntegracaoAtributo, CreateIntegracaoAtributoRequest } from '../../types/integrationAttribute';
@@ -117,127 +117,129 @@ export default function IntegrationAttributeFormModal({ open, onOpenChange, inte
           <ModalTitle>{isEditing ? t('integration.attribute.form.editTitle') : t('integration.attribute.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="campo" className="text-sm font-medium">{t('integration.attribute.form.fieldLabel')}</label>
-              <Input
-                id="campo"
-                value={formData.field}
-                onChange={(e) => handleChange('field', e.target.value)}
-                placeholder={t('integration.attribute.form.fieldPlaceholder')}
-                required
-              />
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="campo" className="text-sm font-medium">{t('integration.attribute.form.fieldLabel')}</label>
+                <Input
+                  id="campo"
+                  value={formData.field}
+                  onChange={(e) => handleChange('field', e.target.value)}
+                  placeholder={t('integration.attribute.form.fieldPlaceholder')}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="label" className="text-sm font-medium">{t('integration.attribute.form.labelLabel')}</label>
+                <Input
+                  id="label"
+                  value={formData.label}
+                  onChange={(e) => handleChange('label', e.target.value)}
+                  placeholder={t('integration.attribute.form.labelPlaceholder')}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
+                <Input
+                  id="descricao"
+                  value={formData.description || ''}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  placeholder={t('integration.attribute.form.descriptionPlaceholder')}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.type')}</label>
+                <Select
+                  value={formData.type.toString()}
+                  onValueChange={(value) => handleChange('type', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tipoCampoOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="placeholder" className="text-sm font-medium">{t('integration.attribute.form.placeholderLabel')}</label>
+                <Input
+                  id="placeholder"
+                  value={formData.placeholder || ''}
+                  onChange={(e) => handleChange('placeholder', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="valorPadrao" className="text-sm font-medium">{t('integration.attribute.form.defaultValueLabel')}</label>
+                <Input
+                  id="valorPadrao"
+                  value={formData.defaultValue || ''}
+                  onChange={(e) => handleChange('defaultValue', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="grupo" className="text-sm font-medium">{t('integration.attribute.form.groupLabel')}</label>
+                <Input
+                  id="grupo"
+                  value={formData.group || ''}
+                  onChange={(e) => handleChange('group', e.target.value)}
+                  placeholder={t('integration.attribute.form.groupPlaceholder')}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="ordem" className="text-sm font-medium">{t('common.column.order')}</label>
+                <Input
+                  id="ordem"
+                  type="number"
+                  value={formData.order}
+                  onChange={(e) => handleChange('order', parseInt(e.target.value) || 0)}
+                  min={1}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="label" className="text-sm font-medium">{t('integration.attribute.form.labelLabel')}</label>
-              <Input
-                id="label"
-                value={formData.label}
-                onChange={(e) => handleChange('label', e.target.value)}
-                placeholder={t('integration.attribute.form.labelPlaceholder')}
-                required
-              />
-            </div>
+            <div className="flex flex-wrap items-center gap-6 pt-1">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="obrigatorio"
+                  checked={formData.isRequired}
+                  onCheckedChange={(checked) => handleChange('isRequired', !!checked)}
+                />
+                <label htmlFor="obrigatorio" className="text-sm font-medium cursor-pointer">{t('integration.detail.required')}</label>
+              </div>
 
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="descricao" className="text-sm font-medium">{t('common.column.description')}</label>
-              <Input
-                id="descricao"
-                value={formData.description || ''}
-                onChange={(e) => handleChange('description', e.target.value)}
-                placeholder={t('integration.attribute.form.descriptionPlaceholder')}
-              />
-            </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="sensivel"
+                  checked={formData.isSensitive}
+                  onCheckedChange={(checked) => handleChange('isSensitive', !!checked)}
+                />
+                <label htmlFor="sensivel" className="text-sm font-medium cursor-pointer">{t('integration.detail.sensitive')}</label>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.type')}</label>
-              <Select
-                value={formData.type.toString()}
-                onValueChange={(value) => handleChange('type', parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {tipoCampoOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="oculto"
+                  checked={formData.isHidden}
+                  onCheckedChange={(checked) => handleChange('isHidden', !!checked)}
+                />
+                <label htmlFor="oculto" className="text-sm font-medium cursor-pointer">{t('integration.attribute.form.isHidden')}</label>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <label htmlFor="placeholder" className="text-sm font-medium">{t('integration.attribute.form.placeholderLabel')}</label>
-              <Input
-                id="placeholder"
-                value={formData.placeholder || ''}
-                onChange={(e) => handleChange('placeholder', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="valorPadrao" className="text-sm font-medium">{t('integration.attribute.form.defaultValueLabel')}</label>
-              <Input
-                id="valorPadrao"
-                value={formData.defaultValue || ''}
-                onChange={(e) => handleChange('defaultValue', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="grupo" className="text-sm font-medium">{t('integration.attribute.form.groupLabel')}</label>
-              <Input
-                id="grupo"
-                value={formData.group || ''}
-                onChange={(e) => handleChange('group', e.target.value)}
-                placeholder={t('integration.attribute.form.groupPlaceholder')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="ordem" className="text-sm font-medium">{t('common.column.order')}</label>
-              <Input
-                id="ordem"
-                type="number"
-                value={formData.order}
-                onChange={(e) => handleChange('order', parseInt(e.target.value) || 0)}
-                min={1}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="obrigatorio"
-                checked={formData.isRequired}
-                onCheckedChange={(checked) => handleChange('isRequired', !!checked)}
-              />
-              <label htmlFor="obrigatorio" className="text-sm font-medium">{t('integration.detail.required')}</label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="sensivel"
-                checked={formData.isSensitive}
-                onCheckedChange={(checked) => handleChange('isSensitive', !!checked)}
-              />
-              <label htmlFor="sensivel" className="text-sm font-medium">{t('integration.detail.sensitive')}</label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="oculto"
-                checked={formData.isHidden}
-                onCheckedChange={(checked) => handleChange('isHidden', !!checked)}
-              />
-              <label htmlFor="oculto" className="text-sm font-medium">{t('integration.attribute.form.isHidden')}</label>
-            </div>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

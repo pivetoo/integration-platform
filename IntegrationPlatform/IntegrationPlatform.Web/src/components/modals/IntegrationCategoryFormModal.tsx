@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Badge, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Badge, useApi, useI18n } from 'archon-ui';
 import { integrationCategoryService } from '../../services/integrationCategoryService';
 import type { IntegrationCategory, CreateIntegrationCategoryRequest } from '../../types/integrationCategory';
 
@@ -89,7 +89,7 @@ export default function IntegrationCategoryFormModal({ open, onOpenChange, categ
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent>
+      <ModalContent size="md">
         <ModalHeader>
           <ModalTitle className="flex items-center gap-2">
             {isEditing ? t('integration.category.form.editTitle') : t('integration.category.form.createTitle')}
@@ -97,61 +97,62 @@ export default function IntegrationCategoryFormModal({ open, onOpenChange, categ
           </ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              required
-              placeholder={t('integration.category.form.namePlaceholder')}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="identifier" className="text-sm font-medium">
-              {t('integration.category.form.identifier')}
-            </label>
-            <Input
-              id="identifier"
-              value={formData.identifier}
-              onChange={(e) => handleIdentifierChange(e.target.value)}
-              required
-              disabled={isSystem}
-              placeholder={t('integration.category.form.identifierPlaceholder')}
-            />
-            <p className="text-xs text-muted-foreground">
-              {isSystem
-                ? t('integration.category.form.identifierSystemHint')
-                : t('integration.category.form.identifierHint')}
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
-            <Input
-              id="description"
-              value={formData.description || ''}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder={t('integration.category.form.descriptionPlaceholder')}
-            />
-          </div>
-
-          {isEditing && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isActive"
-                checked={isActive}
-                onCheckedChange={(checked) => setIsActive(checked as boolean)}
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                required
+                placeholder={t('integration.category.form.namePlaceholder')}
               />
-              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
-                {t('common.column.active')}
-              </label>
             </div>
-          )}
+
+            <div className="space-y-2">
+              <label htmlFor="identifier" className="text-sm font-medium">
+                {t('integration.category.form.identifier')}
+              </label>
+              <Input
+                id="identifier"
+                value={formData.identifier}
+                onChange={(e) => handleIdentifierChange(e.target.value)}
+                required
+                disabled={isSystem}
+                placeholder={t('integration.category.form.identifierPlaceholder')}
+              />
+              <p className="text-xs text-muted-foreground">
+                {isSystem
+                  ? t('integration.category.form.identifierSystemHint')
+                  : t('integration.category.form.identifierHint')}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
+              <Input
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                placeholder={t('integration.category.form.descriptionPlaceholder')}
+              />
+            </div>
+          </ModalBody>
 
           <ModalFooter>
+            {isEditing && (
+              <div className="flex items-center gap-2 sm:mr-auto">
+                <Checkbox
+                  id="isActive"
+                  checked={isActive}
+                  onCheckedChange={(checked) => setIsActive(checked as boolean)}
+                />
+                <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
+                  {t('common.column.active')}
+                </label>
+              </div>
+            )}
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('common.action.cancel')}
             </Button>

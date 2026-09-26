@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { connectorService } from '../../services/connectorService';
 import { integrationService } from '../../services/integrationService';
 import type { Conector, CreateConectorRequest } from '../../types/connector';
@@ -84,57 +84,58 @@ export default function ConnectorFormModal({ open, onOpenChange, connector, onSu
           <ModalTitle>{isEditing ? t('connector.form.editTitle') : t('connector.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
-              <Input
-                id="nome"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="nome" className="text-sm font-medium">{t('common.column.name')}</label>
+                <Input
+                  id="nome"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.integration')}</label>
-              <Select
-                value={formData.integrationId ? formData.integrationId.toString() : ''}
-                onValueChange={(value) => handleChange('integrationId', parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('connector.form.integrationPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {integrations.map((integracao) => (
-                    <SelectItem key={integracao.id} value={integracao.id.toString()}>
-                      {integracao.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.integration')}</label>
+                <Select
+                  value={formData.integrationId ? formData.integrationId.toString() : ''}
+                  onValueChange={(value) => handleChange('integrationId', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('connector.form.integrationPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {integrations.map((integracao) => (
+                      <SelectItem key={integracao.id} value={integracao.id.toString()}>
+                        {integracao.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="sistemaId" className="text-sm font-medium">{t('connector.form.systemId')}</label>
-              <Input
-                id="sistemaId"
-                value={formData.systemApplicationId || ''}
-                onChange={(e) => handleChange('systemApplicationId', e.target.value)}
-              />
+              <div className="space-y-2">
+                <label htmlFor="sistemaId" className="text-sm font-medium">{t('connector.form.systemId')}</label>
+                <Input
+                  id="sistemaId"
+                  value={formData.systemApplicationId || ''}
+                  onChange={(e) => handleChange('systemApplicationId', e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="ativo"
-              checked={formData.isActive}
-              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
-            />
-            <label htmlFor="ativo" className="text-sm font-medium">{t('common.column.active')}</label>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
+            <div className="flex items-center gap-2 sm:mr-auto">
+              <Checkbox
+                id="ativo"
+                checked={formData.isActive}
+                onCheckedChange={(checked) => handleChange('isActive', !!checked)}
+              />
+              <label htmlFor="ativo" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
+            </div>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('common.action.cancel')}
             </Button>

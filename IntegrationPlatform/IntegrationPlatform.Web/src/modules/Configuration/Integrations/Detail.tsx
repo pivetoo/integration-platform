@@ -110,6 +110,7 @@ export default function IntegracaoDetalhe() {
           icon: <Pencil size={16} />,
           variant: 'secondary',
           onClick: () => setIsEditIntegracaoOpen(true),
+          primary: true,
         },
       ]}
     >
@@ -132,7 +133,7 @@ export default function IntegracaoDetalhe() {
             <div>
               <span className="text-xs text-muted-foreground">{t('common.column.status')}</span>
               <div className="mt-1">
-                <Badge variant={integracao.isActive ? 'success' : 'destructive'}>
+                <Badge dot variant={integracao.isActive ? 'soft-success' : 'soft-neutral'}>
                   {integracao.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </div>

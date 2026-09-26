@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { serviceContractService } from '../../services/serviceContractService';
 import { integrationCategoryService } from '../../services/integrationCategoryService';
 import type { ServiceContract, CreateServiceContractRequest } from '../../types/serviceContract';
@@ -100,81 +100,82 @@ export default function ServiceContractFormModal({ open, onOpenChange, serviceCo
           </ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
-              <Input id="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} required />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="identifier" className="text-sm font-medium">{t('serviceContract.form.identifier')}</label>
-              <Input
-                id="identifier"
-                value={formData.identifier}
-                onChange={(e) => handleChange('identifier', normalizeIdentifier(e.target.value))}
-                required
-                disabled={isSystem}
-                placeholder="receivable.charge.create"
-              />
-              <p className="text-xs text-muted-foreground">
-                {isSystem ? t('serviceContract.form.identifierSystemHint') : t('serviceContract.form.identifierHint')}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('serviceContract.form.category')}</label>
-              <Select
-                value={formData.integrationCategoryId ? formData.integrationCategoryId.toString() : ''}
-                onValueChange={(value) => handleChange('integrationCategoryId', Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('serviceContract.form.categoryPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id.toString()}>{category.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center gap-2 pt-7">
-              <Checkbox id="hasCallback" checked={formData.hasCallback} onCheckedChange={(checked) => handleChange('hasCallback', checked as boolean)} />
-              <label htmlFor="hasCallback" className="text-sm font-medium cursor-pointer">{t('serviceContract.form.hasCallback')}</label>
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
-              <Input id="description" value={formData.description || ''} onChange={(e) => handleChange('description', e.target.value)} />
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="inputSchema" className="text-sm font-medium">{t('serviceContract.form.inputSchema')}</label>
-              <textarea id="inputSchema" className={textareaClass} value={formData.inputSchema || ''} onChange={(e) => handleChange('inputSchema', e.target.value)} rows={6} />
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="outputSchema" className="text-sm font-medium">{t('serviceContract.form.outputSchema')}</label>
-              <textarea id="outputSchema" className={textareaClass} value={formData.outputSchema || ''} onChange={(e) => handleChange('outputSchema', e.target.value)} rows={4} />
-            </div>
-
-            {formData.hasCallback && (
-              <div className="space-y-2 col-span-2">
-                <label htmlFor="callbackSchema" className="text-sm font-medium">{t('serviceContract.form.callbackSchema')}</label>
-                <textarea id="callbackSchema" className={textareaClass} value={formData.callbackSchema || ''} onChange={(e) => handleChange('callbackSchema', e.target.value)} rows={4} />
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
+                <Input id="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} required />
               </div>
-            )}
 
+              <div className="space-y-2">
+                <label htmlFor="identifier" className="text-sm font-medium">{t('serviceContract.form.identifier')}</label>
+                <Input
+                  id="identifier"
+                  value={formData.identifier}
+                  onChange={(e) => handleChange('identifier', normalizeIdentifier(e.target.value))}
+                  required
+                  disabled={isSystem}
+                  placeholder="receivable.charge.create"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isSystem ? t('serviceContract.form.identifierSystemHint') : t('serviceContract.form.identifierHint')}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('serviceContract.form.category')}</label>
+                <Select
+                  value={formData.integrationCategoryId ? formData.integrationCategoryId.toString() : ''}
+                  onValueChange={(value) => handleChange('integrationCategoryId', Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('serviceContract.form.categoryPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>{category.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2 pt-7">
+                <Checkbox id="hasCallback" checked={formData.hasCallback} onCheckedChange={(checked) => handleChange('hasCallback', checked as boolean)} />
+                <label htmlFor="hasCallback" className="text-sm font-medium cursor-pointer">{t('serviceContract.form.hasCallback')}</label>
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
+                <Input id="description" value={formData.description || ''} onChange={(e) => handleChange('description', e.target.value)} />
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="inputSchema" className="text-sm font-medium">{t('serviceContract.form.inputSchema')}</label>
+                <textarea id="inputSchema" className={textareaClass} value={formData.inputSchema || ''} onChange={(e) => handleChange('inputSchema', e.target.value)} rows={6} />
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="outputSchema" className="text-sm font-medium">{t('serviceContract.form.outputSchema')}</label>
+                <textarea id="outputSchema" className={textareaClass} value={formData.outputSchema || ''} onChange={(e) => handleChange('outputSchema', e.target.value)} rows={4} />
+              </div>
+
+              {formData.hasCallback && (
+                <div className="space-y-2 col-span-2">
+                  <label htmlFor="callbackSchema" className="text-sm font-medium">{t('serviceContract.form.callbackSchema')}</label>
+                  <textarea id="callbackSchema" className={textareaClass} value={formData.callbackSchema || ''} onChange={(e) => handleChange('callbackSchema', e.target.value)} rows={4} />
+                </div>
+              )}
+            </div>
+          </ModalBody>
+
+          <ModalFooter>
             {isEditing && (
-              <div className="flex items-center gap-2 col-span-2">
+              <div className="flex items-center gap-2 sm:mr-auto">
                 <Checkbox id="isActive" checked={isActive} onCheckedChange={(checked) => setIsActive(checked as boolean)} />
                 <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
               </div>
             )}
-          </div>
-
-          <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('common.action.cancel')}</Button>
             <Button type="submit" disabled={loading || !formData.integrationCategoryId}>
               {loading ? t('common.action.saving') : t('common.action.save')}

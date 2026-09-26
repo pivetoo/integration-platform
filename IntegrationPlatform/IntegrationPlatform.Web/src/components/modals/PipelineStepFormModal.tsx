@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { pipelineStepService } from '../../services/pipelineStepService';
 import { apiCallService } from '../../services/apiCallService';
 import { javaScriptFunctionService } from '../../services/javaScriptFunctionService';
@@ -155,167 +155,169 @@ export default function PipelineStepFormModal({ open, onOpenChange, step, pipeli
           <ModalTitle>{isEditing ? t('pipeline.step.form.editTitle') : t('pipeline.step.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.type')}</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.type')}</label>
                 <Select
                   value={formData.type.toString()}
                   onValueChange={(value) => handleChange('type', parseInt(value))}
                   disabled={loadingReferencias}
                 >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {tipoOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tipoOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('pipeline.detail.onErrorLabel')}</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('pipeline.detail.onErrorLabel')}</label>
                 <Select
                   value={formData.errorAction.toString()}
                   onValueChange={(value) => handleChange('errorAction', parseInt(value))}
                   disabled={loadingReferencias}
                 >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {acaoErroOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {formData.type === PipelineStepType.HttpRequest && (
-              <div className="space-y-2 col-span-2">
-                <label className="text-sm font-medium">{t('pipeline.detail.apiCall')}</label>
-                <Select
-                  value={formData.apiCallId?.toString() || '_none'}
-                  onValueChange={(value) => handleChange('apiCallId', value === '_none' ? undefined : parseInt(value))}
-                  disabled={loadingReferencias}
-                >
                   <SelectTrigger>
-                    <SelectValue placeholder={loadingReferencias ? t('pipeline.step.form.loadingApiCalls') : t('pipeline.step.form.apiCallPlaceholder')} />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="_none">{t('common.option.none')}</SelectItem>
-                    {chamadas.map((chamada) => (
-                      <SelectItem key={chamada.id} value={chamada.id.toString()}>
-                        {chamada.name}
+                    {acaoErroOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
 
-            {formData.type === PipelineStepType.JavaScriptFunction && (
-              <div className="space-y-2 col-span-2">
-                <label className="text-sm font-medium">{t('pipeline.detail.javaScriptFunction')}</label>
-                <Select
-                  value={formData.javaScriptFunctionId?.toString() || '_none'}
-                  onValueChange={(value) => handleChange('javaScriptFunctionId', value === '_none' ? undefined : parseInt(value))}
-                  disabled={loadingReferencias}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={loadingReferencias ? t('pipeline.step.form.loadingJavaScriptFunctions') : t('pipeline.step.form.javaScriptFunctionPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">{t('common.option.none')}</SelectItem>
-                    {funcoes.map((funcao) => (
-                      <SelectItem key={funcao.id} value={funcao.id.toString()}>
-                        {funcao.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {formData.type === PipelineStepType.HttpRequest && (
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-medium">{t('pipeline.detail.apiCall')}</label>
+                  <Select
+                    value={formData.apiCallId?.toString() || '_none'}
+                    onValueChange={(value) => handleChange('apiCallId', value === '_none' ? undefined : parseInt(value))}
+                    disabled={loadingReferencias}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingReferencias ? t('pipeline.step.form.loadingApiCalls') : t('pipeline.step.form.apiCallPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">{t('common.option.none')}</SelectItem>
+                      {chamadas.map((chamada) => (
+                        <SelectItem key={chamada.id} value={chamada.id.toString()}>
+                          {chamada.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {formData.type === PipelineStepType.JavaScriptFunction && (
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-medium">{t('pipeline.detail.javaScriptFunction')}</label>
+                  <Select
+                    value={formData.javaScriptFunctionId?.toString() || '_none'}
+                    onValueChange={(value) => handleChange('javaScriptFunctionId', value === '_none' ? undefined : parseInt(value))}
+                    disabled={loadingReferencias}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingReferencias ? t('pipeline.step.form.loadingJavaScriptFunctions') : t('pipeline.step.form.javaScriptFunctionPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">{t('common.option.none')}</SelectItem>
+                      {funcoes.map((funcao) => (
+                        <SelectItem key={funcao.id} value={funcao.id.toString()}>
+                          {funcao.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {formData.type === PipelineStepType.ExecuteScript && (
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-medium">{t('pipeline.step.form.databaseScriptLabel')}</label>
+                  <Select
+                    value={formData.databaseScriptId?.toString() || '_none'}
+                    onValueChange={(value) => handleChange('databaseScriptId', value === '_none' ? undefined : parseInt(value))}
+                    disabled={loadingReferencias}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingReferencias ? t('pipeline.step.form.loadingDatabaseScripts') : t('pipeline.step.form.databaseScriptPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">{t('common.option.none')}</SelectItem>
+                      {scripts.map((script) => (
+                        <SelectItem key={script.id} value={script.id.toString()}>
+                          {script.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('pipeline.step.form.runCondition')}</label>
+              <Input
+                value={formData.runCondition ?? ''}
+                onChange={(event) => handleChange('runCondition', event.target.value)}
+                placeholder="!variables.existingCustomerId"
+                maxLength={1000}
+              />
+              <p className="text-xs text-muted-foreground">{t('pipeline.step.form.runCondition.help')}</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 pt-1">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => handleChange('isActive', !!checked)}
+                />
+                <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
               </div>
-            )}
 
-            {formData.type === PipelineStepType.ExecuteScript && (
-              <div className="space-y-2 col-span-2">
-                <label className="text-sm font-medium">{t('pipeline.step.form.databaseScriptLabel')}</label>
-                <Select
-                  value={formData.databaseScriptId?.toString() || '_none'}
-                  onValueChange={(value) => handleChange('databaseScriptId', value === '_none' ? undefined : parseInt(value))}
-                  disabled={loadingReferencias}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={loadingReferencias ? t('pipeline.step.form.loadingDatabaseScripts') : t('pipeline.step.form.databaseScriptPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">{t('common.option.none')}</SelectItem>
-                    {scripts.map((script) => (
-                      <SelectItem key={script.id} value={script.id.toString()}>
-                        {script.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="ignoreOnResponse"
+                  checked={!!formData.ignoreOnResponse}
+                  onCheckedChange={(checked) => handleChange('ignoreOnResponse', !!checked)}
+                />
+                <label htmlFor="ignoreOnResponse" className="text-sm font-medium cursor-pointer">{t('pipeline.step.form.ignoreOnApiReturn')}</label>
               </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t('pipeline.step.form.runCondition')}</label>
-            <Input
-              value={formData.runCondition ?? ''}
-              onChange={(event) => handleChange('runCondition', event.target.value)}
-              placeholder="!variables.existingCustomerId"
-              maxLength={1000}
-            />
-            <p className="text-xs text-muted-foreground">{t('pipeline.step.form.runCondition.help')}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isActive"
-                checked={formData.isActive}
-                onCheckedChange={(checked) => handleChange('isActive', !!checked)}
-              />
-              <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="runOnError"
+                  checked={!!formData.runOnError}
+                  onCheckedChange={(checked) => handleChange('runOnError', !!checked)}
+                />
+                <label htmlFor="runOnError" className="text-sm font-medium cursor-pointer">{t('pipeline.step.form.runOnError')}</label>
+              </div>
             </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="ignoreOnResponse"
-                checked={!!formData.ignoreOnResponse}
-                onCheckedChange={(checked) => handleChange('ignoreOnResponse', !!checked)}
-              />
-              <label htmlFor="ignoreOnResponse" className="text-sm font-medium">{t('pipeline.step.form.ignoreOnApiReturn')}</label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="runOnError"
-                checked={!!formData.runOnError}
-                onCheckedChange={(checked) => handleChange('runOnError', !!checked)}
-              />
-              <label htmlFor="runOnError" className="text-sm font-medium">{t('pipeline.step.form.runOnError')}</label>
-            </div>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

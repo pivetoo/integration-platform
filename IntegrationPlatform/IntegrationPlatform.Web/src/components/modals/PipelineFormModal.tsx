@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { pipelineService } from '../../services/pipelineService';
 import { integrationService } from '../../services/integrationService';
 import type { Pipeline, CreatePipelineRequest } from '../../types/pipeline';
@@ -86,67 +86,68 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
           <ModalTitle>{isEditing ? t('pipeline.form.editTitle') : t('pipeline.form.createTitle')}</ModalTitle>
         </ModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="identifier" className="text-sm font-medium">{t('common.column.identifier')}</label>
-              <Input
-                id="identifier"
-                value={formData.identifier}
-                onChange={(e) => handleChange('identifier', e.target.value)}
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+          <ModalBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="identifier" className="text-sm font-medium">{t('common.column.identifier')}</label>
+                <Input
+                  id="identifier"
+                  value={formData.identifier}
+                  onChange={(e) => handleChange('identifier', e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">{t('common.column.name')}</label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2 col-span-2">
-              <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
-              <Input
-                id="description"
-                value={formData.description || ''}
-                onChange={(e) => handleChange('description', e.target.value)}
-              />
-            </div>
+              <div className="space-y-2 col-span-2">
+                <label htmlFor="description" className="text-sm font-medium">{t('common.column.description')}</label>
+                <Input
+                  id="description"
+                  value={formData.description || ''}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.column.integration')}</label>
-              <Select
-                value={formData.integrationId ? formData.integrationId.toString() : ''}
-                onValueChange={(value) => handleChange('integrationId', parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('pipeline.form.integrationPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {integrations.map((integration) => (
-                    <SelectItem key={integration.id} value={integration.id.toString()}>
-                      {integration.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('common.column.integration')}</label>
+                <Select
+                  value={formData.integrationId ? formData.integrationId.toString() : ''}
+                  onValueChange={(value) => handleChange('integrationId', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('pipeline.form.integrationPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {integrations.map((integration) => (
+                      <SelectItem key={integration.id} value={integration.id.toString()}>
+                        {integration.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="isActive"
-              checked={formData.isActive}
-              onCheckedChange={(checked) => handleChange('isActive', !!checked)}
-            />
-            <label htmlFor="isActive" className="text-sm font-medium">{t('common.column.active')}</label>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
+            <div className="flex items-center gap-2 sm:mr-auto">
+              <Checkbox
+                id="isActive"
+                checked={formData.isActive}
+                onCheckedChange={(checked) => handleChange('isActive', !!checked)}
+              />
+              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">{t('common.column.active')}</label>
+            </div>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('common.action.cancel')}
             </Button>
