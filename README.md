@@ -74,7 +74,6 @@ As principais entidades do sistema são:
 - `ProcessingQueue`: fila persistida de processamento.
 - `Execution`: registro de execução.
 - `ExecutionLog`: log detalhado da execução.
-- `Reference`: mapeamento entre IDs internos e externos.
 - `PipelineRoutine`: rotina agendada para execução de pipeline.
 
 ## Motor de Execução

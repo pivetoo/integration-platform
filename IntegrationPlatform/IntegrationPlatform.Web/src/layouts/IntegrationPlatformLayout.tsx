@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout, useAuth, useNotifications, AuthService, useI18n } from 'archon-ui';
 import type { BreadcrumbItem, ModuleNavConfig } from 'archon-ui';
-import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, ExternalLink, Clock3, Layers, LayoutDashboard, ScrollText } from 'lucide-react';
+import { FolderTree, GitBranch, Plug2, Workflow, Database, FileJson, Globe, Code2, Play, ListOrdered, Clock3, Layers, LayoutDashboard, ScrollText } from 'lucide-react';
 import logoEmpresa from '../assets/logo-empresa.png';
 
 export default function IntegrationPlatformLayout() {
@@ -63,7 +63,6 @@ export default function IntegrationPlatformLayout() {
       routes: [
         { key: 'execucoes', label: t('layout.menu.executions'), path: '/execucoes', icon: <Play size={20} /> },
         { key: 'fila', label: t('layout.menu.processingQueue'), path: '/fila', icon: <ListOrdered size={20} /> },
-        { key: 'referencias', label: t('layout.menu.references'), path: '/referencias', icon: <ExternalLink size={20} /> },
       ],
     },
     {
@@ -95,7 +94,6 @@ export default function IntegrationPlatformLayout() {
       '/pipelines': t('layout.menu.pipelines'),
       '/execucoes': t('layout.menu.executions'),
       '/fila': t('layout.menu.processingQueue'),
-      '/referencias': t('layout.menu.references'),
       '/automacao': t('layout.menu.pipelineRoutines'),
     };
 

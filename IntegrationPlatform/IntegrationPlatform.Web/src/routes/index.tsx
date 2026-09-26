@@ -16,7 +16,6 @@ import DatabaseScripts from '../modules/Configuration/DatabaseScripts';
 import DatabaseConnections from '../modules/Configuration/DatabaseConnections';
 import Executions from '../modules/Operations/Executions';
 import ProcessingQueue from '../modules/Operations/ProcessingQueue';
-import References from '../modules/Operations/References';
 import PipelineRoutines from '../modules/Automation/PipelineRoutines';
 
 const identityManagementUrl = import.meta.env.VITE_IDENTITY_MANAGEMENT_URL;
@@ -67,7 +66,6 @@ function AppRoutes() {
           <Route path="pipelines/:id" element={<PipelineDetail />} />
           <Route path="execucoes" element={<Executions />} />
           <Route path="fila" element={<ProcessingQueue />} />
-          <Route path="referencias" element={<References />} />
           <Route path="automacao" element={<PipelineRoutines />} />
         </Route>
 

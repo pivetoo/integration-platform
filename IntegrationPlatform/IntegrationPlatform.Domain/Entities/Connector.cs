@@ -7,7 +7,6 @@ namespace IntegrationPlatform.Domain.Entities
         private readonly List<ConnectorAttributeValue> attributeValues = [];
         private readonly List<Execution> executions = [];
         private readonly List<ProcessingQueue> processingQueues = [];
-        private readonly List<Reference> references = [];
         private readonly List<PipelineRoutine> routines = [];
 
         public string? SystemApplicationId { get; private set; }
@@ -35,8 +34,6 @@ namespace IntegrationPlatform.Domain.Entities
         public IReadOnlyCollection<Execution> Executions => executions.AsReadOnly();
 
         public IReadOnlyCollection<ProcessingQueue> ProcessingQueues => processingQueues.AsReadOnly();
-
-        public IReadOnlyCollection<Reference> References => references.AsReadOnly();
 
         public IReadOnlyCollection<PipelineRoutine> Routines => routines.AsReadOnly();
 

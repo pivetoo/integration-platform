@@ -348,12 +348,6 @@
   <data name="processingQueue.processed" xml:space="preserve">
     <value>Queue item processed successfully.</value>
   </data>
-  <data name="reference.deleted" xml:space="preserve">
-    <value>Reference deleted successfully.</value>
-  </data>
-  <data name="reference.notFound" xml:space="preserve">
-    <value>Reference not found.</value>
-  </data>
   <data name="request.connector.id.required" xml:space="preserve">
     <value>Connector id is required.</value>
   </data>
@@ -432,7 +426,6 @@
   <data name="layout.menu.automation" xml:space="preserve"><value>Automation</value></data>
   <data name="layout.menu.executions" xml:space="preserve"><value>Executions</value></data>
   <data name="layout.menu.processingQueue" xml:space="preserve"><value>Integration Queue</value></data>
-  <data name="layout.menu.references" xml:space="preserve"><value>References</value></data>
   <data name="layout.menu.resources" xml:space="preserve"><value>Resources</value></data>
   <data name="layout.menu.pipelineRoutines" xml:space="preserve"><value>Pipeline Routines</value></data>
   <data name="layout.menu.reports" xml:space="preserve"><value>Reports</value></data>
@@ -498,11 +491,6 @@
   <data name="processingQueue.list.deleteTitle" xml:space="preserve"><value>Delete from Queue</value></data>
   <data name="processingQueue.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} queue item(s)?</value></data>
   <data name="processingQueue.list.removed" xml:space="preserve"><value>Queue item removed successfully.</value></data>
-  <data name="reference.list.title" xml:space="preserve"><value>References</value></data>
-  <data name="reference.list.empty" xml:space="preserve"><value>No references found</value></data>
-  <data name="reference.list.deleteTitle" xml:space="preserve"><value>Delete Reference</value></data>
-  <data name="reference.list.deleteDescription" xml:space="preserve"><value>Are you sure you want to delete {0} reference(s)?</value></data>
-  <data name="reference.list.removed" xml:space="preserve"><value>Reference removed successfully.</value></data>
   <data name="automation.list.title" xml:space="preserve"><value>Automation</value></data>
   <data name="automation.list.empty" xml:space="preserve"><value>No routines found</value></data>
   <data name="automation.list.deleteTitle" xml:space="preserve"><value>Delete Routine</value></data>
@@ -613,7 +601,7 @@
   <data name="about.feature.integrations.title" xml:space="preserve"><value>Integrations</value></data>
   <data name="about.feature.integrations.description" xml:space="preserve"><value>Groups resources by business domain and centralizes connection governance.</value></data>
   <data name="about.feature.operations.title" xml:space="preserve"><value>Operations</value></data>
-  <data name="about.feature.operations.description" xml:space="preserve"><value>Tracks executions, processing queues and references for operational auditing.</value></data>
+  <data name="about.feature.operations.description" xml:space="preserve"><value>Tracks executions and processing queues for operational auditing.</value></data>
   <data name="about.bestPractices.title" xml:space="preserve"><value>Best practices</value></data>
   <data name="about.bestPractices.description" xml:space="preserve"><value>Use clear pipelines, standardized names and explicit error handling in each step to improve maintenance and observability.</value></data>
   <data name="common.column.order" xml:space="preserve"><value>Order</value></data>
@@ -628,13 +616,6 @@
   <data name="queue.form.payloadLabel" xml:space="preserve"><value>Payload (JSON)</value></data>
   <data name="queue.form.submitting" xml:space="preserve"><value>Queueing...</value></data>
   <data name="queue.form.submit" xml:space="preserve"><value>Queue</value></data>
-  <data name="reference.form.createTitle" xml:space="preserve"><value>New Reference</value></data>
-  <data name="reference.form.editTitle" xml:space="preserve"><value>Edit Reference</value></data>
-  <data name="reference.form.connectorPlaceholder" xml:space="preserve"><value>Select a connector</value></data>
-  <data name="reference.form.entityLabel" xml:space="preserve"><value>Entity</value></data>
-  <data name="reference.form.entityPlaceholder" xml:space="preserve"><value>Ex: Product, Order, Customer</value></data>
-  <data name="reference.form.internalId" xml:space="preserve"><value>Internal ID</value></data>
-  <data name="reference.form.externalId" xml:space="preserve"><value>External ID</value></data>
   <data name="pipeline.routine.form.createTitle" xml:space="preserve"><value>New Routine</value></data>
   <data name="pipeline.routine.form.editTitle" xml:space="preserve"><value>Edit Routine</value></data>
   <data name="pipeline.routine.form.created" xml:space="preserve"><value>Routine created successfully</value></data>
@@ -828,13 +809,6 @@
   <data name="processingQueues.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de um item da fila de processamento.</value></data>
   <data name="processingQueues.getPending.description" xml:space="preserve"><value>Permite listar os itens pendentes da fila de processamento.</value></data>
   <data name="processingQueues.process.description" xml:space="preserve"><value>Permite processar manualmente um item específico da fila.</value></data>
-  <data name="references.area" xml:space="preserve"><value>References</value></data>
-  <data name="references.create.description" xml:space="preserve"><value>Permite cadastrar uma nova referência entre identificadores internos e externos.</value></data>
-  <data name="references.delete.description" xml:space="preserve"><value>Permite excluir uma referência cadastrada na plataforma.</value></data>
-  <data name="references.get.description" xml:space="preserve"><value>Permite listar as referências internas e externas registradas na plataforma.</value></data>
-  <data name="references.getByConnector.description" xml:space="preserve"><value>Permite listar as referências vinculadas a um conector específico.</value></data>
-  <data name="references.getById.description" xml:space="preserve"><value>Permite consultar os detalhes de uma referência específica.</value></data>
-  <data name="references.update.description" xml:space="preserve"><value>Permite atualizar uma referência entre identificadores internos e externos.</value></data>
   <data name="serviceContract.created" xml:space="preserve"><value>Service contract created successfully.</value></data>
   <data name="serviceContract.updated" xml:space="preserve"><value>Service contract updated successfully.</value></data>
   <data name="serviceContract.deleted" xml:space="preserve"><value>Service contract deleted successfully.</value></data>

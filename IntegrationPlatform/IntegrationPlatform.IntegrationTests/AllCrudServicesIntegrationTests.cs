@@ -7,7 +7,6 @@ using IntegrationPlatform.Application.Requests.IntegrationCategories;
 using IntegrationPlatform.Application.Requests.PipelineRoutines;
 using IntegrationPlatform.Application.Requests.Pipelines;
 using IntegrationPlatform.Application.Requests.PipelineSteps;
-using IntegrationPlatform.Application.Requests.References;
 using IntegrationPlatform.Application.Requests.ServiceContracts;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
@@ -139,21 +138,6 @@ namespace IntegrationPlatform.IntegrationTests
             });
         }
 
-        [Test]
-        public async Task ReferenceService_creates_with_connector()
-        {
-            await InScopeAsync(async serviceProvider =>
-            {
-                (long connectorId, _) = await SeedConnectorAndPipeline(serviceProvider);
-                IReferenceService service = serviceProvider.GetRequiredService<IReferenceService>();
-
-                Reference created = await service.CreateReference(new CreateReferenceRequest { ConnectorId = connectorId, Entity = "Customer", InternalId = "10", ExternalId = "ext-99" });
-
-                Reference? fetched = await service.GetReferenceById(created.Id);
-                fetched.Should().NotBeNull();
-                fetched!.ExternalId.Should().Be("ext-99");
-            });
-        }
 
         [Test]
         public async Task PipelineStepService_creates_with_pipeline()
