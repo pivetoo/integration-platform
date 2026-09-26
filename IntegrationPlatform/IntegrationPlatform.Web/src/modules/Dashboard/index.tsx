@@ -1,26 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Badge, GlobalLoader, LineChart, PieChart, BarChart, ChartContainer, useApi, useI18n } from 'archon-ui';
+import { useMemo, useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, GlobalLoader, LineChart, PieChart, ChartContainer, useApi, useI18n } from 'archon-ui';
 import type { DashboardData } from '../../types/dashboard';
-import { LayoutDashboard, Cable, Plug, GitBranch, ListOrdered, Play, CheckCircle2, XCircle, AlertTriangle, Timer, TrendingUp, PieChart as PieChartIcon, BarChart3, Clock } from 'lucide-react';
+import { LayoutDashboard, Cable, Plug, GitBranch, ListOrdered, Play, CheckCircle2, AlertTriangle, Timer, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
 import { dashboardService } from '../../services/dashboardService';
-import { ExecutionStatusLabels } from '../../types/execution';
-import type { ExecutionStatus } from '../../types/execution';
 import { ProcessingStatus, ProcessingStatusLabels } from '../../types/processingQueue';
-import { formatDuration, formatTime } from '../../utils/formatters';
-
-const statusVariantMap: Record<number, 'success' | 'destructive' | 'warning'> = {
-  1: 'warning',
-  2: 'success',
-  3: 'destructive',
-  4: 'warning',
-};
-
-const statusBorderMap: Record<number, string> = {
-  1: 'border-l-amber-500',
-  2: 'border-l-green-500',
-  3: 'border-l-red-500',
-  4: 'border-l-amber-500',
-};
+import { formatDuration } from '../../utils/formatters';
 
 const queueStatusOrder = [
   ProcessingStatus.Pending,
@@ -37,16 +21,6 @@ const queueStatusColors: Record<number, string> = {
   [ProcessingStatus.Error]: '#ef4444',
   [ProcessingStatus.Cancelled]: '#9ca3af',
 };
-
-function getStatusIcon(status: number) {
-  if (status === 2) {
-    return <CheckCircle2 className="h-3.5 w-3.5" />;
-  }
-  if (status === 3) {
-    return <XCircle className="h-3.5 w-3.5" />;
-  }
-  return <Clock className="h-3.5 w-3.5 animate-spin" />;
-}
 
 export default function Dashboard() {
   const { t } = useI18n();
@@ -78,8 +52,6 @@ export default function Dashboard() {
     erro: e.erro ?? 0,
   }));
 
-  const execucoesRecentes = data?.execucoesRecentes || [];
-
   const filaPorStatusOrdenada = useMemo(() => {
     const byStatus = new Map((data?.filaPorStatus || []).map(item => [item.status, item.count]));
     return queueStatusOrder
@@ -89,11 +61,6 @@ export default function Dashboard() {
 
   const filaPorStatus = filaPorStatusOrdenada.map(item => ({ name: ProcessingStatusLabels[item.status], value: item.count }));
   const filaPorStatusCores = filaPorStatusOrdenada.map(item => queueStatusColors[item.status]);
-
-  const topConectores = (data?.topConectores || []).map(item => ({
-    name: item.conector,
-    value: item.executionCount,
-  }));
 
   const errosHoje = kpis?.errosHoje ?? 0;
 
@@ -250,67 +217,6 @@ export default function Dashboard() {
                 innerRadius={55}
               />
             </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="border border-border/70 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <BarChart3 className="h-4 w-4 text-violet-600" />
-              {t('dashboard.topConnectors.title')}
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">{t('dashboard.topConnectors.subtitle')}</p>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <ChartContainer height={220} isEmpty={topConectores.length === 0} emptyMessage={t('dashboard.topConnectors.empty')}>
-              <BarChart
-                data={topConectores}
-                dataKeys={['value']}
-                colors={['#8b5cf6']}
-                height={200}
-                layout="horizontal"
-                showLegend={false}
-              />
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-border/70 shadow-sm">
-          <CardHeader className="flex flex-row items-center gap-2 pb-4">
-            <Clock className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-base font-semibold">{t('dashboard.recentExecutions')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {execucoesRecentes.map((exec) => (
-                <div
-                  key={exec.id}
-                  className={`flex items-center justify-between rounded-lg border-l-4 bg-muted/30 px-4 py-3 ${statusBorderMap[exec.status] || 'border-l-gray-400'}`}
-                >
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium">{exec.pipeline}</p>
-                    <p className="text-xs text-muted-foreground">{exec.conector}</p>
-                  </div>
-                  <div className="text-right space-y-0.5">
-                    <Badge variant={statusVariantMap[exec.status] || 'warning'}>
-                      <span className="flex items-center gap-1">
-                        {getStatusIcon(exec.status)}
-                        {ExecutionStatusLabels[exec.status as ExecutionStatus] || '-'}
-                      </span>
-                    </Badge>
-                    <div className="flex items-center gap-2 justify-end">
-                      <span className="text-xs text-muted-foreground">{formatDuration(exec.duration)}</span>
-                      <span className="text-xs text-muted-foreground">{formatTime(exec.startedAt)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {execucoesRecentes.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">{t('dashboard.noRecentExecutions')}</p>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>

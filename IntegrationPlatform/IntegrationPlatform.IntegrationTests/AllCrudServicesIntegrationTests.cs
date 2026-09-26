@@ -188,7 +188,6 @@ namespace IntegrationPlatform.IntegrationTests
 
                 data.Should().NotBeNull();
                 data.QueueByStatus.Should().NotBeNull();
-                data.TopConnectors.Should().NotBeNull();
             });
         }
     }

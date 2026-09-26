@@ -451,13 +451,8 @@
   <data name="dashboard.monthlyExecutions" xml:space="preserve"><value>Execuções Mensais</value></data>
   <data name="dashboard.monthlyExecutions.series.success" xml:space="preserve"><value>Sucesso</value></data>
   <data name="dashboard.monthlyExecutions.series.error" xml:space="preserve"><value>Erro</value></data>
-  <data name="dashboard.recentExecutions" xml:space="preserve"><value>Execuções Recentes</value></data>
-  <data name="dashboard.noRecentExecutions" xml:space="preserve"><value>Nenhuma execução recente</value></data>
   <data name="dashboard.queueByStatus.title" xml:space="preserve"><value>Fila por Status</value></data>
   <data name="dashboard.queueByStatus.empty" xml:space="preserve"><value>Nenhum item na fila</value></data>
-  <data name="dashboard.topConnectors.title" xml:space="preserve"><value>Top Conectores</value></data>
-  <data name="dashboard.topConnectors.subtitle" xml:space="preserve"><value>execuções nos últimos 30 dias</value></data>
-  <data name="dashboard.topConnectors.empty" xml:space="preserve"><value>Nenhuma execução nos últimos 30 dias</value></data>
   <data name="integration.list.deleteTitle" xml:space="preserve"><value>Excluir Integração</value></data>
   <data name="integration.list.deleteDescription" xml:space="preserve"><value>Tem certeza que deseja excluir {0} integração(ões)?</value></data>
   <data name="integration.category.list.title" xml:space="preserve"><value>Categorias de Integração</value></data>

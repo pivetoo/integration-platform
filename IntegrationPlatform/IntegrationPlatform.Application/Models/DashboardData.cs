@@ -26,13 +26,6 @@ namespace IntegrationPlatform.Application.Models
         public long Count { get; set; }
     }
 
-    public class ConnectorExecutionSummary
-    {
-        public string Connector { get; set; } = string.Empty;
-
-        public long ExecutionCount { get; set; }
-    }
-
     public class MonthlyExecutionSummary
     {
         public string Month { get; set; } = string.Empty;
@@ -42,31 +35,12 @@ namespace IntegrationPlatform.Application.Models
         public long Error { get; set; }
     }
 
-    public class RecentExecutionItem
-    {
-        public long Id { get; set; }
-
-        public string Pipeline { get; set; } = string.Empty;
-
-        public string Connector { get; set; } = string.Empty;
-
-        public int Status { get; set; }
-
-        public long? Duration { get; set; }
-
-        public DateTimeOffset StartedAt { get; set; }
-    }
-
     public class DashboardData
     {
         public DashboardKpis Kpis { get; set; } = new();
 
         public List<MonthlyExecutionSummary> MonthlyExecutions { get; set; } = [];
 
-        public List<RecentExecutionItem> RecentExecutions { get; set; } = [];
-
         public List<QueueStatusSummary> QueueByStatus { get; set; } = [];
-
-        public List<ConnectorExecutionSummary> TopConnectors { get; set; } = [];
     }
 }

@@ -451,13 +451,8 @@
   <data name="dashboard.monthlyExecutions" xml:space="preserve"><value>Ejecuciones Mensuales</value></data>
   <data name="dashboard.monthlyExecutions.series.success" xml:space="preserve"><value>Éxito</value></data>
   <data name="dashboard.monthlyExecutions.series.error" xml:space="preserve"><value>Error</value></data>
-  <data name="dashboard.recentExecutions" xml:space="preserve"><value>Ejecuciones Recientes</value></data>
-  <data name="dashboard.noRecentExecutions" xml:space="preserve"><value>No hay ejecuciones recientes</value></data>
   <data name="dashboard.queueByStatus.title" xml:space="preserve"><value>Cola por Estado</value></data>
   <data name="dashboard.queueByStatus.empty" xml:space="preserve"><value>No hay elementos en la cola</value></data>
-  <data name="dashboard.topConnectors.title" xml:space="preserve"><value>Top Conectores</value></data>
-  <data name="dashboard.topConnectors.subtitle" xml:space="preserve"><value>ejecuciones en los últimos 30 días</value></data>
-  <data name="dashboard.topConnectors.empty" xml:space="preserve"><value>No hay ejecuciones en los últimos 30 días</value></data>
   <data name="integration.list.deleteTitle" xml:space="preserve"><value>Eliminar Integración</value></data>
   <data name="integration.list.deleteDescription" xml:space="preserve"><value>¿Seguro que desea eliminar {0} integración(es)?</value></data>
   <data name="integration.category.list.title" xml:space="preserve"><value>Categorías de Integración</value></data>

@@ -22,9 +22,7 @@ namespace IntegrationPlatform.Infrastructure.Services
             {
                 Kpis = await GetKpis(cancellationToken),
                 MonthlyExecutions = await GetMonthlyExecutions(cancellationToken),
-                RecentExecutions = await GetRecentExecutions(cancellationToken),
-                QueueByStatus = await GetQueueByStatus(cancellationToken),
-                TopConnectors = await GetTopConnectors(cancellationToken)
+                QueueByStatus = await GetQueueByStatus(cancellationToken)
             };
         }
 
@@ -137,46 +135,5 @@ namespace IntegrationPlatform.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
-        private async Task<List<ConnectorExecutionSummary>> GetTopConnectors(CancellationToken cancellationToken)
-        {
-            DateTimeOffset since = DateTimeOffset.UtcNow.AddDays(-30);
-
-            return await (
-                from execution in dbContext.Set<Execution>().AsNoTracking()
-                join connector in dbContext.Set<Connector>().AsNoTracking() on execution.ConnectorId equals connector.Id
-                where execution.StartedAt >= since
-                group execution by connector.Name into connectorGroup
-                orderby connectorGroup.LongCount() descending
-                select new ConnectorExecutionSummary
-                {
-                    Connector = connectorGroup.Key,
-                    ExecutionCount = connectorGroup.LongCount()
-                })
-                .Take(5)
-                .ToListAsync(cancellationToken);
-        }
-
-        private async Task<List<RecentExecutionItem>> GetRecentExecutions(CancellationToken cancellationToken)
-        {
-            List<RecentExecutionItem> executions = await (
-                from execution in dbContext.Set<Execution>().AsNoTracking()
-                join connector in dbContext.Set<Connector>().AsNoTracking() on execution.ConnectorId equals connector.Id
-                join pipeline in dbContext.Set<Pipeline>().AsNoTracking() on execution.PipelineId equals (long?)pipeline.Id into pipelineJoin
-                from pipeline in pipelineJoin.DefaultIfEmpty()
-                orderby execution.StartedAt descending
-                select new RecentExecutionItem
-                {
-                    Id = execution.Id,
-                    Pipeline = pipeline != null ? pipeline.Name : "-",
-                    Connector = connector.Name,
-                    Status = (int)execution.Status,
-                    Duration = execution.Duration,
-                    StartedAt = execution.StartedAt
-                })
-                .Take(6)
-                .ToListAsync(cancellationToken);
-
-            return executions;
-        }
     }
 }

@@ -19,21 +19,9 @@ interface DashboardApiData {
     success: number;
     error: number;
   }>;
-  recentExecutions: Array<{
-    id: number;
-    pipeline: string;
-    connector: string;
-    status: number;
-    duration?: number;
-    startedAt: string;
-  }>;
   queueByStatus: Array<{
     status: number;
     count: number;
-  }>;
-  topConnectors: Array<{
-    connector: string;
-    executionCount: number;
   }>;
 }
 
@@ -54,9 +42,7 @@ export const dashboardService = {
           filaPendente: 0,
         },
         execucoesMensais: [],
-        execucoesRecentes: [],
         filaPorStatus: [],
-        topConectores: [],
       };
     }
 
@@ -76,21 +62,9 @@ export const dashboardService = {
         sucesso: item.success,
         erro: item.error,
       })),
-      execucoesRecentes: data.recentExecutions.map((item) => ({
-        id: item.id,
-        pipeline: item.pipeline,
-        conector: item.connector,
-        status: item.status,
-        duration: item.duration,
-        startedAt: item.startedAt,
-      })),
       filaPorStatus: data.queueByStatus.map((item) => ({
         status: item.status,
         count: item.count,
-      })),
-      topConectores: data.topConnectors.map((item) => ({
-        conector: item.connector,
-        executionCount: item.executionCount,
       })),
     };
   },
