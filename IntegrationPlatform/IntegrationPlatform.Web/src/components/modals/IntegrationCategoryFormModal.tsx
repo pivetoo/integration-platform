@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Badge, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, useApi, useI18n } from 'archon-ui';
 import { integrationCategoryService } from '../../services/integrationCategoryService';
 import type { IntegrationCategory, CreateIntegrationCategoryRequest } from '../../types/integrationCategory';
 
@@ -28,7 +28,6 @@ function slugifyIdentifier(value: string): string {
 export default function IntegrationCategoryFormModal({ open, onOpenChange, categoria, onSuccess }: IntegrationCategoryFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!categoria;
-  const isSystem = categoria?.isSystem ?? false;
   const [formData, setFormData] = useState<CreateIntegrationCategoryRequest>(initialFormData);
   const [identifierTouched, setIdentifierTouched] = useState(false);
   const [isActive, setIsActive] = useState(true);
@@ -93,7 +92,6 @@ export default function IntegrationCategoryFormModal({ open, onOpenChange, categ
         <ModalHeader>
           <ModalTitle className="flex items-center gap-2">
             {isEditing ? t('integration.category.form.editTitle') : t('integration.category.form.createTitle')}
-            {isSystem && <Badge variant="outline">{t('integration.category.form.systemBadge')}</Badge>}
           </ModalTitle>
         </ModalHeader>
 
@@ -119,13 +117,10 @@ export default function IntegrationCategoryFormModal({ open, onOpenChange, categ
                 value={formData.identifier}
                 onChange={(e) => handleIdentifierChange(e.target.value)}
                 required
-                disabled={isSystem}
                 placeholder={t('integration.category.form.identifierPlaceholder')}
               />
               <p className="text-xs text-muted-foreground">
-                {isSystem
-                  ? t('integration.category.form.identifierSystemHint')
-                  : t('integration.category.form.identifierHint')}
+                {t('integration.category.form.identifierHint')}
               </p>
             </div>
 

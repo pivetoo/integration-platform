@@ -258,12 +258,6 @@ namespace IntegrationPlatform.Infrastructure.Services
                 return null;
             }
 
-            if (entity.IsSystem)
-            {
-                MutableMessages.Add(new InvalidOperationException(Localizer["serviceContract.system.cannotDelete"]));
-                return null;
-            }
-
             return await Delete([entity], cancellationToken) ? entity : null;
         }
 

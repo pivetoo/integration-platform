@@ -12,8 +12,6 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
 
         public bool IsActive { get; init; }
 
-        public bool IsSystem { get; init; }
-
         public DateTimeOffset CreatedAt { get; init; }
 
         public DateTimeOffset? UpdatedAt { get; init; }

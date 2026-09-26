@@ -31,8 +31,6 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsActive { get; private set; } = true;
 
-        public bool IsSystem { get; private set; }
-
         public IReadOnlyCollection<IntegrationServiceContract> IntegrationServiceContracts => integrationServiceContracts.AsReadOnly();
 
         public IReadOnlyCollection<Pipeline> Pipelines => pipelines.AsReadOnly();
@@ -41,7 +39,7 @@ namespace IntegrationPlatform.Domain.Entities
         {
         }
 
-        public ServiceContract(string identifier, string name, long integrationCategoryId, string? description = null, string? inputSchema = null, string? outputSchema = null, bool hasCallback = false, string? callbackSchema = null, bool isSystem = false)
+        public ServiceContract(string identifier, string name, long integrationCategoryId, string? description = null, string? inputSchema = null, string? outputSchema = null, bool hasCallback = false, string? callbackSchema = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -59,7 +57,6 @@ namespace IntegrationPlatform.Domain.Entities
             OutputSchema = outputSchema?.Trim();
             HasCallback = hasCallback;
             CallbackSchema = callbackSchema?.Trim();
-            IsSystem = isSystem;
         }
 
         public void Update(string identifier, string name, long integrationCategoryId, string? description, string? inputSchema, string? outputSchema, bool hasCallback, string? callbackSchema, bool isActive)
@@ -73,10 +70,6 @@ namespace IntegrationPlatform.Domain.Entities
             }
 
             string normalizedIdentifier = NormalizeIdentifier(identifier);
-            if (IsSystem && !string.Equals(normalizedIdentifier, Identifier, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("serviceContract.identifier.systemReadonly");
-            }
 
             Identifier = normalizedIdentifier;
             Name = name.Trim();

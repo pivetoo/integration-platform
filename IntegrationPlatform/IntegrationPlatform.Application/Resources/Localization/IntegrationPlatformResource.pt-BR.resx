@@ -228,24 +228,13 @@
   <data name="integrationCategory.identifier.duplicated" xml:space="preserve">
     <value>Já existe uma categoria com esse identifier.</value>
   </data>
-  <data name="integrationCategory.identifier.systemReadonly" xml:space="preserve">
-    <value>Categorias do sistema não permitem alteração do identifier.</value>
-  </data>
-  <data name="integrationCategory.system.cannotDelete" xml:space="preserve">
-    <value>Categorias do sistema não podem ser excluídas.</value>
-  </data>
   <data name="validation.integrationCategory.identifier.invalidFormat" xml:space="preserve">
     <value>Identifier inválido. Use apenas letras minúsculas, números e hífens (ex.: payment, digital-signature).</value>
   </data>
   <data name="integration.category.form.identifier" xml:space="preserve"><value>Identifier</value></data>
   <data name="integration.category.form.identifierPlaceholder" xml:space="preserve"><value>ex.: payment, digital-signature</value></data>
   <data name="integration.category.form.identifierHint" xml:space="preserve"><value>Slug único usado pelos sistemas integrados pra identificar essa categoria. Use minúsculas, números e hífens.</value></data>
-  <data name="integration.category.form.identifierSystemHint" xml:space="preserve"><value>Categoria do sistema. O identifier é fixo; você pode renomear o display em "Nome".</value></data>
-  <data name="integration.category.form.systemBadge" xml:space="preserve"><value>Sistema</value></data>
   <data name="integration.category.column.identifier" xml:space="preserve"><value>Identifier</value></data>
-  <data name="integration.category.list.systemBadge" xml:space="preserve"><value>Sistema</value></data>
-  <data name="integration.category.list.deleteSystemBlocked" xml:space="preserve"><value>Categorias do sistema não podem ser excluídas.</value></data>
-  <data name="integration.category.list.deleteSystemBlockedTitle" xml:space="preserve"><value>Categoria protegida</value></data>
   <data name="integration.attribute.created" xml:space="preserve">
     <value>Atributo de integração criado com sucesso.</value>
   </data>
@@ -820,8 +809,6 @@
   <data name="serviceContract.deleted" xml:space="preserve"><value>Contrato de serviço excluído com sucesso.</value></data>
   <data name="serviceContract.notFound" xml:space="preserve"><value>Contrato de serviço não encontrado.</value></data>
   <data name="serviceContract.identifier.duplicated" xml:space="preserve"><value>Já existe um contrato de serviço com este identificador.</value></data>
-  <data name="serviceContract.identifier.systemReadonly" xml:space="preserve"><value>O identificador de um contrato de serviço do sistema não pode ser alterado.</value></data>
-  <data name="serviceContract.system.cannotDelete" xml:space="preserve"><value>Contratos de serviço do sistema não podem ser excluídos.</value></data>
   <data name="serviceContract.integration.bound" xml:space="preserve"><value>Integração vinculada ao contrato de serviço.</value></data>
   <data name="serviceContract.integration.unbound" xml:space="preserve"><value>Vínculo entre integração e contrato de serviço removido.</value></data>
   <data name="validation.serviceContract.identifier.invalidFormat" xml:space="preserve"><value>O identificador deve usar minúsculas, números, pontos e hífens (ex.: email.send).</value></data>
@@ -847,12 +834,9 @@
   <data name="execution.callback.failed" xml:space="preserve"><value>Falha ao entregar callback ao consumer: {0}</value></data>
   <data name="layout.menu.serviceContracts" xml:space="preserve"><value>Contratos de serviço</value></data>
   <data name="serviceContract.list.title" xml:space="preserve"><value>Contratos de serviço</value></data>
-  <data name="serviceContract.list.systemBadge" xml:space="preserve"><value>Sistema</value></data>
   <data name="serviceContract.list.removed" xml:space="preserve"><value>Contrato de serviço removido.</value></data>
   <data name="serviceContract.list.deleteTitle" xml:space="preserve"><value>Remover contratos de serviço</value></data>
   <data name="serviceContract.list.deleteDescription" xml:space="preserve"><value>Remover {0} contrato(s) de serviço? Esta ação não pode ser desfeita.</value></data>
-  <data name="serviceContract.list.deleteSystemBlockedTitle" xml:space="preserve"><value>Contrato de sistema</value></data>
-  <data name="serviceContract.list.deleteSystemBlocked" xml:space="preserve"><value>Contratos de sistema não podem ser removidos.</value></data>
   <data name="serviceContract.column.identifier" xml:space="preserve"><value>Identificador</value></data>
   <data name="serviceContract.column.category" xml:space="preserve"><value>Categoria</value></data>
   <data name="serviceContract.column.callback" xml:space="preserve"><value>Callback</value></data>
@@ -860,10 +844,8 @@
   <data name="serviceContract.callback.no" xml:space="preserve"><value>Não</value></data>
   <data name="serviceContract.form.createTitle" xml:space="preserve"><value>Novo contrato de serviço</value></data>
   <data name="serviceContract.form.editTitle" xml:space="preserve"><value>Editar contrato de serviço</value></data>
-  <data name="serviceContract.form.systemBadge" xml:space="preserve"><value>Sistema</value></data>
   <data name="serviceContract.form.identifier" xml:space="preserve"><value>Identificador</value></data>
   <data name="serviceContract.form.identifierHint" xml:space="preserve"><value>Identificador único e estável (ex: receivable.charge.create).</value></data>
-  <data name="serviceContract.form.identifierSystemHint" xml:space="preserve"><value>Identificador de sistema não pode ser alterado.</value></data>
   <data name="serviceContract.form.category" xml:space="preserve"><value>Categoria</value></data>
   <data name="serviceContract.form.categoryPlaceholder" xml:space="preserve"><value>Selecione a categoria</value></data>
   <data name="serviceContract.form.hasCallback" xml:space="preserve"><value>Possui callback</value></data>

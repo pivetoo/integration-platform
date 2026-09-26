@@ -10,7 +10,6 @@ export interface ServiceContract {
   callbackSchema: string | null;
   includeOutputInCallback: boolean;
   isActive: boolean;
-  isSystem: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -13,7 +13,6 @@ namespace IntegrationPlatform.Testing.Domain.Entities
             category.Identifier.Should().Be("payment");
             category.Name.Should().Be("Pagamentos");
             category.Description.Should().Be("d");
-            category.IsSystem.Should().BeFalse();
             category.IsActive.Should().BeTrue();
         }
 
@@ -27,28 +26,7 @@ namespace IntegrationPlatform.Testing.Domain.Entities
         }
 
         [Test]
-        public void Update_on_system_category_changing_identifier_throws()
-        {
-            IntegrationCategory category = new("payment", "Payment", isSystem: true);
-
-            Action act = () => category.Update("changed", "Payment", null, true);
-
-            act.Should().Throw<InvalidOperationException>();
-        }
-
-        [Test]
-        public void Update_on_system_category_keeping_identifier_succeeds()
-        {
-            IntegrationCategory category = new("payment", "Payment", isSystem: true);
-
-            category.Update("Payment", "Renamed", "desc", false);
-
-            category.Name.Should().Be("Renamed");
-            category.IsActive.Should().BeFalse();
-        }
-
-        [Test]
-        public void Update_on_non_system_category_can_change_identifier()
+        public void Update_can_change_identifier()
         {
             IntegrationCategory category = new("old", "Cat");
 

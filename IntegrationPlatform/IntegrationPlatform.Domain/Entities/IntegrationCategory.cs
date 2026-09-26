@@ -14,15 +14,13 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsActive { get; private set; } = true;
 
-        public bool IsSystem { get; private set; }
-
         public IReadOnlyCollection<Integration> Integrations => integrations.AsReadOnly();
 
         private IntegrationCategory()
         {
         }
 
-        public IntegrationCategory(string identifier, string name, string? description = null, bool isSystem = false)
+        public IntegrationCategory(string identifier, string name, string? description = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -30,7 +28,6 @@ namespace IntegrationPlatform.Domain.Entities
             Identifier = NormalizeIdentifier(identifier);
             Name = name.Trim();
             Description = description?.Trim();
-            IsSystem = isSystem;
         }
 
         public void Update(string identifier, string name, string? description, bool isActive)
@@ -39,10 +36,6 @@ namespace IntegrationPlatform.Domain.Entities
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
             string normalizedIdentifier = NormalizeIdentifier(identifier);
-            if (IsSystem && !string.Equals(normalizedIdentifier, Identifier, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("integrationCategory.identifier.systemReadonly");
-            }
 
             Identifier = normalizedIdentifier;
             Name = name.Trim();

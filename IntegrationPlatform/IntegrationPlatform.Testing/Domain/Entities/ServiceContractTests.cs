@@ -14,7 +14,6 @@ namespace IntegrationPlatform.Testing.Domain.Entities
             contract.Name.Should().Be("Envio de email");
             contract.IsActive.Should().BeTrue();
             contract.IncludeOutputInCallback.Should().BeFalse();
-            contract.IsSystem.Should().BeFalse();
         }
 
         [TestCase("", "name")]
@@ -50,30 +49,7 @@ namespace IntegrationPlatform.Testing.Domain.Entities
         }
 
         [Test]
-        public void Update_on_system_contract_changing_identifier_throws()
-        {
-            ServiceContract contract = new("system.svc", "System", 1, isSystem: true);
-
-            Action act = () => contract.Update("system.changed", "System", 1, null, null, null, false, null, true);
-
-            act.Should().Throw<InvalidOperationException>();
-        }
-
-        [Test]
-        public void Update_on_system_contract_keeping_identifier_succeeds()
-        {
-            ServiceContract contract = new("system.svc", "System", 1, isSystem: true);
-
-            contract.Update("System.Svc", "Renamed", 2, "desc", null, null, true, null, false);
-
-            contract.Name.Should().Be("Renamed");
-            contract.IntegrationCategoryId.Should().Be(2);
-            contract.HasCallback.Should().BeTrue();
-            contract.IsActive.Should().BeFalse();
-        }
-
-        [Test]
-        public void Update_on_non_system_contract_can_change_identifier()
+        public void Update_can_change_identifier()
         {
             ServiceContract contract = new("svc.old", "Service", 1);
 

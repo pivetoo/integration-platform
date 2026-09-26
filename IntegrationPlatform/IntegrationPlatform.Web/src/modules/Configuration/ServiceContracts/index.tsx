@@ -145,7 +145,6 @@ export default function ServiceContracts() {
       label: t('common.action.delete'),
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
-      hidden: (row) => row.isSystem,
       onClick: (row) => {
         setItemsToDelete([row]);
         setIsConfirmOpen(true);
@@ -159,7 +158,7 @@ export default function ServiceContracts() {
       label: t('common.action.delete'),
       icon: <Trash2 className="h-4 w-4" />,
       variant: 'danger',
-      disabled: bulkRunning || selectedRows.some((row) => row.isSystem),
+      disabled: bulkRunning,
       onClick: (rows) => {
         setItemsToDelete(rows);
         setIsConfirmOpen(true);
@@ -173,12 +172,7 @@ export default function ServiceContracts() {
       title: t('common.column.name'),
       dataIndex: 'name',
       sortable: true,
-      render: (value: string, record) => (
-        <span className="inline-flex items-center gap-2">
-          <span className="font-medium">{value}</span>
-          {record.isSystem && <Badge variant="outline" className="text-xs">{t('serviceContract.list.systemBadge')}</Badge>}
-        </span>
-      ),
+      render: (value: string) => <span className="font-medium">{value}</span>,
     },
     {
       key: 'identifier',

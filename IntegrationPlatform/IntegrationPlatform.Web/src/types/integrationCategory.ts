@@ -4,7 +4,6 @@ export interface IntegrationCategory {
   name: string;
   description: string | null;
   isActive: boolean;
-  isSystem: boolean;
   createdAt: string;
   updatedAt: string;
 }

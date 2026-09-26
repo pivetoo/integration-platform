@@ -132,12 +132,6 @@ namespace IntegrationPlatform.Infrastructure.Services
                 return null;
             }
 
-            if (category.IsSystem)
-            {
-                MutableMessages.Add(new InvalidOperationException(Localizer["integrationCategory.system.cannotDelete"]));
-                return null;
-            }
-
             return await Delete([category], cancellationToken) ? category : null;
         }
     }

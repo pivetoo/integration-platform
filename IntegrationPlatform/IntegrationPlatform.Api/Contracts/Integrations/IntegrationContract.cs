@@ -48,7 +48,6 @@ namespace IntegrationPlatform.Api.Contracts.Integrations
                     Name = item.IntegrationCategory.Name,
                     Description = item.IntegrationCategory.Description,
                     IsActive = item.IntegrationCategory.IsActive,
-                    IsSystem = item.IntegrationCategory.IsSystem,
                     CreatedAt = item.IntegrationCategory.CreatedAt,
                     UpdatedAt = item.IntegrationCategory.UpdatedAt
                 }

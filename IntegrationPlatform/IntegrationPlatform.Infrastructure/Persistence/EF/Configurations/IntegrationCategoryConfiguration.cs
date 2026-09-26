@@ -21,10 +21,6 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
             builder.Property(entity => entity.Description)
                 .HasMaxLength(500);
 
-            builder.Property(entity => entity.IsSystem)
-                .IsRequired()
-                .HasDefaultValue(false);
-
             builder.HasIndex(entity => entity.Identifier).IsUnique();
         }
     }

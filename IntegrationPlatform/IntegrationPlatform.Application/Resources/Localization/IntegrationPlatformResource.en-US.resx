@@ -228,24 +228,13 @@
   <data name="integrationCategory.identifier.duplicated" xml:space="preserve">
     <value>A category with this identifier already exists.</value>
   </data>
-  <data name="integrationCategory.identifier.systemReadonly" xml:space="preserve">
-    <value>System categories do not allow changing the identifier.</value>
-  </data>
-  <data name="integrationCategory.system.cannotDelete" xml:space="preserve">
-    <value>System categories cannot be deleted.</value>
-  </data>
   <data name="validation.integrationCategory.identifier.invalidFormat" xml:space="preserve">
     <value>Invalid identifier. Use only lowercase letters, numbers and hyphens (e.g., payment, digital-signature).</value>
   </data>
   <data name="integration.category.form.identifier" xml:space="preserve"><value>Identifier</value></data>
   <data name="integration.category.form.identifierPlaceholder" xml:space="preserve"><value>e.g.: payment, digital-signature</value></data>
   <data name="integration.category.form.identifierHint" xml:space="preserve"><value>Unique slug used by integrated systems to reference this category. Use lowercase, numbers and hyphens.</value></data>
-  <data name="integration.category.form.identifierSystemHint" xml:space="preserve"><value>System category. Identifier is fixed; you can still rename the display via "Name".</value></data>
-  <data name="integration.category.form.systemBadge" xml:space="preserve"><value>System</value></data>
   <data name="integration.category.column.identifier" xml:space="preserve"><value>Identifier</value></data>
-  <data name="integration.category.list.systemBadge" xml:space="preserve"><value>System</value></data>
-  <data name="integration.category.list.deleteSystemBlocked" xml:space="preserve"><value>System categories cannot be deleted.</value></data>
-  <data name="integration.category.list.deleteSystemBlockedTitle" xml:space="preserve"><value>Protected category</value></data>
   <data name="integration.attribute.created" xml:space="preserve">
     <value>Integration attribute created successfully.</value>
   </data>
@@ -820,8 +809,6 @@
   <data name="serviceContract.deleted" xml:space="preserve"><value>Service contract deleted successfully.</value></data>
   <data name="serviceContract.notFound" xml:space="preserve"><value>Service contract not found.</value></data>
   <data name="serviceContract.identifier.duplicated" xml:space="preserve"><value>A service contract with this identifier already exists.</value></data>
-  <data name="serviceContract.identifier.systemReadonly" xml:space="preserve"><value>System service contract identifier is read-only.</value></data>
-  <data name="serviceContract.system.cannotDelete" xml:space="preserve"><value>System service contracts cannot be deleted.</value></data>
   <data name="serviceContract.integration.bound" xml:space="preserve"><value>Integration bound to service contract.</value></data>
   <data name="serviceContract.integration.unbound" xml:space="preserve"><value>Integration unbound from service contract.</value></data>
   <data name="validation.serviceContract.identifier.invalidFormat" xml:space="preserve"><value>Identifier must use lowercase letters, numbers, dots and hyphens (e.g. email.send).</value></data>
@@ -847,12 +834,9 @@
   <data name="execution.callback.failed" xml:space="preserve"><value>Failed to deliver callback to consumer: {0}</value></data>
   <data name="layout.menu.serviceContracts" xml:space="preserve"><value>Service contracts</value></data>
   <data name="serviceContract.list.title" xml:space="preserve"><value>Service contracts</value></data>
-  <data name="serviceContract.list.systemBadge" xml:space="preserve"><value>System</value></data>
   <data name="serviceContract.list.removed" xml:space="preserve"><value>Service contract removed.</value></data>
   <data name="serviceContract.list.deleteTitle" xml:space="preserve"><value>Remove service contracts</value></data>
   <data name="serviceContract.list.deleteDescription" xml:space="preserve"><value>Remove {0} service contract(s)? This action cannot be undone.</value></data>
-  <data name="serviceContract.list.deleteSystemBlockedTitle" xml:space="preserve"><value>System contract</value></data>
-  <data name="serviceContract.list.deleteSystemBlocked" xml:space="preserve"><value>System contracts cannot be removed.</value></data>
   <data name="serviceContract.column.identifier" xml:space="preserve"><value>Identifier</value></data>
   <data name="serviceContract.column.category" xml:space="preserve"><value>Category</value></data>
   <data name="serviceContract.column.callback" xml:space="preserve"><value>Callback</value></data>
@@ -860,10 +844,8 @@
   <data name="serviceContract.callback.no" xml:space="preserve"><value>No</value></data>
   <data name="serviceContract.form.createTitle" xml:space="preserve"><value>New service contract</value></data>
   <data name="serviceContract.form.editTitle" xml:space="preserve"><value>Edit service contract</value></data>
-  <data name="serviceContract.form.systemBadge" xml:space="preserve"><value>System</value></data>
   <data name="serviceContract.form.identifier" xml:space="preserve"><value>Identifier</value></data>
   <data name="serviceContract.form.identifierHint" xml:space="preserve"><value>Unique, stable identifier (e.g. receivable.charge.create).</value></data>
-  <data name="serviceContract.form.identifierSystemHint" xml:space="preserve"><value>System identifier cannot be changed.</value></data>
   <data name="serviceContract.form.category" xml:space="preserve"><value>Category</value></data>
   <data name="serviceContract.form.categoryPlaceholder" xml:space="preserve"><value>Select the category</value></data>
   <data name="serviceContract.form.hasCallback" xml:space="preserve"><value>Has callback</value></data>

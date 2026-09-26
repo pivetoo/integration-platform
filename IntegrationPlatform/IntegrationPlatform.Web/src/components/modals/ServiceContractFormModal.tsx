@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
+import { Modal, ModalBody, ModalContent, ModalHeader, ModalTitle, ModalFooter, Button, Input, Checkbox, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useApi, useI18n } from 'archon-ui';
 import { serviceContractService } from '../../services/serviceContractService';
 import { integrationCategoryService } from '../../services/integrationCategoryService';
 import type { ServiceContract, CreateServiceContractRequest } from '../../types/serviceContract';
@@ -32,7 +32,6 @@ function normalizeIdentifier(value: string): string {
 export default function ServiceContractFormModal({ open, onOpenChange, serviceContract, onSuccess }: ServiceContractFormModalProps) {
   const { t } = useI18n();
   const isEditing = !!serviceContract;
-  const isSystem = serviceContract?.isSystem ?? false;
   const [formData, setFormData] = useState<CreateServiceContractRequest>(initialFormData);
   const [isActive, setIsActive] = useState(true);
   const [categories, setCategories] = useState<IntegrationCategory[]>([]);
@@ -96,7 +95,6 @@ export default function ServiceContractFormModal({ open, onOpenChange, serviceCo
         <ModalHeader>
           <ModalTitle className="flex items-center gap-2">
             {isEditing ? t('serviceContract.form.editTitle') : t('serviceContract.form.createTitle')}
-            {isSystem && <Badge variant="outline">{t('serviceContract.form.systemBadge')}</Badge>}
           </ModalTitle>
         </ModalHeader>
 
@@ -115,11 +113,10 @@ export default function ServiceContractFormModal({ open, onOpenChange, serviceCo
                   value={formData.identifier}
                   onChange={(e) => handleChange('identifier', normalizeIdentifier(e.target.value))}
                   required
-                  disabled={isSystem}
                   placeholder="receivable.charge.create"
                 />
                 <p className="text-xs text-muted-foreground">
-                  {isSystem ? t('serviceContract.form.identifierSystemHint') : t('serviceContract.form.identifierHint')}
+                  {t('serviceContract.form.identifierHint')}
                 </p>
               </div>
 

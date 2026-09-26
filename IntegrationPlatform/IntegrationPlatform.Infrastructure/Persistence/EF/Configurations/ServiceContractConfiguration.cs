@@ -36,10 +36,6 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
             builder.Property(entity => entity.IsActive)
                 .IsRequired();
 
-            builder.Property(entity => entity.IsSystem)
-                .IsRequired()
-                .HasDefaultValue(false);
-
             builder.HasOne(entity => entity.IntegrationCategory)
                 .WithMany()
                 .HasForeignKey(entity => entity.IntegrationCategoryId);

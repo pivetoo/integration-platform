@@ -13,8 +13,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations
         protected void SeedCategory(string identifier, string name, string description)
         {
             Execute.Sql($@"
-                INSERT INTO integrationcategory (identifier, name, description, isactive, issystem, createdat, updatedat)
-                SELECT {Txt(identifier)}, {Txt(name)}, {Nullable(description)}, true, true, now(), now()
+                INSERT INTO integrationcategory (identifier, name, description, isactive, createdat, updatedat)
+                SELECT {Txt(identifier)}, {Txt(name)}, {Nullable(description)}, true, now(), now()
                 WHERE NOT EXISTS (SELECT 1 FROM integrationcategory WHERE identifier = {Txt(identifier)});
             ");
         }
@@ -22,8 +22,8 @@ namespace IntegrationPlatform.Infrastructure.Migrations.Integrations
         protected void SeedContract(string identifier, string name, string description, string categoryIdentifier, string inputSchema, string outputSchema, bool hasCallback, string? callbackSchema, bool includeOutputInCallback = false)
         {
             Execute.Sql($@"
-                INSERT INTO servicecontract (identifier, name, description, integrationcategoryid, inputschema, outputschema, hascallback, callbackschema, isactive, issystem, includeoutputincallback, createdat, updatedat)
-                SELECT {Txt(identifier)}, {Txt(name)}, {Nullable(description)}, {CategoryId(categoryIdentifier)}, {Nullable(inputSchema)}, {Nullable(outputSchema)}, {Bool(hasCallback)}, {Nullable(callbackSchema)}, true, true, {Bool(includeOutputInCallback)}, now(), now()
+                INSERT INTO servicecontract (identifier, name, description, integrationcategoryid, inputschema, outputschema, hascallback, callbackschema, isactive, includeoutputincallback, createdat, updatedat)
+                SELECT {Txt(identifier)}, {Txt(name)}, {Nullable(description)}, {CategoryId(categoryIdentifier)}, {Nullable(inputSchema)}, {Nullable(outputSchema)}, {Bool(hasCallback)}, {Nullable(callbackSchema)}, true, {Bool(includeOutputInCallback)}, now(), now()
                 WHERE NOT EXISTS (SELECT 1 FROM servicecontract WHERE identifier = {Txt(identifier)});
             ");
         }
