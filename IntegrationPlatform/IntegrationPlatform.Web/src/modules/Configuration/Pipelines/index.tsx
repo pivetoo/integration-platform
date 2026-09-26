@@ -88,7 +88,7 @@ export default function Pipelines() {
     setIsFormOpen(true);
   };
 
-  const handleRowDoubleClick = (pipeline: Pipeline) => {
+  const handleRowClick = (pipeline: Pipeline) => {
     navigate(`/pipelines/${pipeline.id}`);
   };
 
@@ -195,7 +195,7 @@ export default function Pipelines() {
         onSelectionChange={setSelectedRows}
         rowActions={rowActions}
         bulkActions={bulkActions}
-        onRowDoubleClick={handleRowDoubleClick}
+        onRowClick={handleRowClick}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}

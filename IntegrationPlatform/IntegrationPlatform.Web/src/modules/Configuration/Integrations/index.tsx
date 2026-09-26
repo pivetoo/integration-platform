@@ -112,7 +112,7 @@ export default function Integracoes() {
     setIsFormOpen(true);
   };
 
-  const handleRowDoubleClick = (integracao: Integration) => {
+  const handleRowClick = (integracao: Integration) => {
     navigate(`/integracoes/${integracao.id}`);
   };
 
@@ -298,7 +298,7 @@ export default function Integracoes() {
         onSelectionChange={setSelectedRows}
         rowActions={rowActions}
         bulkActions={bulkActions}
-        onRowDoubleClick={handleRowDoubleClick}
+        onRowClick={handleRowClick}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}

@@ -88,7 +88,7 @@ export default function Conectores() {
     setIsFormOpen(true);
   };
 
-  const handleRowDoubleClick = (conector: Conector) => {
+  const handleRowClick = (conector: Conector) => {
     navigate(`/conectores/${conector.id}`);
   };
 
@@ -192,7 +192,7 @@ export default function Conectores() {
         onSelectionChange={setSelectedRows}
         rowActions={rowActions}
         bulkActions={bulkActions}
-        onRowDoubleClick={handleRowDoubleClick}
+        onRowClick={handleRowClick}
         emptyText={t('common.state.empty')}
         pageSize={pageSize}
         pageSizeOptions={[10, 20, 50]}
