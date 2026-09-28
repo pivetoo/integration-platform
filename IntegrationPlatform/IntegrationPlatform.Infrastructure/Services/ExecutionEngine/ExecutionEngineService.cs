@@ -69,9 +69,10 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             ArchonIntegration? tenantConfig = await integrationService.GetByNameAsync(TenantConfigIntegrationName, cancellationToken);
             PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId, tenantConfig);
-            if (trackedQueueItem is not null)
+            string? idempotencyKey = trackedQueueItem is not null ? IdempotencyKeyResolver.Resolve(trackedQueueItem, payloadData) : null;
+            if (idempotencyKey is not null)
             {
-                context.StepVariables["idempotencyKey"] = trackedQueueItem.IdempotencyKey ?? $"q{trackedQueueItem.Id}";
+                context.StepVariables[IdempotencyKeyResolver.VariableName] = idempotencyKey;
             }
 
             List<ExecutionLog> logs = [];

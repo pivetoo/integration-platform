@@ -120,15 +120,17 @@ namespace IntegrationPlatform.IntegrationTests
         {
             await InScopeAsync(async serviceProvider =>
             {
-                (long connectorId, long pipelineId) = await SeedPipeline(serviceProvider, maxAttempts: 1);
+                (long connectorId, long pipelineId) = await SeedPipeline(serviceProvider, maxAttempts: 1, withErrorStep: true);
                 ProcessingQueue item = await Enqueue(serviceProvider, connectorId, pipelineId);
-                ExecutionEngineService engine = CreateEngine(serviceProvider, new ScriptedStepExecutor(_ => Failure(transient: true)));
+                ScriptedStepExecutor executor = new(_ => Failure(transient: true));
+                ExecutionEngineService engine = CreateEngine(serviceProvider, executor);
 
                 await engine.ExecutePipeline(connectorId, pipelineId, "{}", ExecutionType.Pipeline, item);
 
                 ProcessingQueue stored = await LoadQueueItem(serviceProvider, item.Id);
                 stored.Status.Should().Be(ProcessingStatus.Error);
                 stored.Attempts.Should().Be(0);
+                executor.ExecutedSteps.Should().Contain("On Error");
             });
         }
 
@@ -137,15 +139,17 @@ namespace IntegrationPlatform.IntegrationTests
         {
             await InScopeAsync(async serviceProvider =>
             {
-                (long connectorId, long pipelineId) = await SeedPipeline(serviceProvider, maxAttempts: 3);
+                (long connectorId, long pipelineId) = await SeedPipeline(serviceProvider, maxAttempts: 3, withErrorStep: true);
                 ProcessingQueue item = await Enqueue(serviceProvider, connectorId, pipelineId);
-                ExecutionEngineService engine = CreateEngine(serviceProvider, new ScriptedStepExecutor(_ => Failure(transient: false)));
+                ScriptedStepExecutor executor = new(_ => Failure(transient: false));
+                ExecutionEngineService engine = CreateEngine(serviceProvider, executor);
 
                 await engine.ExecutePipeline(connectorId, pipelineId, "{}", ExecutionType.Pipeline, item);
 
                 ProcessingQueue stored = await LoadQueueItem(serviceProvider, item.Id);
                 stored.Status.Should().Be(ProcessingStatus.Error);
                 stored.Attempts.Should().Be(0);
+                executor.ExecutedSteps.Should().Contain("On Error");
             });
         }
 
@@ -202,6 +206,53 @@ namespace IntegrationPlatform.IntegrationTests
 
                 await engine.ExecutePipeline(connectorId, pipelineId, "{}", ExecutionType.Pipeline, withoutKey);
                 executor.LastVariables!["idempotencyKey"].Should().Be($"q{withoutKey.Id}");
+            });
+        }
+
+        [Test]
+        public async Task Payload_idempotency_key_is_not_shadowed_by_queue_variable()
+        {
+            await InScopeAsync(async serviceProvider =>
+            {
+                (long connectorId, long pipelineId) = await SeedPipeline(serviceProvider, maxAttempts: 1);
+                ProcessingQueue item = await Enqueue(serviceProvider, connectorId, pipelineId);
+                ScriptedStepExecutor executor = new(_ => new PipelineStepExecutionResult { Success = true });
+                ExecutionEngineService engine = CreateEngine(serviceProvider, executor);
+
+                await engine.ExecutePipeline(connectorId, pipelineId, "{\"idempotencyKey\":\"from-payload\"}", ExecutionType.Pipeline, item);
+
+                executor.LastVariables.Should().NotContainKey("idempotencyKey");
+            });
+        }
+
+        [Test]
+        public async Task ProcessItem_reschedules_and_pending_query_waits_for_backoff()
+        {
+            await InScopeAsync(async serviceProvider =>
+            {
+                (long connectorId, long pipelineId) = await SeedPipeline(serviceProvider, maxAttempts: 2);
+                ProcessingQueue item = await Enqueue(serviceProvider, connectorId, pipelineId);
+                DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
+                ExecutionEngineService engine = CreateEngine(serviceProvider, new ScriptedStepExecutor(_ => Failure(transient: true)));
+                QueueProcessorService processor = new(dbContext, engine);
+
+                await processor.ProcessItem(item.Id);
+
+                ProcessingQueue rescheduled = await LoadQueueItem(serviceProvider, item.Id);
+                rescheduled.Status.Should().Be(ProcessingStatus.Pending);
+                rescheduled.Attempts.Should().Be(1);
+                (await processor.GetPendingToProcess(10)).Should().BeEmpty();
+
+                DateTimeOffset past = DateTimeOffset.UtcNow.AddSeconds(-1);
+                await dbContext.Set<ProcessingQueue>().Where(current => current.Id == item.Id)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(current => current.ScheduledAt, (DateTimeOffset?)past));
+                (await processor.GetPendingToProcess(10)).Should().ContainSingle(current => current.Id == item.Id);
+
+                await processor.ProcessItem(item.Id);
+
+                ProcessingQueue final = await LoadQueueItem(serviceProvider, item.Id);
+                final.Status.Should().Be(ProcessingStatus.Error);
+                final.Attempts.Should().Be(1);
             });
         }
     }
