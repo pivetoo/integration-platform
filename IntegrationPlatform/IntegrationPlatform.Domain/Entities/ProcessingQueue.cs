@@ -23,6 +23,10 @@ namespace IntegrationPlatform.Domain.Entities
 
         public string? LastError { get; private set; }
 
+        public int Attempts { get; private set; }
+
+        public string? IdempotencyKey { get; private set; }
+
         public DateTimeOffset? ScheduledAt { get; private set; }
 
         public DateTimeOffset? StartedAt { get; private set; }
@@ -35,7 +39,7 @@ namespace IntegrationPlatform.Domain.Entities
         {
         }
 
-        public ProcessingQueue(long connectorId, long pipelineId, int priority, ProcessingStatus status, string? payload = null, DateTimeOffset? scheduledAt = null)
+        public ProcessingQueue(long connectorId, long pipelineId, int priority, ProcessingStatus status, string? payload = null, DateTimeOffset? scheduledAt = null, string? idempotencyKey = null)
         {
             if (connectorId <= 0)
             {
@@ -53,6 +57,7 @@ namespace IntegrationPlatform.Domain.Entities
             Status = status;
             Payload = payload;
             ScheduledAt = scheduledAt;
+            IdempotencyKey = string.IsNullOrWhiteSpace(idempotencyKey) ? null : idempotencyKey.Trim();
         }
 
         public void MarkAsProcessing(DateTimeOffset startedAt)
@@ -76,6 +81,17 @@ namespace IntegrationPlatform.Domain.Entities
             Status = ProcessingStatus.Error;
             LastError = error.Trim();
             FinishedAt = finishedAt;
+        }
+
+        public void ScheduleRetry(DateTimeOffset nextAttemptAt, string error)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(error);
+
+            Attempts += 1;
+            Status = ProcessingStatus.Pending;
+            ScheduledAt = nextAttemptAt;
+            LastError = error.Trim();
+            FinishedAt = null;
         }
 
         public void Cancel(DateTimeOffset finishedAt)

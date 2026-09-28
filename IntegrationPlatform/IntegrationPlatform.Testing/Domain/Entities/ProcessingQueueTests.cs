@@ -98,5 +98,46 @@ namespace IntegrationPlatform.Testing.Domain.Entities
             item.Status.Should().Be(ProcessingStatus.Cancelled);
             item.FinishedAt.Should().Be(Now);
         }
+
+        [Test]
+        public void Attempts_starts_at_zero()
+        {
+            NewPending().Attempts.Should().Be(0);
+        }
+
+        [Test]
+        public void ScheduleRetry_returns_item_to_pending_with_next_attempt_and_increments_attempts()
+        {
+            ProcessingQueue item = NewPending();
+            item.MarkAsProcessing(Now);
+
+            item.ScheduleRetry(Now.AddSeconds(30), "HTTP 503");
+
+            item.Status.Should().Be(ProcessingStatus.Pending);
+            item.Attempts.Should().Be(1);
+            item.ScheduledAt.Should().Be(Now.AddSeconds(30));
+            item.LastError.Should().Be("HTTP 503");
+            item.FinishedAt.Should().BeNull();
+        }
+
+        [Test]
+        public void ScheduleRetry_with_blank_error_throws()
+        {
+            ProcessingQueue item = NewPending();
+
+            Action act = () => item.ScheduleRetry(Now, "  ");
+
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [TestCase("  k1 ", "k1")]
+        [TestCase("   ", null)]
+        [TestCase(null, null)]
+        public void Constructor_normalizes_idempotency_key(string? key, string? expected)
+        {
+            ProcessingQueue item = new(2, 5, 1, ProcessingStatus.Pending, idempotencyKey: key);
+
+            item.IdempotencyKey.Should().Be(expected);
+        }
     }
 }

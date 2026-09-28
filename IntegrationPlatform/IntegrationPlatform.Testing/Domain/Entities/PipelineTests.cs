@@ -84,5 +84,34 @@ namespace IntegrationPlatform.Testing.Domain.Entities
             pipeline.Name.Should().Be("New");
             pipeline.IsActive.Should().BeFalse();
         }
+
+        [Test]
+        public void MaxAttempts_defaults_to_one()
+        {
+            new Pipeline(1, "p", "P").MaxAttempts.Should().Be(1);
+        }
+
+        [TestCase(1)]
+        [TestCase(10)]
+        public void SetMaxAttempts_accepts_range(int value)
+        {
+            Pipeline pipeline = new(1, "p", "P");
+
+            pipeline.SetMaxAttempts(value);
+
+            pipeline.MaxAttempts.Should().Be(value);
+        }
+
+        [TestCase(0)]
+        [TestCase(11)]
+        [TestCase(-1)]
+        public void SetMaxAttempts_outside_range_throws(int value)
+        {
+            Pipeline pipeline = new(1, "p", "P");
+
+            Action act = () => pipeline.SetMaxAttempts(value);
+
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
     }
 }

@@ -25,6 +25,8 @@ namespace IntegrationPlatform.Domain.Entities
 
         public bool IsTestPipeline { get; private set; }
 
+        public int MaxAttempts { get; private set; } = 1;
+
         public long? ServiceContractId { get; private set; }
 
         public ServiceContract? ServiceContract { get; private set; }
@@ -60,6 +62,14 @@ namespace IntegrationPlatform.Domain.Entities
         public void SetDefault()
         {
             IsDefault = true;
+        }
+
+        public void SetMaxAttempts(int maxAttempts)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(maxAttempts, 1);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(maxAttempts, 10);
+
+            MaxAttempts = maxAttempts;
         }
 
         public void UnsetDefault()
