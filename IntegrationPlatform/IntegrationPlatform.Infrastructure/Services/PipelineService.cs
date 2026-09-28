@@ -60,6 +60,7 @@ namespace IntegrationPlatform.Infrastructure.Services
             await EnsureUniqueIdentifier(request.IntegrationId, request.Identifier, null, cancellationToken);
 
             Pipeline pipeline = new(request.IntegrationId, request.Identifier, request.Name, request.Description);
+            pipeline.SetMaxAttempts(request.MaxAttempts);
             bool success = await Insert(cancellationToken, pipeline);
             if (!success)
             {
@@ -89,6 +90,7 @@ namespace IntegrationPlatform.Infrastructure.Services
             await EnsureUniqueIdentifier(request.IntegrationId, request.Identifier, id, cancellationToken);
 
             pipeline.Update(request.IntegrationId, request.Identifier, request.Name, request.Description, request.IsActive);
+            pipeline.SetMaxAttempts(request.MaxAttempts);
 
             Pipeline? result = await Update(pipeline, cancellationToken);
             if (result is null)

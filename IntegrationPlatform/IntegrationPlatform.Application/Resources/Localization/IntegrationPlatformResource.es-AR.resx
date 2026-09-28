@@ -114,6 +114,15 @@
   <data name="execution.log.queue.retryScheduled" xml:space="preserve">
     <value>El intento {0} fallo por un error transitorio; reintento programado para {1:u}: {2}</value>
   </data>
+  <data name="pipeline.form.maxAttempts" xml:space="preserve">
+    <value>Intentos maximos</value>
+  </data>
+  <data name="pipeline.form.maxAttemptsHelp" xml:space="preserve">
+    <value>1 = sin reintento automatico. Use mas de 1 solo en pipelines seguros de repetir.</value>
+  </data>
+  <data name="common.column.attempts" xml:space="preserve">
+    <value>Intentos</value>
+  </data>
   <data name="execution.log.pipeline.stoppedDueToError" xml:space="preserve">
     <value>El pipeline se detuvo debido a un error en la etapa '{0}': {1}</value>
   </data>

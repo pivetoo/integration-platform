@@ -36,6 +36,7 @@ export interface Pipeline {
   name: string;
   description?: string;
   isActive: boolean;
+  maxAttempts: number;
   createdAt: string;
   updatedAt?: string;
 }
@@ -62,6 +63,7 @@ export interface CreatePipelineRequest {
   name: string;
   description?: string;
   isActive: boolean;
+  maxAttempts: number;
 }
 
 export interface UpdatePipelineRequest {
@@ -70,6 +72,7 @@ export interface UpdatePipelineRequest {
   name: string;
   description?: string;
   isActive: boolean;
+  maxAttempts: number;
 }
 
 export interface CreatePipelineStepRequest {

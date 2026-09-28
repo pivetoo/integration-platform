@@ -114,6 +114,15 @@
   <data name="execution.log.queue.retryScheduled" xml:space="preserve">
     <value>A tentativa {0} falhou por erro transitorio; nova tentativa agendada para {1:u}: {2}</value>
   </data>
+  <data name="pipeline.form.maxAttempts" xml:space="preserve">
+    <value>Tentativas maximas</value>
+  </data>
+  <data name="pipeline.form.maxAttemptsHelp" xml:space="preserve">
+    <value>1 = sem retry automatico. Use mais de 1 apenas em pipelines seguros para repetir.</value>
+  </data>
+  <data name="common.column.attempts" xml:space="preserve">
+    <value>Tentativas</value>
+  </data>
   <data name="execution.log.pipeline.stoppedDueToError" xml:space="preserve">
     <value>O pipeline foi interrompido devido a um erro na etapa '{0}': {1}</value>
   </data>

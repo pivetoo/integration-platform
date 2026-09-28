@@ -22,5 +22,8 @@ namespace IntegrationPlatform.Application.Requests.Pipelines
         public string? Description { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        [Range(1, 10)]
+        public int MaxAttempts { get; set; } = 1;
     }
 }

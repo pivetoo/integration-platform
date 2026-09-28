@@ -18,6 +18,7 @@ const initialFormData: CreatePipelineRequest = {
   name: '',
   description: '',
   isActive: true,
+  maxAttempts: 1,
 };
 
 export default function PipelineFormModal({ open, onOpenChange, pipeline, onSuccess }: PipelineFormModalProps) {
@@ -49,6 +50,7 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
         name: pipeline.name,
         description: pipeline.description || '',
         isActive: pipeline.isActive,
+        maxAttempts: pipeline.maxAttempts || 1,
       });
     } else {
       setFormData(initialFormData);
@@ -116,6 +118,19 @@ export default function PipelineFormModal({ open, onOpenChange, pipeline, onSucc
                   value={formData.description || ''}
                   onChange={(e) => handleChange('description', e.target.value)}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="maxAttempts" className="text-sm font-medium">{t('pipeline.form.maxAttempts')}</label>
+                <Input
+                  id="maxAttempts"
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={formData.maxAttempts}
+                  onChange={(e) => handleChange('maxAttempts', Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                />
+                <p className="text-xs text-muted-foreground">{t('pipeline.form.maxAttemptsHelp')}</p>
               </div>
 
               <div className="space-y-2">

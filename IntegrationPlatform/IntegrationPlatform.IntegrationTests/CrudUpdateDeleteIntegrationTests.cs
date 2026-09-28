@@ -2,6 +2,7 @@ using IntegrationPlatform.Application.Requests.ApiCalls;
 using IntegrationPlatform.Application.Requests.IntegrationCategories;
 using IntegrationPlatform.Application.Requests.Integrations;
 using IntegrationPlatform.Application.Requests.JavaScriptFunctions;
+using IntegrationPlatform.Application.Requests.Pipelines;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,6 +69,26 @@ namespace IntegrationPlatform.IntegrationTests
 
                 await service.Delete(created.Id);
                 (await service.GetJavaScriptFunctionById(created.Id)).Should().BeNull();
+            });
+        }
+
+        [Test]
+        public async Task PipelineService_persists_max_attempts()
+        {
+            await InScopeAsync(async serviceProvider =>
+            {
+                IIntegrationService integrations = serviceProvider.GetRequiredService<IIntegrationService>();
+                IPipelineService pipelines = serviceProvider.GetRequiredService<IPipelineService>();
+                Integration integration = await integrations.CreateIntegration(new CreateIntegrationRequest { Identifier = "max-att", Name = "Max Attempts" });
+
+                Pipeline created = await pipelines.CreatePipeline(new CreatePipelineRequest { IntegrationId = integration.Id, Identifier = "p-max", Name = "P Max", MaxAttempts = 3 });
+                created.MaxAttempts.Should().Be(3);
+
+                Pipeline updated = await pipelines.UpdatePipeline(created.Id, new UpdatePipelineRequest { Id = created.Id, IntegrationId = integration.Id, Identifier = "p-max", Name = "P Max", IsActive = true, MaxAttempts = 5 });
+                updated.MaxAttempts.Should().Be(5);
+
+                Pipeline withDefault = await pipelines.CreatePipeline(new CreatePipelineRequest { IntegrationId = integration.Id, Identifier = "p-default", Name = "P Default" });
+                withDefault.MaxAttempts.Should().Be(1);
             });
         }
     }

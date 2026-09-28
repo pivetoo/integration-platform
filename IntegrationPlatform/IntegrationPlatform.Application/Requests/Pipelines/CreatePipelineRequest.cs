@@ -17,5 +17,8 @@ namespace IntegrationPlatform.Application.Requests.Pipelines
 
         [StringLength(500)]
         public string? Description { get; set; }
+
+        [Range(1, 10)]
+        public int MaxAttempts { get; set; } = 1;
     }
 }

@@ -168,6 +168,13 @@ export default function ProcessingQueue() {
       ),
     },
     {
+      key: 'attempts',
+      title: t('common.column.attempts'),
+      dataIndex: 'attempts',
+      width: 110,
+      hiddenBelow: 'md',
+    },
+    {
       key: 'scheduledAt',
       title: t('common.column.scheduledAt'),
       dataIndex: 'scheduledAt',

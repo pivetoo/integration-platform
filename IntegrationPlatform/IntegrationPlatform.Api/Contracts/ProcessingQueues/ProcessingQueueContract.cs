@@ -18,6 +18,10 @@ namespace IntegrationPlatform.Api.Contracts.ProcessingQueues
 
         public string? LastError { get; init; }
 
+        public int Attempts { get; init; }
+
+        public string? IdempotencyKey { get; init; }
+
         public DateTimeOffset? ScheduledAt { get; init; }
 
         public DateTimeOffset? StartedAt { get; init; }
@@ -39,6 +43,8 @@ namespace IntegrationPlatform.Api.Contracts.ProcessingQueues
             Status = item.Status,
             Payload = item.Payload,
             LastError = item.LastError,
+            Attempts = item.Attempts,
+            IdempotencyKey = item.IdempotencyKey,
             ScheduledAt = item.ScheduledAt,
             StartedAt = item.StartedAt,
             FinishedAt = item.FinishedAt,

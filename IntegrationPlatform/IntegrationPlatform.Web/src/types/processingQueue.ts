@@ -27,6 +27,8 @@ export interface ProcessingQueueItem {
   status: ProcessingStatus;
   payload?: string;
   lastError?: string;
+  attempts: number;
+  idempotencyKey?: string;
   scheduledAt?: string;
   startedAt?: string;
   finishedAt?: string;

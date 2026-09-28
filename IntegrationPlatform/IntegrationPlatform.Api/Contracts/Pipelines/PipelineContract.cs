@@ -22,6 +22,8 @@ namespace IntegrationPlatform.Api.Contracts.Pipelines
 
         public bool IsTestPipeline { get; init; }
 
+        public int MaxAttempts { get; init; }
+
         public DateTimeOffset CreatedAt { get; init; }
 
         public DateTimeOffset? UpdatedAt { get; init; }
@@ -38,6 +40,7 @@ namespace IntegrationPlatform.Api.Contracts.Pipelines
             IsActive = item.IsActive,
             IsDefault = item.IsDefault,
             IsTestPipeline = item.IsTestPipeline,
+            MaxAttempts = item.MaxAttempts,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
             Integration = item.Integration == null

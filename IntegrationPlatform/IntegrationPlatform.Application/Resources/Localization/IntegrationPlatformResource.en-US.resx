@@ -114,6 +114,15 @@
   <data name="execution.log.queue.retryScheduled" xml:space="preserve">
     <value>Attempt {0} failed on a transient error; retry scheduled for {1:u}: {2}</value>
   </data>
+  <data name="pipeline.form.maxAttempts" xml:space="preserve">
+    <value>Maximum attempts</value>
+  </data>
+  <data name="pipeline.form.maxAttemptsHelp" xml:space="preserve">
+    <value>1 = no automatic retry. Use more than 1 only on pipelines that are safe to repeat.</value>
+  </data>
+  <data name="common.column.attempts" xml:space="preserve">
+    <value>Attempts</value>
+  </data>
   <data name="execution.log.pipeline.stoppedDueToError" xml:space="preserve">
     <value>Pipeline stopped due to error on step '{0}': {1}</value>
   </data>
