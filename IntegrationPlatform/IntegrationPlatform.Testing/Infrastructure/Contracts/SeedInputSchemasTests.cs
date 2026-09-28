@@ -21,7 +21,7 @@ namespace IntegrationPlatform.Testing.Infrastructure.Contracts
             { "payableId": "number?", "idempotencyKey": "string", "callbackToken": "string", "pixPayload": "string copia-e-cola", "amount": "number?", "description": "string?", "scheduleDate": "string date?" }
             """,
             """
-            { "creatorPaymentId": "number", "idempotencyKey": "string", "callbackToken": "string", "netAmount": "number", "pixKey": "string", "pixKeyType": "Cpf|Cnpj|Email|Phone|Random", "creatorName": "string", "creatorDocument": "string", "description": "string?" }
+            { "creatorPaymentId": "number", "idempotencyKey": "string", "callbackToken": "string", "netAmount": "number", "pixKey": "string", "pixKeyType": "Cpf|Cnpj|Email|Phone|Random", "creatorName": "string", "creatorDocument": "string?", "description": "string?" }
             """,
             """
             { "chargeId": "string (obrigatorio)", "financialEntryId": "number (obrigatorio)", "amount": "number?", "dueAt": "string date?", "fineValue": "number?", "interestMonthlyPercent": "number?", "discountValue": "number?", "discountUntil": "string date?", "callbackToken": "string" }
@@ -30,7 +30,7 @@ namespace IntegrationPlatform.Testing.Infrastructure.Contracts
             { "nossoNumero": "string", "financialEntryId": "number" }
             """,
             """
-            { "financialEntryId": "number (obrigatorio)", "amount": "number (obrigatorio)", "dueAt": "string date (obrigatorio)", "method": "boleto | pix", "payerName": "string", "payerDocument": "string CPF/CNPJ", "payerCep": "string", "payerStreet": "string", "payerNumber": "string", "payerCity": "string", "payerState": "string", "interestMonthlyPercent": "number?", "callbackToken": "string" }
+            { "financialEntryId": "number (obrigatorio)", "amount": "number (obrigatorio)", "dueAt": "string date (obrigatorio)", "method": "boleto | pix?", "payerName": "string", "payerDocument": "string CPF/CNPJ", "payerCep": "string", "payerStreet": "string", "payerNumber": "string", "payerCity": "string", "payerState": "string", "interestMonthlyPercent": "number?", "callbackToken": "string" }
             """,
             """
             { "chargeId": "string (obrigatorio)", "financialEntryId": "number", "callbackToken": "string" }
@@ -46,12 +46,12 @@ namespace IntegrationPlatform.Testing.Infrastructure.Contracts
             """
         ];
 
-        private static string BuildSamplePayload(IReadOnlyList<ContractField> fields)
+        private static string BuildSamplePayload(IReadOnlyList<ContractField> fields, params string[] nullFields)
         {
-            Dictionary<string, object> payload = [];
+            Dictionary<string, object?> payload = [];
             foreach (ContractField field in fields)
             {
-                payload[field.Name] = field.Type switch
+                payload[field.Name] = nullFields.Contains(field.Name) ? null : field.Type switch
                 {
                     ContractFieldType.Number => 1,
                     ContractFieldType.Boolean => true,
@@ -98,6 +98,26 @@ namespace IntegrationPlatform.Testing.Infrastructure.Contracts
             }
 
             InputSchemaValidator.Validate(fields, "{}").Should().Contain(violation => violation.EndsWith(": required"));
+        }
+
+        // Payloads que o Mainstay realmente monta: campos que o dominio dele deixa nulos (method da cobranca vem
+        // sempre nulo; Creator.Document e nullable) nao podem ser recusados pela validacao.
+        [Test]
+        public void Charge_contract_accepts_the_mainstay_payload_with_null_method()
+        {
+            string schema = Schemas.Single(item => item.Contains("\"method\": \"boleto"));
+            IReadOnlyList<ContractField> fields = ContractSchemaParser.Parse(schema);
+
+            InputSchemaValidator.Validate(fields, BuildSamplePayload(fields, "method")).Should().BeEmpty();
+        }
+
+        [Test]
+        public void Pix_payment_contract_accepts_the_mainstay_payload_with_null_creator_document()
+        {
+            string schema = Schemas.Single(item => item.Contains("\"creatorDocument\""));
+            IReadOnlyList<ContractField> fields = ContractSchemaParser.Parse(schema);
+
+            InputSchemaValidator.Validate(fields, BuildSamplePayload(fields, "creatorDocument")).Should().BeEmpty();
         }
     }
 }
