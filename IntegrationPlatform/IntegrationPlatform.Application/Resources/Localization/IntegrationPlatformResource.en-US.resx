@@ -111,6 +111,9 @@
   <data name="execution.log.pipeline.starting" xml:space="preserve">
     <value>Starting pipeline '{0}' with {1} step(s).</value>
   </data>
+  <data name="execution.log.queue.retryScheduled" xml:space="preserve">
+    <value>Attempt {0} failed on a transient error; retry scheduled for {1:u}: {2}</value>
+  </data>
   <data name="execution.log.pipeline.stoppedDueToError" xml:space="preserve">
     <value>Pipeline stopped due to error on step '{0}': {1}</value>
   </data>

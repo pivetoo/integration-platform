@@ -111,6 +111,9 @@
   <data name="execution.log.pipeline.starting" xml:space="preserve">
     <value>Iniciando el pipeline '{0}' con {1} etapa(s).</value>
   </data>
+  <data name="execution.log.queue.retryScheduled" xml:space="preserve">
+    <value>El intento {0} fallo por un error transitorio; reintento programado para {1:u}: {2}</value>
+  </data>
   <data name="execution.log.pipeline.stoppedDueToError" xml:space="preserve">
     <value>El pipeline se detuvo debido a un error en la etapa '{0}': {1}</value>
   </data>

@@ -21,5 +21,7 @@ namespace IntegrationPlatform.Infrastructure.BackgroundJobs
         public int CallbackMaxAttempts { get; set; } = 6;
 
         public double CallbackBaseBackoffSeconds { get; set; } = 30;
+
+        public double QueueRetryBaseBackoffSeconds { get; set; } = 30;
     }
 }

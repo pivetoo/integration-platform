@@ -6,9 +6,11 @@ using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
+using IntegrationPlatform.Infrastructure.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -33,8 +35,9 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
         private readonly ArchonIntegrationService integrationService;
         private readonly IStringLocalizer<IntegrationPlatformResource> Localizer;
         private readonly ILogger<ExecutionEngineService> logger;
+        private readonly double queueRetryBaseBackoffSeconds;
 
-        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, ITenantContext tenantContext, ArchonIntegrationService integrationService, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger)
+        public ExecutionEngineService(DbContext dbContext, IStepExecutorService stepExecutorService, IServiceCallbackDispatcher serviceCallbackDispatcher, ITenantContext tenantContext, ArchonIntegrationService integrationService, IStringLocalizer<IntegrationPlatformResource> localizer, ILogger<ExecutionEngineService> logger, IOptions<BackgroundJobOptions> jobOptions)
         {
             this.dbContext = dbContext;
             this.stepExecutorService = stepExecutorService;
@@ -43,6 +46,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             this.integrationService = integrationService;
             Localizer = localizer;
             this.logger = logger;
+            queueRetryBaseBackoffSeconds = jobOptions.Value.QueueRetryBaseBackoffSeconds;
         }
 
         public async Task<Execution> ExecutePipeline(long connectorId, long pipelineId, string? inputData, ExecutionType type, ProcessingQueue? queueItem = null, long? initialStepId = null, CancellationToken cancellationToken = default)
@@ -65,12 +69,18 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             ArchonIntegration? tenantConfig = await integrationService.GetByNameAsync(TenantConfigIntegrationName, cancellationToken);
             PipelineExecutionContext context = BuildContext(connector, pipeline, execution, payloadData, tenantContext.TenantId, tenantConfig);
+            if (trackedQueueItem is not null)
+            {
+                context.StepVariables["idempotencyKey"] = trackedQueueItem.IdempotencyKey ?? $"q{trackedQueueItem.Id}";
+            }
+
             List<ExecutionLog> logs = [];
             Dictionary<string, object?> stepOutputs = [];
             int nextOutputIndex = 1;
             Stopwatch stopwatch = Stopwatch.StartNew();
             bool hasFailure = false;
             bool stopped = false;
+            PipelineStepExecutionResult? stoppingResult = null;
 
             List<PipelineStep> allActiveSteps = pipeline.Steps
                 .Where(step => step.IsActive)
@@ -155,6 +165,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     {
                         context.HasError = true;
                         stopped = true;
+                        stoppingResult = result;
                         AddLog(logs, execution, step, LogLevelType.Error, Localizer["execution.log.pipeline.stoppedDueToError", step.Name, result.Error ?? string.Empty]);
                     }
                     else
@@ -165,7 +176,15 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 }
             }
 
-            if (stopped && errorSteps.Count > 0)
+            // Falha transitoria de item da fila com tentativas restantes: reagenda em vez de encerrar, e os
+            // steps RunOnError (aviso de falha ao consumidor) ficam para a falha final.
+            TimeSpan? retryDelay = null;
+            if (stopped && trackedQueueItem is not null && stoppingResult is { IsTransient: true })
+            {
+                retryDelay = RetryPolicy.NextRetryDelay(trackedQueueItem.Attempts, pipeline.MaxAttempts, queueRetryBaseBackoffSeconds);
+            }
+
+            if (stopped && errorSteps.Count > 0 && retryDelay is null)
             {
                 // Passo de tratamento de erro: roda os steps RunOnError expondo {{errorMessage}}. Nao altera
                 // o finalStatus (a execucao permanece Error) — serve so para notificar/compensar a falha.
@@ -204,7 +223,12 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             execution.Complete(finalStatus, DateTimeOffset.UtcNow, SerializeSafely(stepOutputs), context.LastError);
             AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.pipeline.finished", finalStatus, stopwatch.ElapsedMilliseconds]);
 
-            await PersistResults(execution, logs, trackedQueueItem, finalStatus, context.LastError, cancellationToken);
+            if (retryDelay is not null)
+            {
+                AddLog(logs, execution, null, LogLevelType.Info, Localizer["execution.log.queue.retryScheduled", trackedQueueItem!.Attempts + 1, DateTimeOffset.UtcNow + retryDelay.Value, context.LastError ?? string.Empty]);
+            }
+
+            await PersistResults(execution, logs, trackedQueueItem, finalStatus, context.LastError, retryDelay, cancellationToken);
             return execution;
         }
 
@@ -434,7 +458,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 CreateLog(state.Execution, null, LogLevelType.Info, Localizer["execution.log.debug.finished", finalStatus, state.Stopwatch.ElapsedMilliseconds])
             ];
 
-            await PersistResults(state.Execution, logs, null, finalStatus, state.Context.LastError, CancellationToken.None);
+            await PersistResults(state.Execution, logs, null, finalStatus, state.Context.LastError, null, CancellationToken.None);
             DebugSessions.TryRemove(debugSessionId, out _);
             return state.Execution;
         }
@@ -658,7 +682,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
             }
         }
 
-        private async Task PersistResults(Execution execution, List<ExecutionLog> logs, ProcessingQueue? queueItem, ExecutionStatus finalStatus, string? lastError, CancellationToken cancellationToken)
+        private async Task PersistResults(Execution execution, List<ExecutionLog> logs, ProcessingQueue? queueItem, ExecutionStatus finalStatus, string? lastError, TimeSpan? retryDelay, CancellationToken cancellationToken)
         {
             Execution trackedExecution = await dbContext.Set<Execution>()
                 .AsTracking()
@@ -684,7 +708,11 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
             if (queueItem is not null)
             {
-                if (finalStatus == ExecutionStatus.Error)
+                if (finalStatus == ExecutionStatus.Error && retryDelay is not null)
+                {
+                    queueItem.ScheduleRetry(DateTimeOffset.UtcNow + retryDelay.Value, lastError ?? Localizer["execution.unknownError"].Value);
+                }
+                else if (finalStatus == ExecutionStatus.Error)
                 {
                     queueItem.Fail(lastError ?? Localizer["execution.unknownError"].Value, DateTimeOffset.UtcNow);
                 }
