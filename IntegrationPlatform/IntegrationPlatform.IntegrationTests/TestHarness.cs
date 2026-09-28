@@ -82,7 +82,7 @@ namespace IntegrationPlatform.IntegrationTests
             using IServiceScope scope = TestHarness.Services.CreateScope();
             DbContext dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
             await dbContext.Database.ExecuteSqlRawAsync(
-                "TRUNCATE callbackdelivery, executionlog, execution, processingqueue, reference, " +
+                "TRUNCATE callbackdelivery, executionlog, execution, processingqueue, " +
                 "connectorattributevalue, pipelineroutine, pipelinestep, pipeline, connector, integration, " +
                 "integrationservicecontract, servicecontract, integrationcategory, databasescript, databaseconnection, " +
                 "apicall, javascriptfunction, integrationattribute " +
