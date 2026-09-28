@@ -10,6 +10,9 @@ namespace IntegrationPlatform.Infrastructure.Persistence.EF.Configurations
         {
             builder.ToTable("processingqueue");
 
+            builder.Property(entity => entity.IdempotencyKey)
+                .HasMaxLength(200);
+
             builder.HasOne(entity => entity.Connector)
                 .WithMany(entity => entity.ProcessingQueues)
                 .HasForeignKey(entity => entity.ConnectorId);
