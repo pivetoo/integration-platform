@@ -107,7 +107,7 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
 
         private void ScheduleRetryOrFail(CallbackDelivery delivery, DateTimeOffset now, string error)
         {
-            TimeSpan? delay = CallbackRetryPolicy.NextRetryDelay(delivery.Attempts, options.CallbackMaxAttempts, options.CallbackBaseBackoffSeconds);
+            TimeSpan? delay = RetryPolicy.NextRetryDelay(delivery.Attempts, options.CallbackMaxAttempts, options.CallbackBaseBackoffSeconds);
             if (delay is null)
             {
                 delivery.MarkFailed(error);

@@ -3,7 +3,7 @@ using IntegrationPlatform.Infrastructure.Services.ExecutionEngine;
 namespace IntegrationPlatform.Testing.Infrastructure.ExecutionEngine
 {
     [TestFixture]
-    public sealed class CallbackRetryPolicyTests
+    public sealed class RetryPolicyTests
     {
         [TestCase(0, 30)]
         [TestCase(1, 60)]
@@ -12,7 +12,7 @@ namespace IntegrationPlatform.Testing.Infrastructure.ExecutionEngine
         [TestCase(4, 480)]
         public void NextRetryDelay_returns_exponential_backoff(int attempts, double expectedSeconds)
         {
-            TimeSpan? delay = CallbackRetryPolicy.NextRetryDelay(attempts, maxAttempts: 6, baseBackoffSeconds: 30);
+            TimeSpan? delay = RetryPolicy.NextRetryDelay(attempts, maxAttempts: 6, baseBackoffSeconds: 30);
 
             delay.Should().Be(TimeSpan.FromSeconds(expectedSeconds));
         }
@@ -22,13 +22,13 @@ namespace IntegrationPlatform.Testing.Infrastructure.ExecutionEngine
         [TestCase(10)]
         public void NextRetryDelay_returns_null_when_max_reached(int attempts)
         {
-            CallbackRetryPolicy.NextRetryDelay(attempts, maxAttempts: 6, baseBackoffSeconds: 30).Should().BeNull();
+            RetryPolicy.NextRetryDelay(attempts, maxAttempts: 6, baseBackoffSeconds: 30).Should().BeNull();
         }
 
         [Test]
         public void NextRetryDelay_with_max_one_fails_immediately()
         {
-            CallbackRetryPolicy.NextRetryDelay(0, maxAttempts: 1, baseBackoffSeconds: 30).Should().BeNull();
+            RetryPolicy.NextRetryDelay(0, maxAttempts: 1, baseBackoffSeconds: 30).Should().BeNull();
         }
     }
 }
