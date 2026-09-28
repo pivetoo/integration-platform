@@ -103,57 +103,5 @@ namespace IntegrationPlatform.IntegrationTests
                 (await dbContext.Set<Execution>().CountAsync()).Should().Be(0);
             });
         }
-
-        private static async Task<long> ConnectorId(IServiceProvider serviceProvider)
-        {
-            DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
-            return await dbContext.Set<Connector>().AsNoTracking().Select(item => item.Id).FirstAsync();
-        }
-
-        // Grafo minimo que o ResolveTarget percorre: categoria -> contrato -> vinculo integracao/contrato ->
-        // pipeline do contrato, alem do proprio conector.
-        private static async Task SeedServiceContractGraph(IServiceProvider serviceProvider, bool integrationActive, bool connectorActive)
-        {
-            DbContext dbContext = serviceProvider.GetRequiredService<DbContext>();
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-
-            IntegrationCategory category = new("teste-categoria", "Categoria de Teste");
-            category.SetCreatedAt(now);
-            dbContext.Add(category);
-            await dbContext.SaveChangesAsync();
-
-            Integration integration = new("teste-integracao", "Integracao de Teste", null, category.Id);
-            integration.SetCreatedAt(now);
-            dbContext.Add(integration);
-
-            ServiceContract contract = new("teste.contrato", "Contrato de Teste", category.Id);
-            contract.SetCreatedAt(now);
-            dbContext.Add(contract);
-            await dbContext.SaveChangesAsync();
-
-            if (!integrationActive)
-            {
-                integration.Update(integration.Identifier, integration.Name, integration.Description, category.Id, false, integration.IconUrl, integration.SupportsWebhook);
-            }
-
-            Connector connector = new(integration.Id, "Conector de Teste");
-            connector.SetCreatedAt(now);
-            if (!connectorActive)
-            {
-                connector.Update(integration.Id, connector.Name, connector.SystemApplicationId, false);
-            }
-
-            Pipeline pipeline = new(integration.Id, "teste-pipeline", "Pipeline de Teste");
-            pipeline.BindServiceContract(contract.Id);
-            pipeline.SetCreatedAt(now);
-
-            IntegrationServiceContract binding = new(integration.Id, contract.Id);
-            binding.SetCreatedAt(now);
-
-            dbContext.Add(connector);
-            dbContext.Add(pipeline);
-            dbContext.Add(binding);
-            await dbContext.SaveChangesAsync();
-        }
     }
 }

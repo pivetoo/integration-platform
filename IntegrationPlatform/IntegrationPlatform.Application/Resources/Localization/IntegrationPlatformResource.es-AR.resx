@@ -819,6 +819,7 @@
   <data name="serviceContract.created" xml:space="preserve"><value>Contrato de servicio creado con éxito.</value></data>
   <data name="serviceContract.updated" xml:space="preserve"><value>Contrato de servicio actualizado con éxito.</value></data>
   <data name="serviceContract.deleted" xml:space="preserve"><value>Contrato de servicio eliminado con éxito.</value></data>
+  <data name="serviceContract.input.invalid" xml:space="preserve"><value>Datos de entrada inválidos para el contrato: {0}</value></data>
   <data name="serviceContract.notFound" xml:space="preserve"><value>Contrato de servicio no encontrado.</value></data>
   <data name="serviceContract.identifier.duplicated" xml:space="preserve"><value>Ya existe un contrato de servicio con este identificador.</value></data>
   <data name="serviceContract.integration.bound" xml:space="preserve"><value>Integración vinculada al contrato de servicio.</value></data>

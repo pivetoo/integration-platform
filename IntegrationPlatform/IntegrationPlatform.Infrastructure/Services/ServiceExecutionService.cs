@@ -1,8 +1,10 @@
+using Archon.Core.Exceptions;
 using Archon.Infrastructure.Persistence.EF;
 using IntegrationPlatform.Application.Localization;
 using IntegrationPlatform.Application.Services;
 using IntegrationPlatform.Domain.Entities;
 using IntegrationPlatform.Domain.ValueObjects;
+using IntegrationPlatform.Infrastructure.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 
@@ -24,6 +26,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         public async Task<Execution> ExecuteService(string serviceIdentifier, long connectorId, string? inputData, CancellationToken cancellationToken = default)
         {
             ResolvedTarget target = await ResolveTarget(serviceIdentifier, connectorId, cancellationToken);
+            ValidateInput(target.InputSchema, inputData);
 
             return await executionEngineService.ExecutePipeline(
                 target.ConnectorId,
@@ -36,6 +39,7 @@ namespace IntegrationPlatform.Infrastructure.Services
         public async Task<ProcessingQueue> EnqueueService(string serviceIdentifier, long connectorId, string? inputData, int priority = 5, DateTime? scheduledFor = null, string? idempotencyKey = null, CancellationToken cancellationToken = default)
         {
             ResolvedTarget target = await ResolveTarget(serviceIdentifier, connectorId, cancellationToken);
+            ValidateInput(target.InputSchema, inputData);
 
             DateTimeOffset? scheduledAt = scheduledFor.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(scheduledFor.Value, DateTimeKind.Utc)) : null;
 
@@ -117,9 +121,18 @@ namespace IntegrationPlatform.Infrastructure.Services
                 throw new InvalidOperationException("serviceContract.pipeline.notFound");
             }
 
-            return new ResolvedTarget(connector.Id, pipeline.Id);
+            return new ResolvedTarget(connector.Id, pipeline.Id, service.InputSchema);
         }
 
-        private readonly record struct ResolvedTarget(long ConnectorId, long PipelineId);
+        private static void ValidateInput(string? inputSchema, string? inputData)
+        {
+            IReadOnlyList<string> violations = InputSchemaValidator.Validate(ContractSchemaParser.Parse(inputSchema), inputData);
+            if (violations.Count > 0)
+            {
+                throw new BusinessRuleException("serviceContract.input.invalid", string.Join("; ", violations));
+            }
+        }
+
+        private readonly record struct ResolvedTarget(long ConnectorId, long PipelineId, string? InputSchema);
     }
 }
