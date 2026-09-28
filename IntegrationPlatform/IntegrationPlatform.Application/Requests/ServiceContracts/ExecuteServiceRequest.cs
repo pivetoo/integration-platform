@@ -21,5 +21,8 @@ namespace IntegrationPlatform.Application.Requests.ServiceContracts
         public int Priority { get; set; } = 5;
 
         public DateTime? ScheduledFor { get; set; }
+
+        [StringLength(200)]
+        public string? IdempotencyKey { get; set; }
     }
 }

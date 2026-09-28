@@ -68,20 +68,19 @@ namespace IntegrationPlatform.Infrastructure.Services
             return executions;
         }
 
-        public async Task<ProcessingQueue> EnqueuePipeline(long connectorId, long pipelineId, string? payload, int priority, CancellationToken cancellationToken = default)
+        public async Task<ProcessingQueue> EnqueuePipeline(long connectorId, long pipelineId, string? payload, int priority, string? idempotencyKey = null, CancellationToken cancellationToken = default)
         {
             ProcessingQueue queueItem = new(
                 connectorId,
                 pipelineId,
                 priority,
                 ProcessingStatus.Pending,
-                payload);
+                payload,
+                idempotencyKey: idempotencyKey);
 
             queueItem.SetCreatedAt(DateTimeOffset.UtcNow);
-            DbContext.Set<ProcessingQueue>().Add(queueItem);
-            await DbContext.SaveChangesAsync(cancellationToken);
 
-            return queueItem;
+            return await IdempotentEnqueue.AddOrGetExisting(DbContext, queueItem, cancellationToken);
         }
 
         private IQueryable<Execution> QueryWithDetails()

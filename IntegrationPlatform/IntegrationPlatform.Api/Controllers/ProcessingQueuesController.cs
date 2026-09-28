@@ -77,6 +77,7 @@ namespace IntegrationPlatform.Api.Controllers
                 request.PipelineId,
                 request.Payload.ToRawInputData(),
                 request.Priority,
+                request.IdempotencyKey,
                 cancellationToken);
             ProcessingQueue? queue = await processingQueueService.GetProcessingQueueById(item.Id, cancellationToken);
             return Http201(MapProcessingQueue(queue ?? item), Localizer["processingQueue.enqueued"]);

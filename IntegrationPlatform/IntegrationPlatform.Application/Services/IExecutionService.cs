@@ -17,6 +17,6 @@ namespace IntegrationPlatform.Application.Services
 
         Task<IReadOnlyCollection<Execution>> GetRecent(int take, CancellationToken cancellationToken = default);
 
-        Task<ProcessingQueue> EnqueuePipeline(long connectorId, long pipelineId, string? payload, int priority, CancellationToken cancellationToken = default);
+        Task<ProcessingQueue> EnqueuePipeline(long connectorId, long pipelineId, string? payload, int priority, string? idempotencyKey = null, CancellationToken cancellationToken = default);
     }
 }

@@ -33,16 +33,14 @@ namespace IntegrationPlatform.Infrastructure.Services
                 cancellationToken: cancellationToken);
         }
 
-        public async Task<ProcessingQueue> EnqueueService(string serviceIdentifier, long connectorId, string? inputData, int priority = 5, DateTime? scheduledFor = null, CancellationToken cancellationToken = default)
+        public async Task<ProcessingQueue> EnqueueService(string serviceIdentifier, long connectorId, string? inputData, int priority = 5, DateTime? scheduledFor = null, string? idempotencyKey = null, CancellationToken cancellationToken = default)
         {
             ResolvedTarget target = await ResolveTarget(serviceIdentifier, connectorId, cancellationToken);
 
             DateTimeOffset? scheduledAt = scheduledFor.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(scheduledFor.Value, DateTimeKind.Utc)) : null;
 
-            ProcessingQueue queue = new(target.ConnectorId, target.PipelineId, priority, ProcessingStatus.Pending, inputData, scheduledAt);
-            await dbContext.Set<ProcessingQueue>().AddAsync(queue, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return queue;
+            ProcessingQueue queue = new(target.ConnectorId, target.PipelineId, priority, ProcessingStatus.Pending, inputData, scheduledAt, idempotencyKey);
+            return await IdempotentEnqueue.AddOrGetExisting(dbContext, queue, cancellationToken);
         }
 
         private async Task<ResolvedTarget> ResolveTarget(string serviceIdentifier, long connectorId, CancellationToken cancellationToken)

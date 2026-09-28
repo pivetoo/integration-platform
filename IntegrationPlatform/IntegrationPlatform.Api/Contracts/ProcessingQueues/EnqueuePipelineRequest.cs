@@ -14,5 +14,8 @@ namespace IntegrationPlatform.Api.Contracts.ProcessingQueues
         public JsonElement? Payload { get; set; }
 
         public int Priority { get; set; }
+
+        [StringLength(200)]
+        public string? IdempotencyKey { get; set; }
     }
 }

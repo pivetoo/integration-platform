@@ -58,7 +58,7 @@ namespace IntegrationPlatform.Api.Controllers
                 return Http400(Localizer["serviceContract.identifier.required"]);
             }
 
-            ProcessingQueue queue = await serviceExecutionService.EnqueueService(identifier, request.ConnectorId, request.InputData.ToRawInputData(), request.Priority, request.ScheduledFor, cancellationToken);
+            ProcessingQueue queue = await serviceExecutionService.EnqueueService(identifier, request.ConnectorId, request.InputData.ToRawInputData(), request.Priority, request.ScheduledFor, request.IdempotencyKey, cancellationToken);
             return Http200(queue, Localizer["serviceExecution.enqueued"]);
         }
     }
