@@ -129,7 +129,8 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                     ResponseBody = responseBody,
                     StatusCode = (int)response.StatusCode,
                     DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
-                    Error = response.IsSuccessStatusCode ? null : $"HTTP {(int)response.StatusCode}: {responseBody}"
+                    Error = response.IsSuccessStatusCode ? null : $"HTTP {(int)response.StatusCode}: {responseBody}",
+                    IsTransient = !response.IsSuccessStatusCode && TransientFailure.IsTransientStatus((int)response.StatusCode)
                 };
             }
             catch (Exception exception)
@@ -140,7 +141,8 @@ namespace IntegrationPlatform.Infrastructure.Services.ExecutionEngine
                 {
                     Success = false,
                     DurationInMilliseconds = stopwatch.ElapsedMilliseconds,
-                    Error = exception.Message
+                    Error = exception.Message,
+                    IsTransient = TransientFailure.IsTransientException(exception, cancellationToken)
                 };
             }
         }

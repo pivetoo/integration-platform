@@ -14,6 +14,8 @@ namespace IntegrationPlatform.Application.Models
 
         public string? Error { get; set; }
 
+        public bool IsTransient { get; set; }
+
         public object? ExtractedResult { get; set; }
     }
 }
